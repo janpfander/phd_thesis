@@ -1,0 +1,88 @@
+# Experiment 5 {#exp5}
+
+\FloatBarrier
+
+
+```{r exp5-condition}
+# We manipulated convergence within participants in the same way we did in experiment 4. In addition, between participants, we manipulated informational dependence, akin to experiment 3 (Table \@ref(tab:exp5-condition)). In the biased condition, experts were described to gain personally from recommending a certain investment option - but without specifying what that option is. In the independent condition, there was no such conflict of interest and experts were described as independent.
+
+# Participants read only one of these introductions before seeing the sets of estimates, depending on which condition they had been assigned to
+# data.frame(
+#   Condition = c("Independence condition", "Conflict of interest condition"),
+#   Description = c(
+#     "The three advisors are independent of each other, and have no conflict of interest in making investment recommendations.",
+#     "The three advisors have already invested in one of the three options, the same option for all three. As a result, they have an incentive to push that option in their recommendations."
+#   )
+# ) %>% 
+#   apa_table(align = c("m{3cm}", "m{12cm}")) 
+```
+
+## Attention check
+
+Imagine you are playing video games with a friend and at some point your friend says: “I don’t want to play this game anymore! To make sure that you read the instructions, please write the three following words "I pay attention" in the box below. I really dislike this game, it's the most overrated game ever.”
+
+Do you agree with your friend? (Yes/No)
+
+## Results
+
+Table \@ref(tab:exp5-table) contains descriptive results.
+
+```{r exp5-table}
+exp5_accuracy <- exp5 %>% 
+  mutate(Convergence = paste0(convergence_categorical, " (", convergence, ")")) %>% 
+  group_by(independence, Convergence, convergence) %>% 
+  summarise(across(accuracy, list(mean = mean, sd = sd))) %>% 
+  rounded_numbers() %>% 
+  mutate(Accuracy = paste0(accuracy_mean, " (sd = ", accuracy_sd, ") ")) %>% 
+  select(independence, Accuracy, Convergence, convergence) %>% 
+mutate(independence = ifelse(independence == "conflict of interest", "Conflict of interest", 
+                "Independent") 
+         ) %>% 
+  pivot_wider(names_from = independence,
+              values_from = Accuracy) %>% 
+  arrange(convergence) %>% 
+  ungroup() %>% 
+  select(-convergence) %>% 
+  rename(" " = Convergence) %>% 
+  as.matrix()
+
+exp5_competence <- exp5 %>% 
+  mutate(Convergence = paste0(convergence_categorical, " (", convergence, ")")) %>% 
+  group_by(independence, Convergence, convergence) %>% 
+  summarise(across(competence, list(mean = mean, sd = sd))) %>% 
+  rounded_numbers() %>% 
+  mutate(Competence = paste0(competence_mean, " (sd = ", competence_sd, ") ")) %>% 
+  select(independence, Competence, Convergence, convergence) %>% 
+mutate(independence = ifelse(independence == "conflict of interest", "Conflict of interest", 
+                "Independent") 
+         ) %>% 
+  pivot_wider(names_from = independence,
+              values_from = Competence) %>% 
+  ungroup() %>% 
+  arrange(convergence) %>% 
+  select(-c(convergence, Convergence)) %>% 
+  as.matrix()
+
+table <- cbind(exp5_accuracy, exp5_competence)
+
+# Create the basic table
+if (knitr::is_latex_output() || knitr::is_html_output()) {
+  # For LaTeX or HTML: Use kable, add_header_above, and kable_styling
+  table_output <- table %>%
+    kable(booktabs = TRUE, 
+          caption = "") %>%  # Empty caption for cross-referencing
+    add_header_above(c("", "Accuracy" = 2, "Competence" = 2)) %>%
+    kable_styling(latex_options = "scale_down")  # Scale down for LaTeX
+} else {
+  # For Word: Use apa_table
+  table_output <- papaja::apa_table(
+    table, 
+    caption = "Participants vs. Model"
+  )
+}
+
+# Print the table
+table_output
+```
+
+

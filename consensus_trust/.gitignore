@@ -1,0 +1,26 @@
+# R stuff
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+
+# knitr and caching stuff
+*output
+**/*_files/
+**/sim*
+**/sensitivity*
+*cover_letter_consensus.docx
+*paper.docx
+*.log
+*.html
+
+# remove folders
+no_git/*
+revisions/*
+
+# remove other specific files
+author_info*
+
+# remove old analysis files
+*analysis*

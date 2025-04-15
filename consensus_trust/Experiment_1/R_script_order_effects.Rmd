@@ -1,0 +1,201 @@
+---
+title: "Check order effects Rscript"
+output: html_document
+---
+
+```{r packages}
+library(tidyverse)     # create plots with ggplot, manipulate data, etc.
+library(broom.mixed)   # convert regression models into nice tables
+library(modelsummary)  # combine multiple regression models into a single table
+library(lme4)          # model specification / estimation 
+library(lmerTest)      # provides p-values in the output
+library(ggpubr)        # stile feature of ggplot
+```
+
+## Data Cleaning
+
+Import data.
+```{r import}
+d <- read_csv("./data/order.csv")
+head(d)
+
+# delete first two rows
+d <- d[3:208,]
+```
+Exclude participants that failed the attention check. 
+```{r attention}
+# attention check
+# to see different answers given (i.e.levels), transform into factor
+d$attention <- as.factor(d$attention)
+# check levels to see different answer types
+levels(d$attention) 
+```
+All levels are some variation of "I pay attention", so we do not exclude any participants. 
+
+For now, the data is in a wide format where each combination of stimulus item and dependent variable has its own column. We need to "tidy" the data. 
+```{r}
+d <- d %>% 
+  # build an easy-to-read ID variable for subjects
+  mutate(ID = as.factor(1:nrow(.))) %>% 
+  # order data by subjects
+  arrange(ID) %>% 
+  # from wide to long format
+  gather(item, score, conv_large_guess_a_4:noconv_small_comp_b...91,
+               factor_key=TRUE) %>% 
+  # seperate variables 
+  separate(item, into = c("convergence", "number", "dependent_variable",
+                          "variant"), convert = T, sep = "\\_")  %>% 
+  # remove NA's
+  filter(!is.na(score)) %>% 
+  # make sure data is still ordered by participants
+  arrange(ID) %>% 
+  # The variable "variant" that distinguishes between the two items of the same
+  # condition did not come as intended. Without changing it, we won't be able
+  # to "spread" our dependent variables (DV)
+  mutate(variant = rep(c("a", "b"), each = 3, length.out = nrow(.))) %>% 
+  # now for each subject, each condition and each variant the three DVs
+  # can be assigned
+  pivot_wider(names_from = dependent_variable, values_from = score) %>% 
+  # so far, all variables are coded characters (see e.g. str(d))
+  # we want our dependent variables to be numeric
+  mutate(competence = as.numeric(comp),
+         guess = as.numeric(guess), 
+         confidence = as.numeric(conf))
+```
+
+In the qualtrics output, the the order of each condition-stimulus pair is coded as a separate variable (i.e. column). The names of these variables are given by qualtrics internally. We need to manually check in the qualtrics flow diagram (by activating to see the flow names, top right corner), which condition-stimulus pair corresponds to which flow name (i.e. the variable/column name that appears in our data set). Once we have done this, we bring our data frame in the long format just like above. We then only select those values of the order variable that correspond to our stimuli (we build an identifier variable for stimulus beforehand and check row by row whether this identifier corresponds to the order variable). 
+```{r}
+d <- d %>% 
+  rename(sample1 = FL_5_DO_FL_13,
+         sample2 = FL_5_DO_FL_14,
+         sample3 = FL_5_DO_FL_37) %>% 
+  gather(sample, indicator, sample1:sample3,
+               factor_key=TRUE) %>% 
+  # remove NA's
+  filter(!is.na(indicator)) %>% 
+  # build an identifier variable to later check against
+  mutate(stimulus = paste(convergence, number, variant, sample, sep = "_")) %>%
+  # rename flow names to later check against identifier variable
+  rename(conv_large_a_sample1_order = FL_24_DO_FL_41,
+         conv_large_b_sample1_order = FL_24_DO_FL_44,
+         conv_small_a_sample1_order = FL_24_DO_FL_46,
+         conv_small_b_sample1_order = FL_24_DO_FL_49,
+         noconv_large_a_sample1_order = FL_24_DO_FL_52,
+         noconv_large_b_sample1_order = FL_24_DO_FL_55,
+         noconv_small_a_sample1_order = FL_24_DO_FL_58,
+         noconv_small_b_sample1_order = FL_24_DO_FL_61,
+         conv_large_a_sample2_order = FL_15_DO_FL_64,
+         conv_large_b_sample2_order = FL_15_DO_FL_67,
+         conv_small_a_sample2_order = FL_15_DO_FL_70,
+         conv_small_b_sample2_order = FL_15_DO_FL_72,
+         noconv_large_a_sample2_order = FL_15_DO_FL_74,
+         noconv_large_b_sample2_order = FL_15_DO_FL_76,
+         noconv_small_a_sample2_order = FL_15_DO_FL_78,
+         noconv_small_b_sample2_order = FL_15_DO_FL_81,
+         conv_large_a_sample3_order = FL_38_DO_FL_83,
+         conv_large_b_sample3_order = FL_38_DO_FL_86,
+         conv_small_a_sample3_order = FL_38_DO_FL_88,
+         conv_small_b_sample3_order = FL_38_DO_FL_90,
+         noconv_large_a_sample3_order = FL_38_DO_FL_92,
+         noconv_large_b_sample3_order = FL_38_DO_FL_94,
+         noconv_small_a_sample3_order = FL_38_DO_FL_96,
+         noconv_small_b_sample3_order = FL_38_DO_FL_98,
+         ) %>% 
+  # frow wide to long
+  gather(stimulus_order, order_indicator, 
+         conv_large_a_sample1_order:noconv_small_b_sample3_order,
+               factor_key=TRUE) %>% 
+  # remove NA's
+  filter(!is.na(order_indicator)) %>% 
+  # order data by participants
+  arrange(ID) %>% 
+  mutate(stimulus_order = as.character(stimulus_order),
+         order_indicator = as.numeric(order_indicator),
+         # compare stimulus identifier column with order identifier column
+         # only keep the order values where they match
+         order = ifelse(paste0(stimulus, "_order") == 
+                          stimulus_order, order_indicator, NA)) %>% 
+  # remove NA's
+  filter(!is.na(order)) %>% 
+  # get rid of building variables 
+  select(-c("indicator", "stimulus", "stimulus_order", "order_indicator"))
+
+```
+
+To see if there are any weird values, we inspect the distributions of the dependent variables.
+```{r}
+# competence
+ggplot(d, aes(x = competence)) +
+  geom_histogram()# seems like 7s have been coded as 8s
+
+# confidence
+ggplot(d, aes(x = confidence)) +
+  geom_histogram()# same, 7s have been coded as 8s
+
+# guess
+ggplot(d, aes(x = guess)) +
+  geom_histogram() # all guesses are coded withing range, looks good
+```
+For the two Likert scale measures (`confidence` and `competence`) The maximum of the scale has been coded as `8` instead of `7`. 
+
+```{r}
+d <- d %>% 
+  mutate(competence = ifelse(competence == 8, 7, competence), 
+         confidence = ifelse(confidence ==8, 7, confidence))
+
+# check again
+ggplot(d, aes(x = competence)) +
+  geom_histogram()# looks good
+
+ggplot(d, aes(x = confidence)) +
+  geom_histogram()# looks good
+```
+## Check order effects
+
+Here are the means for the convergence conditions conditional on whether they were first or last in order.
+```{r}
+d %>% 
+  filter(convergence == "conv", order == 1 ) %>% 
+  summarise(mean_confidence_convergence_first_element = mean(confidence), 
+            mean_competence_convergence_first_element = mean(competence))
+
+d %>% 
+  filter(convergence == "conv", order == 8 ) %>% 
+  summarise(mean_confidence_convergence_last_element = mean(confidence), 
+            mean_competence_convergence_last_element = mean(competence))
+
+d %>% 
+  filter(convergence == "noconv", order == 1 ) %>% 
+  summarise(mean_confidence_noconvergence_first_element = mean(confidence), 
+            mean_competence_noconvergence_first_element = mean(competence))
+
+d %>% 
+  filter(convergence == "noconv", order == 8 ) %>% 
+  summarise(mean_confidence_noconvergence_last_element = mean(confidence), 
+            mean_competence_noconvergence_last_element = mean(competence))
+```
+
+Here is a t-test for competence between convergent and non-convergent based on stimuli ratings that came _first_ in order.
+
+```{r}
+d_first_order <- d %>% 
+  filter(order == 1)
+
+first_order_model <- lm(competence ~ convergence, data = d_first_order)
+summary(first_order_model)
+
+d_last_order <- d %>% 
+  filter(order == 8)
+
+last_order_model <- lm(competence ~ convergence, data = d_last_order)
+summary(last_order_model)
+```
+
+
+
+
+
+
+
+
+

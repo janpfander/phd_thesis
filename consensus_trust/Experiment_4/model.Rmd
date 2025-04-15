@@ -1,0 +1,1070 @@
+---
+title: "Model for categorical choice scenarios (experiments 4 to 6)"
+output: 
+  html_document: 
+    keep_md: yes
+date: "2023-04-08"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message=FALSE, echo=FALSE}
+# Load packages
+library(tidyverse)
+library(gghalves) # for plots
+library(patchwork)
+library(lme4) # for linear mixed models
+library(lmerTest) # p-values for mixed models
+library(broom) # for tidy outputs of regressions
+library(broom.mixed) # for tidy outputs of linear mixed models
+library(ggpubr) # for plots
+```
+
+```{r, echo=FALSE}
+# set general theme for plots
+plot_theme <- theme_minimal(base_size = 12) +
+  theme(# Bold title
+    plot.title = element_text(face = "bold", size = rel(0.7)),
+    # Plain subtitle that is grey
+    plot.subtitle = element_text(face = "plain", size = rel(1), color = "grey70"),
+    # Bold legend titles
+    legend.title = element_text(face = "bold"),
+    # Bold axis titles
+    axis.title = element_text(face = "bold"), 
+    # Bold legend labels
+    legend.text = element_text(face = "bold")
+    )
+```
+
+```{r}
+# ensure this script returns the same results on each run
+set.seed(7643)
+```
+
+## Explaining the model
+
+```{r}
+# Imagine a situation with 3 choice options
+options <- 3
+# and a population of n = 999
+population <- 999
+# and we observe samples of 3
+sample <- 3
+```
+
+
+### Define competence and its distribution 
+
+We define competence as the probability of making an accurate choice (among various options). Competence is continuous and ranges from `0` to `1`, where `0` corresponds to pure chance (`1/options`) and `1` corresponds to certainly making the correct choice. 
+
+In our code this measure is called `relative_competence`, while `competence` designates the actual probability of making an accurate choice, ranging from `1/options` to `1`). For example, in a 3-choice-options scenario, an individual with a probability of 1/3 (`competence == 0.333`) to pick the right answer has `relative_competence == 0`. 
+
+We assume that individuals (i) vary in competence and (ii) that the distribution of competence in the population varies, as can be modeled by a beta distribution. In the case below, we assume a uniform competence distribution (equal to a beta distribution of alpha = 1 and beta = 1). 
+
+```{r}
+# 1: Distribution of competence
+data <- data.frame(competence = runif(population, min = 1/options, max = 1))
+
+# Create a relative measure of competence that allows to compare across
+# different numbers of choice options. 
+# This measure varies from 0 = random chance to 1 = definitely right. 
+# We use min-max scaling, with min = 1/options and max = 1.
+data <- data %>% 
+  mutate(relative_competence = (competence - 1/options) / (1 - 1/options) )
+
+# data generating function
+ggplot() +
+  stat_function(fun = dunif, args = list(min = 0, max = 1)) +
+  labs(title = "Uniform distribution of competence from 0 to 1", x = "Competence", y = "P(Competence)") + 
+  xlim(0, 1)
+
+# generated population
+ggplot(data, aes(x = relative_competence)) +
+  geom_histogram() + 
+  scale_x_continuous(breaks = seq(from = 0, to = 1, by = 0.1)) + 
+  annotate("text", x = 0.9, y = 100, label = paste0("n = ", population), color = "red") +
+  labs(title = "(sampled) Population of competence drawn from \n uniform population distribution", 
+       y = "Count")
+```
+
+### Generate a choice for each individual based on their competence. 
+
+```{r}
+# 2: Draw individual answers based on competence levels 
+data$answer <- data$competence %>% 
+  purrr::map_chr(function(x){ 
+    
+    answer_options <- c("correct", paste0("false", 1:(options-1)))
+    probabilities <- c(x, rep((1-x)/(options-1), options-1))
+    
+    answer = sample(answer_options, 
+                    size = 1, 
+                    prob = probabilities
+                    )
+  }
+  )
+
+data <- data %>% 
+  mutate(correct = ifelse(str_detect(answer, "correct"), 
+                                        TRUE, FALSE))
+
+answers <- ggplot(data, aes(x = answer, fill = correct)) +
+  geom_bar() +
+  guides(fill = "none") +
+  plot_theme
+
+competence_by_answers <- ggplot(data, 
+       aes(x = answer, y = relative_competence, fill = correct)) +
+geom_half_violin(position = position_nudge(x = -.2),
+                     adjust=2, alpha = .8,
+                     side = "r") +
+  coord_flip() +
+  guides(fill = "none") +
+  plot_theme
+
+answers + competence_by_answers
+```
+
+### Draw samples, assign categories & compare average outcomes
+
+### Randomly draw samples from the population
+
+```{r}
+# 3: randomly assign samples in population
+data <- data %>% mutate(sample_id = rep(1:(population/sample), sample))
+```
+
+### Categorize constellations. 
+
+```{r}
+# 4: identify constellations 
+data <- data %>% 
+  # identify how often a one type of answer occurs in one group
+  group_by(sample_id, answer) %>% 
+  mutate(n_answer_in_sample = n()) %>% 
+  # assign constellations
+  group_by(sample_id) %>% 
+  mutate(unique_answers = n_distinct(answer),
+         # Build a first version of constellation variable
+         constellation = case_when(unique_answers == 1 ~ "consensus",
+                                   unique_answers <=  sample ~ "majority-minority-dissensus"
+         ),
+         # identify majority answers in majority constellations
+         majority = ifelse(constellation == "majority-minority-dissensus", 
+                           # report whether occurrences of answer within a group
+                           # are the majority within that group
+                           n_answer_in_sample == max(n_answer_in_sample),
+                           # for all other constellations, simply code NA,
+                           NA
+         ), 
+         # identify dissensus answers in majority constellations
+         dissensus = ifelse(constellation == "majority-minority-dissensus", 
+                            # report whether occurrences of answer within a group
+                            # are the minority within that group
+                            min(n_answer_in_sample) == max(n_answer_in_sample),
+                            # for all other constellations, simply code NA,
+                            NA
+         ), 
+         # build final constellation variable using helper variables 
+         constellation = case_when(
+           dissensus == TRUE ~ "dissensus",
+           majority == TRUE ~ "majority",
+           majority == FALSE ~ "minority(ies)",
+           .default = constellation)
+  ) %>% ungroup()
+```
+
+### Compute average accuracy/competence by constellation.
+
+```{r}
+# 5: calculate accuracy and competence levels per constellation
+
+# identify accurate responses
+data <- data %>%
+  mutate(accurate = ifelse(answer == "correct", TRUE, FALSE))
+
+# compute the summary statistics by sample id
+results <- data %>% 
+  group_by(sample_id, constellation) %>% 
+  summarize(average_competence = mean(competence), 
+            average_relative_competence = mean(relative_competence),
+            average_accuracy = mean(accurate)) %>% 
+  # store simulation information
+  mutate(population = population, 
+         sample = sample, 
+         options = options)
+```
+
+```{r}
+ggplot(results,
+       aes(x = constellation, y = average_accuracy, fill = constellation)) +
+  geom_half_violin(position = position_nudge(x = -.2),
+                   adjust=2, alpha = .8,
+                   side = "l") +
+  stat_summary(fun = "mean", geom = "point", size = 1, shape = 21) +
+  stat_summary(fun = "mean", geom = "line", size = 1, linetype = "dashed") +
+  stat_summary(fun.data = "mean_se", geom = "errorbar", width = .2) +
+  # Add nice labels
+  labs(x = "Convergence", y = "Accuracy") +
+  scale_fill_viridis_d(option = "plasma", begin = 0.1) +
+  guides(fill = "none") +
+  plot_theme + 
+  theme(axis.text.x = element_text(angle = 20, hjust = 1)) +
+  ylim(c(0, 1))
+```
+
+## Functions
+
+### Data generating functions
+
+#### Single population
+
+```{r, echo=FALSE}
+simulate_single_population <- function(population, sample, options, 
+                                       distribution = "uniform", 
+                                       alpha, beta,
+                                       return = "by constellation") {
+  # Check if population is not divisible by sample without remainder
+  if (population %% sample != 0) {
+    warning("Population is not divisible by sample without remainder.")
+  }
+  
+  # if necessary, alter population size so that it is divisible by sample without rest
+  n_possible_samples <- floor(population/sample)
+  
+  # Biggest possible population to pick
+  possible_population = n_possible_samples * sample
+  
+  # Issue warning if different population size used
+  if (population %% sample != 0) {
+    warning(paste0("Chosen population size is ", possible_population))
+  }
+  # change population value (if divisible without remainder, it'll be the same)
+  population = possible_population
+  
+  # 1: Distribution of competence
+  
+  if (distribution == "uniform") {
+  # randomly draw competence levels
+    data <- tibble(id = 1:population,
+                   competence = runif(population, min = 1/options, max = 1)) %>% 
+      # Create a relative measure of competence that allows to compare across
+      # different numbers of choice options. 
+      # This measure varies from 0 = random chance to 1 = definitely right. 
+      # We use min-max scaling, with min = 1/options and max = 1.
+      mutate(relative_competence = (competence - 1/options) / (1 - 1/options))
+  }
+  
+  if (distribution == "beta") {
+  # randomly draw competence levels
+  data <- tibble(id = 1:population,
+                 relative_competence = rbeta(population, shape1 = alpha, 
+                                             shape2 = beta)) %>% 
+    mutate(
+      competence = relative_competence * (1 - 1/options) + 1/options
+      )
+  }
+  
+  # 2: Draw individual answers based on competence levels 
+  data$answer <- data$competence %>% 
+    purrr::map_chr(function(x){ 
+      
+      answer_options <- c("correct", paste0("false", 1:(options-1)))
+      probabilities <- c(x, rep((1-x)/(options-1), options-1))
+      
+      answer = sample(answer_options, 
+                      size = 1, 
+                      prob = probabilities
+      )
+      return(answer)
+      
+    }) 
+  
+  # 3: randomly assign samples in population
+  data <- data %>% mutate(sample_id = rep(1:(population/sample), sample))
+  
+  # 4: identify constellations 
+  data <- data %>% 
+    # identify how often a one type of answer occurs in one group
+    group_by(sample_id, answer) %>% 
+  mutate(n_answer_in_sample = n()) %>% 
+    # assign constellations
+  group_by(sample_id) %>% 
+    mutate(unique_answers = n_distinct(answer),
+           # relative degree of majority
+           n_sample = n_distinct(id),
+           relative_majority = n_answer_in_sample / n_sample,
+           # Build a first version of constellation variable
+           constellation = case_when(unique_answers == 1 ~ "consensus",
+                                     unique_answers <=  sample ~ "majority-minority-dissensus"
+           ),
+           # identify majority answers in majority constellations
+           majority = ifelse(constellation == "majority-minority-dissensus", 
+                             # report whether occurrences of answer within a group
+                             # are the majority within that group
+                             n_answer_in_sample == max(n_answer_in_sample),
+                             # for all other constellations, simply code NA,
+                             NA
+           ), 
+           # identify dissensus answers in majority constellations
+           dissensus = ifelse(constellation == "majority-minority-dissensus", 
+                             # report whether occurrences of answer within a group
+                             # are the minority within that group
+                             min(n_answer_in_sample) == max(n_answer_in_sample),
+                             # for all other constellations, simply code NA,
+                             NA
+           ), 
+           # build final constellation variable using helper variables 
+           constellation = case_when(
+             dissensus == TRUE ~ "dissensus",
+             majority == TRUE ~ "majority",
+             majority == FALSE ~ "minority(ies)",
+             .default = constellation)
+           ) %>% ungroup()
+  
+  # 5: calculate accuracy and competence levels per constellation
+  
+  # identify accurate responses
+  data <- data %>%
+    mutate(accurate = ifelse(answer == "correct", TRUE, FALSE))
+  
+  if(return == "by participant") {
+    return(data)
+  } else {
+    
+    if(return == "by degree of majority") {
+      results <- data %>% 
+        group_by(sample_id, relative_majority)
+    } 
+    
+    if(return == "by constellation") {
+      results <- data %>% 
+        group_by(sample_id, constellation)
+    } 
+    
+    # compute the summary statistics by sample id (and constellation)
+    results <- results %>% summarize(average_competence = mean(competence), 
+                                     average_relative_competence = mean(relative_competence),
+                                     average_accuracy = mean(accurate),
+                                     count = n_distinct(sample_id)) %>% 
+      # store simulation information
+      mutate(population = population, 
+             sample = sample, 
+             options = options)
+    
+    return(results)
+  }
+}
+```
+
+```{r, echo=FALSE}
+# test output (set return to data above)
+# test <- simulate_single_population(population = 10000, sample = 10, options = 10,
+#                                    return = "by degree of majority", distribution = "beta",
+#                                    alpha = 2, beta = 6) %>% arrange(sample_id) %>%
+#   arrange(sample_id)
+# 
+# test %>% group_by(relative_majority) %>% summarise(across(c(average_relative_competence,
+#                                                         average_accuracy),
+#                                                       mean)
+#                                                )
+```
+
+#### Various populations
+
+```{r, echo=FALSE}
+simulate_various_populations <- function(iterations,...) {
+  
+  # create data frame with model results for generated samples
+  various_populations <- 1:iterations %>% 
+    purrr::map_df(function(x){
+      # this is essentially a for loop - do the following for each 
+      # element in 1:iterations
+      
+      results <- simulate_single_population(...)
+      
+      # identify iteration
+      results$iteration <- x
+      
+      # To keep track of progress
+      if (x %% 50 == 0) {print(paste("iteration number ", x))}
+      
+      return(results)
+      
+    }) %>% 
+    # store simulation information
+    mutate(total_iterations = iterations)
+  
+  return(various_populations)
+}
+```
+
+#### Vary choice options and sample size
+
+This function allows us to investigate how accuracy and competence change with varying the number of choice options and the sample size. 
+
+The simulations that this function executes will take quite some time. Therefore, we do not want to run it every time we render this document. Instead we want to store the output of the power simulation in a `.csv` file, and have an integrated "stop" mechanism to prevent execution when that file already exists. To achieve this, we make `file_name` a mandatory argument. If a file with that name already exists, the function will not be executed.
+
+```{r, echo=FALSE}
+# set name
+file_name <- "model.csv" # change for new analyses / or delete file to re-use same name
+
+vary_sample_options <- function(vary = "options", file_name, n, 
+                                format = "result", ...) {
+  
+  # only run analysis if a file with that name does not yet exists
+  if (!file.exists(paste0("data/", file_name))) {
+    
+    
+    # vary choice options for given sample size
+    if (vary == "options") {
+      
+      # run the populations generating function for different values of n
+      data <- n %>% purrr::map_df(function(n_option){
+        # this is essentially a for loop - 
+        # do the following for each 
+        # element of n
+        
+        # To keep track of progress
+        print(paste("tested option number = ", n_option))
+        
+        # run simulation
+        result <- simulate_various_populations(
+          options = n_option, ...)
+        
+        return(result)
+        
+      })
+      
+      if(format == "result") {
+        return(data)
+      } else{
+        write_csv(data, paste0("data/", file_name))
+      }
+    }
+    
+    # vary sample size for given choice option
+    if (vary == "sample") {
+      
+      # do the `calculate_power()` function for each sample size and store the results
+      # in a new variable called `power`
+      data <- n %>% purrr::map_df(function(n_sample){
+        # this is essentially a for loop - 
+        # do the following for each 
+        # element data$n_subj
+        
+        # To keep track of progress
+        print(paste("tested sample number = ", n_sample))
+        
+        # run power calculation
+        result <- simulate_various_populations(
+          sample = n_sample, ...)
+        
+        return(result)
+        
+      })
+      
+      if(format == "result") {
+        return(data)
+      } else{
+        write_csv(data, paste0("data/", file_name))
+      }
+    }
+  }
+}
+```
+
+#### Vary competence distribution
+
+We now want to do the above (simulate a single population, repeat this process, do so for various sample sizes and choice options) for different competence distributions. We vary these distributions with the `alpha` and `beta` parameters for the beta distributions.
+
+```{r, echo=FALSE}
+# set name
+file_name <- "model.csv" # change for new analyses / or delete file to re-use same name
+
+vary_competence <- function(file_name, alpha, beta, names, ...) {
+  
+  # only run analysis if a file with that name does not yet exists
+  if (!file.exists(paste0("data/", file_name))) {
+    
+    competence_data <- tibble(alpha, beta, names) %>% 
+      mutate(competence = paste0(names, "\n(alpha = ", alpha, ", beta = ", beta, ")"))
+    
+    # do all the above functions for different competence distributions
+    data <- competence_data$competence %>% purrr::map_df(function(competence_level){
+      # this is essentially a for loop 
+      
+      # To keep track of progress
+      print(paste("competence_level = ", competence_level))
+      
+      # set alpha and beta
+      alpha = competence_data %>% filter(competence == competence_level) %>% pull(alpha)
+      beta = competence_data %>% filter(competence == competence_level) %>% pull(beta)
+      
+      # run simulation
+      result <- vary_sample_options(
+        alpha = alpha, beta = beta, file_name = file_name, ...)
+      
+      # add competence level
+      result <- result %>% mutate(competence = competence_level, 
+                                  alpha = alpha,
+                                  beta = beta)
+      
+      return(result)
+      
+    })
+    
+    write_csv(data, paste0("data/", file_name))
+  }
+}
+```
+
+### Plot functions
+
+#### a) Plot various populations
+
+First, we want a function that plots results obtained by the `simulate_various_populations` function. 
+```{r, echo=FALSE}
+plot_results <- function(data, outcome = "everything") {
+  
+  d <- data
+  
+  # make constellation a factor with the right levels
+  d$constellation <- fct_relevel(d$constellation, "minority(ies)", "dissensus", "majority", "consensus")
+  
+  # extract simulation info
+  simulation_info <- d %>% summarize(across(c(population, sample, options, total_iterations), mean)) 
+  
+  caption = paste0("Number of choice options: ", simulation_info$options,
+                   "; Sample size: ", simulation_info$sample,
+                   "; Iterations : ", simulation_info$total_iterations, 
+                   "; Population size per iteration: ", simulation_info$population)
+  
+  # make descriptive data
+  # descriptive <- d %>% 
+  #   group_by(constellation) %>% 
+  #   summarise(count = sum(count)) %>% 
+  #   mutate(rel_freq = round(count / sum(count), digits = 2)) %>% 
+  #   gridExtra::tableGrob(rows = NULL)
+
+  
+  # plot for accuracy
+  plot_accuracy <- ggplot(d,
+                          aes(x = constellation, y = average_accuracy, fill = constellation)) +
+    geom_half_violin(position = position_nudge(x = -.2),
+                     adjust=2, alpha = .8,
+                     side = "l") +
+    stat_summary(fun = "mean", geom = "point", size = 1, shape = 21) +
+    stat_summary(fun = "mean", geom = "line", size = 1, linetype = "dashed") +
+    stat_summary(fun.data = "mean_se", geom = "errorbar", width = .2) +
+    # Add nice labels
+    labs(x = "Convergence", y = "Accuracy") +
+    scale_fill_viridis_d(option = "plasma", begin = 0.1) +
+    guides(fill = FALSE) +
+    plot_theme + 
+    theme(axis.text.x = element_text(angle = 20, hjust = 1)) +
+    ylim(c(0, 1))
+  
+  # plot for competence
+  plot_competence <- ggplot(d,
+                            aes(x = constellation, y =  average_relative_competence, fill = constellation)) +
+    geom_half_violin(position = position_nudge(x = -.2),
+                     adjust=2, alpha = .8,
+                     side = "l") +
+    stat_summary(fun = "mean", geom = "point", size = 1, shape = 21) +
+    stat_summary(fun = "mean", geom = "line", size = 1, linetype = "dashed") +
+    stat_summary(fun.data = "mean_se", geom = "errorbar", width = .2) +
+    # Add nice labels
+    labs(x = "Convergence", y = "Competence", caption = caption) +
+    scale_fill_viridis_d(option = "plasma", begin = 0.1) +
+    guides(fill = FALSE) +
+    plot_theme + 
+    theme(axis.text.x = element_text(angle = 20, hjust = 1)) +
+    ylim(c(0, 1))
+  
+  # unite tables
+  # tables <- gridExtra::grid.arrange(descriptive, simulation_info, ncol = 2)
+  
+  if (outcome == "everything") {
+    
+    return(plot_accuracy | plot_competence )
+  }
+  
+  if (outcome == "accuracy") {
+    
+    return(plot_accuracy + labs(caption = caption))
+  }
+  
+  if (outcome == "competence") {
+    
+    return(plot_competence)
+  }
+  
+}
+```
+
+#### b) Plot varying sample & options
+
+Second, we want a function that plots results obtained by the `vary_sample_options` function. 
+
+```{r, echo=FALSE}
+plot_results_vary <- function(data, variable = options) {
+  
+  d <- data
+  
+  # Extract variable name as a string
+  variable_name <- deparse(substitute(variable))
+  
+  # retrieve info from choice of variable
+  if (variable_name == "options") {
+    x_label = "Number of Choice Options"
+    title = paste0("Sample: ", d$sample," \n iterations: ", d$total_iterations)
+  }
+    if (variable_name == "sample") {
+    x_label = "Size of informant groups"
+    title = paste0("Options: ", d$options," \n iterations: ", d$total_iterations)
+  }
+  
+  # make constellation a factor with the right levels
+  d$constellation <- fct_relevel(d$constellation, "minority(ies)", "dissensus", "majority", "consensus")
+  
+  # plot for accuracy
+  plot_accuracy <- ggplot(d,
+                          aes(x = as.factor({{variable}}), y = average_accuracy, fill = constellation)) +
+    geom_half_violin(position = position_nudge(x = -.2),
+                     adjust=2, alpha = .5,
+                     side = "l") +
+    stat_summary(fun = "mean", geom = "point", size = 1, shape = 21) +
+    stat_summary(fun = "mean", geom = "line", size = 1, linetype = "dashed") +
+    stat_summary(fun.data = "mean_se", geom = "errorbar", width = .2) +
+    # Add nice labels
+    labs(x = x_label, y = "Accuracy") +
+    scale_fill_viridis_d(option = "plasma", begin = 0.1, 
+                         limits = rev(levels(d$constellation)),
+                         direction = -1
+    ) +
+    plot_theme 
+  
+  # plot for competence
+  plot_competence <- ggplot(d,
+                            aes(x = as.factor({{variable}}), y = average_relative_competence, fill = constellation)) +
+    geom_half_violin(position = position_nudge(x = -.2),
+                     adjust=2, alpha = .5,
+                     side = "l") +
+    stat_summary(fun = "mean", geom = "point", size = 1, shape = 21) +
+    stat_summary(fun = "mean", geom = "line", size = 1, linetype = "dashed") +
+    stat_summary(fun.data = "mean_se", geom = "errorbar", width = .2) +
+    # Add nice labels
+    labs(x = x_label, y = "Relative competence", fill = NULL) + 
+    scale_fill_viridis_d(option = "plasma", begin = 0.1, 
+                         limits = rev(levels(d$constellation)),
+                         direction = -1
+    ) +
+    plot_theme 
+  
+  ggpubr::ggarrange(plot_accuracy, plot_competence, common.legend = TRUE) +
+    plot_annotation(title = title)
+}
+```
+
+#### c) Plot varying competence distributions
+
+Third, we want a function that plots results by various competence levels.
+
+```{r}
+plot_competence_vary <- function(data, variable = options, outcome = "Accuracy", 
+                                 return = "simulations") {
+  
+  d <- data
+  
+  # Extract variable name as a string
+  variable_name <- deparse(substitute(variable))
+  
+  # retrieve info from choice of variable
+  if (variable_name == "options") {
+    x_label = "Number of Choice Options"
+    caption = paste0("Sample size of informants: ", d$sample[1],
+                     "; Iterations per sample size: ", d$total_iterations[1], 
+                     "; Population size per iteration: ", d$population[1])
+  }
+  if (variable_name == "sample") {
+    x_label = "Size of informant groups"
+    caption = paste0("Number of choice options: ", d$options[1],
+                     "; Iterations per sample size: ", d$total_iterations[1], 
+                     "; Population size per iteration: ", d$population[1])
+  }
+  
+  # make constellation a factor with the right levels
+  d$constellation <- fct_relevel(d$constellation, "minority(ies)", "dissensus", "majority", "consensus")
+  
+  d <- d %>% 
+    group_by(constellation, {{variable}}, competence) %>% 
+    summarise(competence_mean = mean(average_relative_competence),
+              accuracy_mean = mean(average_accuracy),
+              accuracy_sd = sd(average_accuracy),
+              competence_sd = sd(average_relative_competence)
+    )
+  
+  # Assign outcome variable
+  if(outcome == "Accuracy") {
+    d$outcome <- d$accuracy_mean
+    d$outcome_sd <- d$accuracy_sd
+  }
+  
+  if(outcome == "Competence") {
+    d$outcome <- d$competence_mean
+    d$outcome_sd <- d$competence_sd
+  }
+  
+  # plot for accuracy
+  plot_outcome <- ggplot(d,
+                         aes(x = {{variable}}, y = outcome,
+                             color = constellation)) +
+    # geom_half_violin(position = position_nudge(x = -.2),
+    #                  adjust=2, alpha = .5,
+    #                  side = "l") +
+    geom_pointrange(aes(ymin = outcome - outcome_sd, 
+                        ymax = outcome + outcome_sd), 
+                    size = 0.1) +
+    geom_line() +
+    # Add nice labels
+    labs(x = x_label, y = outcome, caption = caption) +
+    scale_color_viridis_d(option = "plasma", begin = 0.1, 
+                          limits = rev(levels(d$constellation)),
+                          direction = -1
+    ) +
+    facet_wrap(~competence) +
+    plot_theme + 
+    theme(legend.position = "top")
+  
+  # Plot competence distributions
+  # Your data frame
+  d <- data %>% 
+    group_by(competence) %>% 
+    reframe(alpha = unique(alpha), beta = unique(beta))
+  
+  # Function to plot the different competence distributions 
+  plot_competence_distributions <- function(alpha, beta) {
+    ggplot() +
+      geom_function(
+        fun = ~dbeta(.x, shape1 = alpha, shape2 = beta)
+      ) +
+      labs(title = paste0("alpha = ", alpha, ", beta = ", beta), 
+           y = "Density", x = "Competence") +
+      plot_theme
+  }
+  
+  # Specify the values of alpha and beta from the data
+  alpha_values <- d$alpha
+  beta_values <- d$beta 
+  
+  # Create a list of ggplot objects
+  plot_list <- map2(alpha_values, beta_values, plot_competence_distributions)
+  
+  # Arrange and display the plots
+  competence_plot <- ggarrange(plotlist = plot_list) %>%
+    ggpubr::annotate_figure(top = ggpubr::text_grob("Competence distributions", 
+                                                    face = "bold",
+                                                    color = "darkgrey",
+                                                    size = 14))
+  
+  if(return == "competence distributions") {
+    return(competence_plot)
+  } else {
+   return(plot_outcome) 
+  }
+} 
+```
+
+#### d) Plot varying competence distributions by relative majority
+
+Fourth, we want another function that plots results by various competence levels - but this time not for  constellations but the numeric value of the relative majority.
+
+```{r}
+plot_competence_vary_relative_majority <- function(data, variable = options, outcome = "Accuracy") {
+  
+  d <- data
+  
+  # Extract variable name as a string
+  variable_name <- deparse(substitute(variable))
+  
+  # retrieve info from choice of variable
+  if (variable_name == "options") {
+    caption = paste0("Sample size of informants: ", d$sample[1],
+                     "; Iterations per sample size: ", d$total_iterations[1], 
+                     "; Population size per iteration: ", d$population[1])
+  }
+  if (variable_name == "sample") {
+    caption = paste0("Number of choice options: ", d$options[1],
+                     "; Iterations per sample size: ", d$total_iterations[1], 
+                     "; Population size per iteration: ", d$population[1])
+  }
+  
+  d <- d %>% 
+    group_by(relative_majority, {{variable}}, competence) %>%
+    summarise(competence_mean = mean(average_relative_competence),
+              accuracy_mean = mean(average_accuracy),
+              accuracy_sd = sd(average_accuracy),
+              competence_sd = sd(average_relative_competence)
+    )
+  
+  # Assign outcome variable
+  if(outcome == "Accuracy") {
+    d$outcome <- d$accuracy_mean
+    d$outcome_sd <- d$accuracy_sd
+  }
+  
+  if(outcome == "Competence") {
+    d$outcome <- d$competence_mean
+    d$outcome_sd <- d$competence_sd
+  }
+  
+  plot_outcome <- ggplot(d, 
+                         aes(x = relative_majority, y = outcome,
+                             color = as.factor({{variable}}))) +
+    geom_point() +
+    geom_line() +
+    # Add nice labels
+    labs(x = "Relative majority \n (share of informants agreeing on an option)", 
+         y = outcome, caption = caption, 
+         color = variable_name) +
+    scale_color_viridis_d(option = "plasma", begin = 0.1, 
+                          #limits = rev(levels(d$constellation)),
+                          direction = -1
+    ) +
+    facet_wrap(~competence) +
+    plot_theme + 
+    theme(legend.position = "top")
+  
+   return(plot_outcome) 
+
+} 
+```
+
+#### e) Plot competence
+
+Finally, we want to plot the underlying competence distributions
+
+```{r}
+# Plot competence distributions
+plot_competence_distributions <- function(data) {
+  # Your data frame
+  d <- data %>% 
+    group_by(competence) %>% 
+    reframe(alpha = unique(alpha), beta = unique(beta))
+  
+  # Function to plot the different competence distributions 
+  plot_competence_distributions <- function(alpha, beta) {
+    ggplot() +
+      geom_function(
+        fun = ~dbeta(.x, shape1 = alpha, shape2 = beta)
+      ) +
+      labs(title = paste0("alpha = ", alpha, ", beta = ", beta), 
+           y = "Density", x = "Competence") +
+      plot_theme
+  }
+  
+  # Specify the values of alpha and beta from the data
+  alpha_values <- d$alpha
+  beta_values <- d$beta 
+  
+  # Create a list of ggplot objects
+  plot_list <- map2(alpha_values, beta_values, plot_competence_distributions)
+  
+  # Arrange and display the plots
+  competence_plot <- ggarrange(plotlist = plot_list) %>%
+    ggpubr::annotate_figure(top = ggpubr::text_grob("Competence distributions", 
+                                                    face = "bold",
+                                                    color = "darkgrey",
+                                                    size = 14))
+  
+  
+  return(competence_plot) 
+}
+```
+
+
+## Simulation
+
+```{r}
+# Tryout beta functions
+# ggplot() +
+#   geom_function(fun = ~dbeta(.x, shape1 = 0.1, shape2 = 10))
+```
+
+We first simulate data to compare to our experiments. We then do more general simulations.
+
+### Experiment 4
+
+#### Generate Data
+
+First, we want to simulate data under assumptions that correspond to our experimental design.
+
+^We assume:
+- a uniform competence distribution (beta = 1 and alpha = 1)
+- 3 choice options,
+- samples of 3 (i.e. 3 informants)
+
+We generate a sample of 999x1000 = 999000 individuals.
+
+```{r, message=FALSE}
+file_name <- "sim_experiment_4.csv" # change for new analyses / or delete file to re-use same name
+
+if (!file.exists(paste0("data/", file_name))) { 
+  
+  # generate data
+  data <- simulate_various_populations(iterations = 1000, population = 999, sample = 3, options = 3)
+  
+  write_csv(data, paste0("data/", file_name))
+}
+
+# read simulated data from .csv files
+sim_experiment_4 <- read_csv(paste0("data/", file_name))
+```
+
+#### Plot result
+
+We make then make a plot corresponding to the figure from the experiments.
+
+```{r}
+# descriptive
+sim_experiment_4 %>% group_by(constellation) %>% summarise(across(c(average_accuracy, average_competence), mean))
+
+plot_results(sim_experiment_4)
+```
+
+### Experiment 6
+
+#### Generate data
+
+In experiment 6, we varied choice options (from 3 to 10). 
+
+In this simulation, we assume:
+- a sample size of 3 
+- a uniform competence distribution (beta = 1 and alpha = 1)
+
+```{r, message=FALSE}
+n <- c(3, 5, 10, 20, 50, 100)
+
+# run simulation and store results in .csv files
+vary_sample_options(n = n, format = "csv file", vary = "options", iterations = 5, population = 10000, 
+                    sample = 3, file_name = "sim_vary_options_3_sample.csv", 
+                    distribution = "beta", alpha = 1, beta = 1)
+
+# read simulated data from .csv files
+data_3_options <- read_csv("data/sim_vary_options_3_sample.csv")
+```
+
+#### Plot result
+
+```{r}
+# example for plot
+plot_results_vary(data_3_options, 
+                  variable = options)
+```
+## Vary competence
+
+Finally, we want to vary the underlying competence distribution. Along with it, we vary either sample size or number of choice options (holding the respective other constant). 
+
+#### By constellation
+
+We classify samples into categories: dissensus, minority (any of potentially several minorites), majority (the answer with the most counts), and consensus.
+
+```{r, message=FALSE}
+n <- c(3, 5, 10, 20, 50, 100)
+alpha = c(0.1, 2, 1, 1, 6, 0.9)
+beta = c(1, 6, 1, 0.1, 2, 0.9)
+names = c("very incompetent", "incompetent", "uniform", 
+          "very competent", "competent", "bimodal")
+
+vary_competence(file_name = "sim_vary_competence_sample_3_options.csv", 
+                distribution = "beta", 
+                alpha = alpha, beta = beta, names = names, vary = "sample", n = n, 
+                iterations = 5, 
+                population = 1000, options = 3)
+
+varied_competence <- read_csv("data/sim_vary_competence_sample_3_options.csv")
+```
+
+```{r}
+plot_competence_vary(varied_competence,  return = "competence distributions")
+plot_competence_vary(varied_competence , outcome = "Competence", variable = sample)
+plot_competence_vary(varied_competence , outcome = "Accuracy", variable = sample)
+```
+#### By relative majority
+
+Here, we do not group data into categories, but simply sort it by the share of participants (within a sample of informants) that agreed with an options. We call this relative majority.
+
+##### Vary sample size
+
+```{r}
+n <- c(3, 5, 10, 20, 50, 100)
+alpha = c(0.1, 2, 1, 1, 6, 0.9)
+beta = c(1, 6, 1, 0.1, 2, 0.9)
+names = c("very incompetent", "incompetent", "uniform", 
+          "very competent", "competent", "bimodal")
+
+# Vary the sample size, while holding constant on 3 choice options
+vary_competence(file_name = "sim_rel_majority_vary_competence_sample_3_options.csv", 
+                distribution = "beta", 
+                alpha = alpha, beta = beta, names = names, vary = "sample", n = n, 
+                iterations = 100, 
+                population = 1000, options = 3, return = "by degree of majority")
+
+vary_competence_sample <- read_csv("data/sim_rel_majority_vary_competence_sample_3_options.csv")
+```
+
+```{r}
+# Competence distributions
+plot_competence_distributions(vary_competence_sample)
+```
+
+```{r}
+plot_competence_vary_relative_majority(vary_competence_sample,
+                                       outcome = "Accuracy", variable = sample)
+```
+
+```{r}
+plot_competence_vary_relative_majority(vary_competence_sample,
+                                       outcome = "Competence", variable = sample)
+```
+
+##### Vary choice options
+
+```{r}
+n <- c(3, 5, 10, 20, 50, 100)
+alpha = c(0.1, 2, 1, 1, 6, 0.9)
+beta = c(1, 6, 1, 0.1, 2, 0.9)
+names = c("very incompetent", "incompetent", "uniform", 
+          "very competent", "competent", "bimodal")
+
+# Vary the sample size, while holding constant on 3 choice options
+vary_competence(file_name = "sim_rel_majority_vary_competence_options_3_sample.csv", 
+                distribution = "beta", 
+                alpha = alpha, beta = beta, names = names, vary = "options", n = n, 
+                iterations = 100, 
+                population = 1000, sample = 3, return = "by degree of majority")
+
+vary_competence_options <- read_csv("data/sim_rel_majority_vary_competence_options_3_sample.csv")
+```
+
+```{r}
+# Competence distributions
+plot_competence_distributions(vary_competence_options)
+```
+
+```{r}
+plot_competence_vary_relative_majority(vary_competence_options,
+                                       outcome = "Accuracy", variable = options)
+```
+
+```{r}
+plot_competence_vary_relative_majority(vary_competence_options,
+                                       outcome = "Competence", variable = options)
+```
+
+
+
+

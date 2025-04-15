@@ -1,0 +1,361 @@
+# Experiment 6 {#exp6}
+
+## Design
+
+\FloatBarrier
+
+The main focus of experiment 6 was on comparing 3-options conditions to 10-options conditions (see Table \@ref(tab:stimuli-options)). Additionally, we varied between two versions of the 10-options conditions: one in which the range of the answers corresponded to the range of the three options condition (see Table \@ref(tab:stimuli-10)), and another with increased range (see Table \@ref(tab:stimuli-10-alt)).
+
+```{r stimuli-options, echo=FALSE}
+# Create a matrix of image file paths as Markdown-formatted strings
+image_paths <- data.frame(
+  imgage_a = c("![](stimuli/Experiment_6/stimuli_Exp6/consensus_3_a.png){ width=40% }"),
+  imgage_b = c("![](stimuli/Experiment_6/stimuli_Exp6/consensus_10_a.png){ width=40% }")
+  )
+
+# Use kable() to create the table and print it as Markdown
+kableExtra::kable(image_paths, format = "markdown",
+                  col.names = c("Number of options: 3", "Number of options: 10"), 
+                  align = "l",
+                  caption = "Example of a consensus stimulus for the two 'Number of option' conditions") 
+```
+
+## Attention check
+
+Imagine you are playing video games with a friend and at some point your friend says: “I don’t want to play this game anymore! To make sure that you read the instructions, please write the three following words "I pay attention" in the box below. I really dislike this game, it's the most overrated game ever.”
+
+Do you agree with your friend? (Yes/No)
+
+## Stimuli
+
+```{r stimuli-10, echo=FALSE}
+# Create a matrix of image file paths as Markdown-formatted strings
+image_paths <- data.frame(
+  condition = c("minority (0)", "dissensus (1)", "majority (2)", "consensus (3)"),
+  imgage_a = c(
+    "![](Experiment_6/figures/stimuli/minority_10_a.png){ width=40% }",
+    "![](Experiment_6/figures/stimuli/divergence_10_a.png){ width=40% }",
+    "![](Experiment_6/figures/stimuli/majority_10_a.png){ width=40% }",
+    "![](Experiment_6/figures/stimuli/consensus_10_a.png){ width=40% }"
+  ),
+  imgage_b = c(
+    "![](Experiment_6/figures/stimuli/minority_10_b.png){ width=40% }",
+    "![](Experiment_6/figures/stimuli/divergence_10_b.png){ width=40% }",
+    "![](Experiment_6/figures/stimuli/majority_10_b.png){ width=40% }",
+    "![](Experiment_6/figures/stimuli/consensus_10_b.png){ width=40% }"
+  )
+)
+
+# Use kable() to create the table and print it as Markdown
+kableExtra::kable(image_paths, format = "markdown",
+                  col.names = c("Level", "Version a)", "Version b)"), 
+                  align = "c",
+                  caption = "Stimuli for 10 options condition by levels of convergence", 
+                  full_width = T) 
+# %>%
+#   column_spec(1, width = "2em") %>%
+#   column_spec(2, width = "20em") %>%
+#   column_spec(3, width = "20em") %>%
+#   # make smaller to fit
+#   kable_styling(latex_options = "scale_down") 
+
+```
+
+```{r stimuli-10-alt, echo=FALSE}
+# Create a matrix of image file paths as Markdown-formatted strings
+image_paths <- data.frame(
+  condition = c("minority (0)", "dissensus (1)", "majority (2)", "consensus (3)"),
+  imgage_a = c(
+    "![](Experiment_6/figures/stimuli/minority_10_a_alt.png){ width=40% }",
+    "![](Experiment_6/figures/stimuli/divergence_10_a_alt.png){ width=40% }",
+    "![](Experiment_6/figures/stimuli/majority_10_a_alt.png){ width=40% }",
+    "![](Experiment_6/figures/stimuli/consensus_10_a_alt.png){ width=40% }"
+  ),
+  imgage_b = c(
+    "![](Experiment_6/figures/stimuli/minority_10_b_alt.png){ width=40% }",
+    "![](Experiment_6/figures/stimuli/divergence_10_b_alt.png){ width=40% }",
+    "![](Experiment_6/figures/stimuli/majority_10_b_alt.png){ width=40% }",
+    "![](Experiment_6/figures/stimuli/consensus_10_b_alt.png){ width=40% }"
+  )
+)
+
+# Use kable() to create the table and print it as Markdown
+kableExtra::kable(image_paths, format = "markdown",
+                  col.names = c("Level", "Version a)", "Version b)"), 
+                  align = "c",
+                  caption = "Alternative stimuli for 10 options condition by levels of convergence")
+
+```
+
+## Results
+
+Figure \@ref(fig:exp5-plot) visualizes the results and table \@ref(tab:exp5-table) contains descriptive results.
+
+```{r exp6-table}
+exp6_accuracy <- exp6 %>% 
+  mutate(Convergence = paste0(convergence_categorical, " (", convergence, ")")) %>% 
+  group_by(number_options, Convergence, convergence) %>% 
+  summarise(across(accuracy, list(mean = mean, sd = sd))) %>% 
+  rounded_numbers() %>% 
+  mutate(Accuracy = paste0(accuracy_mean, " (sd = ", accuracy_sd, ") ")) %>% 
+  select(number_options, Accuracy, Convergence, convergence) %>% 
+mutate(number_options = ifelse(number_options == "three", "3 options", 
+                "10 options") 
+         ) %>% 
+  pivot_wider(names_from = number_options,
+              values_from = Accuracy) %>% 
+  arrange(convergence) %>% 
+  ungroup() %>% 
+  select(-convergence) %>% 
+  rename(" " = Convergence) %>% 
+  as.matrix()
+
+exp6_competence <- exp6 %>% 
+  mutate(Convergence = paste0(convergence_categorical, " (", convergence, ")")) %>% 
+  group_by(number_options, Convergence, convergence) %>% 
+  summarise(across(competence, list(mean = mean, sd = sd))) %>% 
+  rounded_numbers() %>% 
+  mutate(Competence = paste0(competence_mean, " (sd = ", competence_sd, ") ")) %>% 
+  select(number_options, Competence, Convergence, convergence) %>% 
+mutate(number_options = ifelse(number_options == "three", "3 options", 
+                "10 options") 
+         ) %>% 
+  pivot_wider(names_from = number_options,
+              values_from = Competence) %>% 
+  ungroup() %>% 
+  arrange(convergence) %>% 
+  select(-c(convergence, Convergence)) %>% 
+  as.matrix()
+
+table <- cbind(exp6_accuracy, exp6_competence)
+
+# Conditionally apply table formatting based on output format
+if (knitr::is_latex_output() || knitr::is_html_output()) {
+  # For LaTeX/HTML: Use kable and add_header_above
+  table_output <- table %>%
+    kable(booktabs = TRUE, 
+          caption = "") %>%  # Empty caption for cross-referencing
+    kable_styling() %>%
+    add_header_above(c("", "Accuracy" = 2, "Competence" = 2)) %>%
+    kable_styling(latex_options = "scale_down")  # Scale down for LaTeX
+} else {
+  # For Word: Use apa_table for APA-style table
+  table_output <- papaja::apa_table(
+    table, 
+    caption = "Participants vs. Model"
+  )
+}
+
+# Print the table
+table_output
+```
+
+(ref:exp6-plot) Interaction of convergence and informational dependency.
+
+```{r exp6-plot, fig.cap="(ref:exp6-plot)"}
+# colors were identified with the wesanderson package (library(wesanderson)) as:
+# wes_palette("Zissou1", 100, type = "continuous")[A number]
+
+# plot for accuracy
+plot_accuracy <- ggplot(exp6,
+       aes(x = convergence_categorical, y = accuracy, fill = number_options)) +
+  geom_half_violin(position = position_nudge(x = -.2),
+                   adjust=2, alpha = .4,
+                   side = "l") +
+  stat_summary(fun = "mean", geom = "point", size = 2, shape = 21) +
+  stat_summary(fun = "mean", geom = "line", size = 1, linetype = "dashed") +
+  stat_summary(fun.data = "mean_se", geom = "errorbar", width = .2) +
+  # Add nice labels
+  labs(x = "Convergence", y = "Accuracy", fill = NULL) +
+  scale_fill_manual(values = c("#EE3800", "#3D9BB2"), 
+                    name = "Number of choice options: ") +
+  plot_theme + 
+  theme(axis.text.x = element_text(angle = 20, hjust = 1))
+
+# plot for competence
+plot_competence <- ggplot(exp6,
+       aes(x = convergence_categorical, y = competence, fill = number_options)) +
+  geom_half_violin(position = position_nudge(x = -.2),
+                   adjust=2, alpha = .4,
+                   side = "l") +
+  stat_summary(fun = "mean", geom = "point", size = 2, shape = 21) +
+  stat_summary(fun = "mean", geom = "line", size = 1, linetype = "dashed") +
+  stat_summary(fun.data = "mean_se", geom = "errorbar", width = .2) +
+  # Add nice labels
+  labs(x = "Convergence", y = "Competence", fill = NULL) +
+  scale_fill_manual(values = c("#EE3800", "#3D9BB2")) +
+  plot_theme + 
+  theme(axis.text.x = element_text(angle = 20, hjust = 1))
+
+ggpubr::ggarrange(plot_accuracy, plot_competence, common.legend = TRUE)
+```
+
+## Comparison with simulation
+
+```{r}
+# read simulated data from .csv files
+data_3_options <- read_csv("Experiment_4/data/sim_vary_options_3_sample.csv")
+```
+
+Since we didn't find a difference between three and ten choice option scenarios in the participant data, we wanted to have a normative point of reference of what should have been the expected difference, given our model. We therefor compared participant ratings to observed values from simulated data. The data was generated using the model described in the main paper, and assuming a uniform competence distribution. Compared to this data generating model, participants considerably underestimated how the number of choice options alters the effect of convergence for both accuracy and competence. Table \@ref(tab:model-vs-participant-table) compares the results of regressions on participant data and regressions on simulated data. Fig. \@ref(fig:exp6-model) visualizes the results.
+
+```{r}
+# possible analysis for varying choice options (3 vs. 10)
+regression_data <- data_3_options %>%
+  filter(options %in% c(3, 10)) %>%
+  # group_by(iteration, constellation, options) %>%
+  # summarise(across(c(average_accuracy, average_relative_competence), mean)) %>%
+  mutate(
+    convergence = case_when(
+      constellation == "minority(ies)" ~ 0,
+      constellation == "dissensus" ~ 1,
+      constellation == "majority" ~ 2,
+      constellation == "consensus" ~ 3),
+    # make a categorical version
+    convergence_categorical = recode_factor(convergence, 
+                                            `0` = "minority", 
+                                            `1` = "divergence", 
+                                            `2` = "majority", 
+                                            `3` = "consensus",
+                                            .default = NA_character_),
+    # make a version of number for plot
+    number_options = ifelse(options == 3, "three", "ten"),
+    # we'll use an effect coded version for the analysis
+    number_options_effect_code = ifelse(options == 3, -0.5, 0.5),
+    # scale accuracy to reach from 0 to 100 (instead from 0 to 1)
+    average_accuracy = average_accuracy*100,
+    # scale competence to reach from 1 to 7 (instead of 0 to 1)
+    average_relative_competence = 6*average_relative_competence + 1
+  )
+
+accuracy <- lm(average_accuracy ~ convergence + number_options_effect_code + convergence*number_options_effect_code,
+               data = regression_data)
+competence <- lm(average_relative_competence ~ convergence + number_options_effect_code + convergence*number_options_effect_code, 
+                 data = regression_data)
+```
+
+```{r}
+# read data
+exp6 <- read_csv("Experiment_6/data/cleaned.csv") %>% 
+  # import experimental variable as factor and set levels
+  mutate(
+    # set levels for `convergence`
+    convergence_categorical = recode_factor(convergence, 
+                                            `0` = "minority", 
+                                            `1` = "divergence", 
+                                            `2` = "majority", 
+                                            `3` = "consensus",
+                                            .default = NA_character_))  %>% 
+  # For this model, we effect code `number_options`, so that we get a coefficient 
+  # for the main effect of convergence as well as for the interaction
+  mutate(number_options_effect_code = recode(number_options, "three" = -0.5, "ten" = +0.5))
+
+# run mixed model (random slope and intercept) with participants as random factor
+exp6_model_accuracy = lmer(accuracy ~ convergence + number_options_effect_code + 
+                            number_options_effect_code*convergence + (1 + convergence | id), 
+                       data = exp6)
+exp6_model_competence = lmer(competence ~ convergence + number_options_effect_code + 
+                            number_options_effect_code*convergence + (1 + convergence | id), 
+                       data = exp6)
+```
+
+```{r}
+# Create the basic table
+table_output <- modelsummary::modelsummary(list("Accuracy" = exp6_model_accuracy, 
+                                                "Competence" = exp6_model_competence,
+                                                "Accuracy" = accuracy, 
+                                                "Competence" = competence),
+                                           title = 'Participants vs. Model (Exp. 6)', 
+                                           stars = TRUE,
+                                           output = "kableExtra")
+
+# Conditionally apply header styling for LaTeX or HTML
+if (knitr::is_latex_output() || knitr::is_html_output()) {
+  table_output <- table_output %>%
+    kableExtra::add_header_above(c(" " = 1, "Participants" = 2, "Model" = 2))
+}
+
+# Print the table
+table_output
+```
+
+(ref:exp6-model) Comparison of accuracy (top) and competence (bottom) ratings in participant data (left) to observations in simulated data (right), by level of convergence. 
+
+```{r exp6-model, fig.cap="(ref:exp6-model)"}
+# colors were identified with the wesanderson package (library(wesanderson)) as:
+# wes_palette("Zissou1", 100, type = "continuous")[A number]
+
+# plot for accuracy
+plot_accuracy_participants <- ggplot(exp6,
+       aes(x = convergence_categorical, y = accuracy, fill = number_options)) +
+  geom_half_violin(position = position_nudge(x = -.2),
+                   adjust=2, alpha = .4,
+                   side = "l") +
+  stat_summary(fun = "mean", geom = "point", size = 2, shape = 21) +
+  stat_summary(fun = "mean", geom = "line", size = 1, linetype = "dashed") +
+  stat_summary(fun.data = "mean_se", geom = "errorbar", width = .2) +
+  # Add nice labels
+  labs(x = "Convergence", y = "Accuracy", fill = NULL, title = "Participants") +
+  scale_fill_manual(values = c("#EE3800", "#3D9BB2"), 
+                    name = "Number of choice options: ") +
+  plot_theme + 
+  theme(axis.text.x = element_text(angle = 20, hjust = 1))
+
+plot_accuracy_model <- ggplot(regression_data,
+       aes(x = convergence_categorical, y = average_accuracy, fill = number_options)) +
+  geom_half_violin(position = position_nudge(x = -.2),
+                   adjust=2, alpha = .4,
+                   side = "l") +
+  stat_summary(fun = "mean", geom = "point", size = 2, shape = 21) +
+  stat_summary(fun = "mean", geom = "line", size = 1, linetype = "dashed") +
+  stat_summary(fun.data = "mean_se", geom = "errorbar", width = .2) +
+  # Add nice labels
+  labs(x = "Convergence", y = "Accuracy", fill = NULL, title = "Model") +
+  scale_fill_manual(values = c("#EE3800", "#3D9BB2"), 
+                    name = "Number of choice options: ") +
+  guides(fill = "none") +
+  plot_theme + 
+  theme(axis.text.x = element_text(angle = 20, hjust = 1))
+
+# plot for competence
+plot_competence_participants <- ggplot(exp6,
+       aes(x = convergence_categorical, y = competence, fill = number_options)) +
+  geom_half_violin(position = position_nudge(x = -.2),
+                   adjust=2, alpha = .4,
+                   side = "l") +
+  stat_summary(fun = "mean", geom = "point", size = 2, shape = 21) +
+  stat_summary(fun = "mean", geom = "line", size = 1, linetype = "dashed") +
+  stat_summary(fun.data = "mean_se", geom = "errorbar", width = .2) +
+  # Add nice labels
+  labs(x = "Convergence", y = "Competence", fill = NULL) +
+  scale_fill_manual(values = c("#EE3800", "#3D9BB2")) +
+  guides(fill = "none") +
+  plot_theme + 
+  theme(axis.text.x = element_text(angle = 20, hjust = 1))
+
+plot_competence_model <- ggplot(regression_data,
+       aes(x = convergence_categorical, y = average_competence, fill = number_options)) +
+  geom_half_violin(position = position_nudge(x = -.2),
+                   adjust=2, alpha = .4,
+                   side = "l") +
+  stat_summary(fun = "mean", geom = "point", size = 2, shape = 21) +
+  stat_summary(fun = "mean", geom = "line", size = 1, linetype = "dashed") +
+  stat_summary(fun.data = "mean_se", geom = "errorbar", width = .2) +
+  # Add nice labels
+  labs(x = "Convergence", y = "Competence", fill = NULL) +
+  scale_fill_manual(values = c("#EE3800", "#3D9BB2")) +
+  guides(fill = "none") +
+  plot_theme + 
+  theme(axis.text.x = element_text(angle = 20, hjust = 1))
+
+participants <- ggpubr::ggarrange(plot_accuracy_participants,plot_accuracy_model, common.legend = TRUE) 
+model <- ggpubr::ggarrange(plot_competence_participants, plot_competence_model) 
+
+participants / model + plot_layout(guides = "collect")
+```
+
+
+
+
+
+

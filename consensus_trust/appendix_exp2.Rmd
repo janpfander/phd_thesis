@@ -1,0 +1,124 @@
+# Experiment 2 {#exp2}
+
+\FloatBarrier
+
+```{r exp2-conditions}
+# We manipulated informational dependency. According to the condition, players read a different introduction before seeing a set of estimates (see Table \@ref(tab:exp2-conditions)).
+
+# The different introductions that participants read before seeing the sets of estimates, according to the conditions 
+# data.frame(
+#   Condition = c("Independence", "Discussion"),
+#   Description = c(
+#     "Players are asked to make completely independent decisions – they cannot see each other’s estimates, or talk with each other before giving their estimates.",
+#     "Players are asked to talk with each other about the game at length before giving their estimates."
+#   )
+# ) %>% 
+#   apa_table(align = c("m{3cm}", "m{10cm}")) 
+```
+
+## Attention check
+
+Imagine you are playing video games with a friend and at some point your friend says: “I don’t want to play this game anymore! To make sure that you read the instructions, please write the three following words "I pay attention" in the box below. I really dislike this game, it's the most overrated game ever.”
+
+Do you agree with your friend? (Yes/No)
+
+## Results
+
+Figure \@ref(fig:exp2-plot) visualizes the results and table \@ref(tab:exp2-table) contains descriptive results.
+
+```{r exp2-table}
+exp2 %>% 
+  group_by(independence) %>% 
+  summarise(across(c(competence, confidence), list(mean = mean, sd = sd))) %>% 
+  rounded_numbers() %>% 
+  mutate(Accuracy = paste0(confidence_mean, " (sd = ", confidence_sd, ")"),
+         Competence = paste0(competence_mean, " (sd = ", competence_sd, ")")
+         ) %>% 
+  rename(Independence = independence) %>% 
+  select(Independence, Accuracy, Competence) %>% 
+  apa_table()
+```
+
+(ref:exp2-plot) Distributions of accuracy and competence by level of informational dependency.
+
+```{r exp2-plot, fig.cap="(ref:exp2-plot)"}
+# make mean data for plot
+x_nudge <- 0.8
+
+means <- exp2 %>%
+  group_by(independence) %>%
+  summarize(confidence = mean(confidence), 
+            competence = mean(competence)) %>% 
+  pivot_longer(c(confidence, competence), 
+               names_to = "outcome", 
+               values_to = "value") %>% 
+  mutate(x_position = ifelse(independence == "dependent", value + x_nudge, 
+                                value - x_nudge)) 
+
+confidence_plot <- ggplot(data=exp2, aes(x=confidence, fill=independence)) +
+  # density plot
+  geom_density(adjust=3, alpha=.6) +
+ # mean lines
+  geom_vline(data=means %>% 
+               filter(outcome == "confidence"), 
+             aes(xintercept = value, 
+                 color = independence),
+             show.legend = FALSE,
+             linetype="dashed") +
+  geom_label(data = means %>% 
+               filter(outcome == "confidence"), 
+             aes(x = x_position, y = 0.3, 
+                 label =  paste("mean", round(value, digits = 2),
+                                sep = " = ")), 
+             alpha = 0.6, show.legend = FALSE, size = 3
+            ) +
+  # scales
+  scale_x_continuous(name = "Accuracy (confidence) ratings", breaks = seq(1, 7), 
+                     limits=c(1, 7)) +
+  scale_y_continuous(name = "Density", limits=c(0, 0.4)) +
+  scale_fill_brewer(palette = "Accent",
+                    direction = 1) +
+  scale_color_brewer(palette = "Accent",
+                    direction = 1) +
+  guides(fill = guide_legend(title = NULL)) +
+  plot_theme 
+
+competence_plot <- ggplot(data=exp2, aes(x=competence, fill=independence)) +
+  # density plot
+  geom_density(adjust=3, alpha=.6) +
+ # mean lines
+  geom_vline(data=means %>% 
+               filter(outcome == "competence"), 
+             aes(xintercept = value, 
+                 color = independence),
+             show.legend = FALSE,
+             linetype="dashed") +
+  geom_label(data = means %>% 
+               filter(outcome == "competence"), 
+             aes(x = x_position, y = 0.3, 
+                 label =  paste("mean", round(value, digits = 2),
+                                sep = " = ")), 
+             alpha = 0.6, show.legend = FALSE, size = 3
+            ) +
+  # scales
+  scale_x_continuous(name = "Competence ratings", breaks = seq(1, 7), 
+                     limits=c(1, 7)) +
+  scale_y_continuous(name = "Density", limits=c(0, 0.4)) +
+  scale_fill_brewer(palette = "Accent",
+                    direction = 1) +
+  scale_color_brewer(palette = "Accent",
+                    direction = 1) +
+  guides(fill = guide_legend(title = NULL)) +
+  plot_theme 
+
+figure <- ggarrange(confidence_plot, 
+                    competence_plot + 
+                      theme(axis.text.y = element_blank(),
+                            axis.ticks.y = element_blank(),
+                            axis.title.y = element_blank()), 
+                    common.legend = T) +
+  theme(legend.position="top") 
+figure
+```
+
+

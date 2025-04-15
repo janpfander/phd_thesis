@@ -1,0 +1,762 @@
+---
+title: "Model for numerical choice scenarios (experiments 1 to 3)"
+output: 
+  html_document: 
+    keep_md: yes
+date: "2023-04-08"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message=FALSE, echo=FALSE}
+# Load packages
+library(tidyverse)
+library(gghalves) # for plots
+library(patchwork)
+library(lme4) # for linear mixed models
+library(lmerTest) # p-values for mixed models
+library(broom) # for tidy outputs of regressions
+library(broom.mixed) # for tidy outputs of linear mixed models
+library(ggpubr) # for plots and ggarrange()
+```
+
+```{r, echo = FALSE}
+# set general theme for plots
+plot_theme <- theme_minimal(base_size = 12) +
+  theme(# Bold title
+    plot.title = element_text(face = "bold", size = rel(0.7)),
+    # Plain subtitle that is grey
+    plot.subtitle = element_text(face = "plain", size = rel(1), color = "grey70"),
+    # Bold legend titles
+    legend.title = element_text(face = "bold"),
+    # Bold axis titles
+    axis.title = element_text(face = "bold"), 
+    # Bold legend labels
+    legend.text = element_text(face = "bold")
+    )
+```
+
+```{r}
+# ensure this script returns the same results on each run
+set.seed(8726)
+```
+
+## Explaining the model
+
+```{r}
+# Imagine a situation in which answers range from 1000 to 2000
+range <- 1000
+# and a population of n = 999
+population <- 999
+# and we observe samples of 3
+sample <- 3
+# alpha and beta values for beta distributions modelling competence
+alpha <- 1
+beta <- 1
+# ramge of values for estimates
+min_range = 1000
+max_range = 2000
+
+# set arbitrary limit for competence distribution
+# (factor determining distance between lowest and highest possible competence, 
+# i.e. standard deviation)
+competence_ratio = 1000 
+```
+
+
+### Define competence and its distribution 
+
+We define competence as the value of the standard deviation from which one's answer is drawn. We suppose that answers for all individuals are drawn from normal distributions. Each individual has their own normal distribution. All normal distributions are centered around the true answer, but they differ in their standard deviations. The higher the competence, the lower the standard deviation, i.e. the more certain a guess drawn from the normal distribution will be close to the true answer. 
+
+We (arbitrarily) set the *lowest* competence to the range of possible values, in our case 2000 - 1000 = 1000. We set the *highest* competence to 1/1000 of the range of possible values, in our case 1. 
+
+```{r}
+# Define the x-axis values
+x <- seq(1000, 2000, length.out = 1000)
+
+# Define the PDFs for the two distributions
+high_competence_pdf <- dnorm(x, mean = 1500, sd = 1)
+low_competence_pdf <- dnorm(x, mean = 1500, sd = 1000)
+
+# Create the plot
+ggplot() +
+  geom_line(aes(x, high_competence_pdf, color = "Highest Competence Individual \n (SD = 1, Mean = 1500)"), size = 1) +
+  geom_line(aes(x, low_competence_pdf, color = "Lowest Competence Individual \n (SD = 1000, Mean = 1500)"), size = 1) +
+  labs(x = "Competence Level", y = "Density", color = "Data generating function for") +
+  ggtitle("Competence Level Distributions") +
+  scale_color_manual(values = c("Highest Competence Individual \n (SD = 1, Mean = 1500)" = "blue", 
+                                "Lowest Competence Individual \n (SD = 1000, Mean = 1500)" = "red")) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+We assume that individuals (i) vary in competence and (ii) that the distribution of competence in the population varies, as can be modeled by a beta distribution. In the case below, we assume a uniform competence distribution (equal to a beta distribution of alpha = 1 and beta = 1). 
+
+In order to be able to compare competence measures across different ranges, we want to scale it to reach from 0 (minimal competence) to 1 (maximal competence). 
+
+```{r}
+# 1: Distribution of competence
+
+# Theoretical population distribution of competence
+ggplot() +
+  geom_function(fun = ~dbeta(.x, shape1 = 1, shape2 = 1))
+
+# randomly draw competence levels
+data <- tibble(id = 1:population,
+               competence = rbeta(population, shape1 = alpha, 
+                                          shape2 = beta)) %>% 
+    # For now competence tending towards one is more competent.
+    # For the data generating, we need the reverse and scale this competence measure.  
+    mutate(
+      # Since competence = standard deviation of estimate generating normal distribution, 
+      # reverse the scale such that 0 corresponds to maximal competence (instead of 1).
+      competence_reversed = 1 - competence, 
+      # Put values on a scale: 
+      # We (arbitrarily) set the lowest competence to the range of possible values, 
+      # in case of our experiments 2000 - 1000 = 1000. 
+      # We set the highest competence to 1/1000 of the range of possible values, 
+      # in our case 1.
+      competence_reversed_scaled = (competence_reversed * range) + range/competence_ratio)
+
+
+# generated population
+ggplot(data, aes(x = competence)) +
+  geom_histogram() + 
+  scale_x_continuous(breaks = seq(from = 0, to = 1, by = 0.1)) + 
+  annotate("text", x = 0.9, y = 100, label = paste0("n = ", population), color = "red") +
+  labs(title = "(sampled) Population of competence drawn from \n uniform population distribution", 
+       y = "Count")
+```
+### Generate a choice for each individual based on their competence. 
+
+The numbers that we generate from the normal distributions are truncated such that they all lie within the pre-defined range (1000 to 2000)
+
+```{r}
+# 2: Draw individual answers based on competence levels 
+mean <- 1500
+
+# use the reversed competence variable to generate the estimates
+data$answer <- data$competence_reversed_scaled %>% 
+  purrr::map_dbl(function(x){ 
+    
+    sd <- x
+    
+    answer = truncnorm::rtruncnorm(1, mean = mean, sd = sd, a = min_range, b = max_range)
+  }
+  )
+
+ggplot(data, aes(x = answer)) +
+  geom_histogram()
+```
+
+### Measure accuracy
+
+We measure accuracy as the (squared) distance between the chosen answer and the true answer for each individual.
+
+We let this distance be negative, such that higher values represent higher accuracy. 
+
+```{r}
+# 3: measure accuracy
+data <- data %>% 
+  mutate(accuracy = -1 * sd(answer))
+
+ggplot(data, aes(x = accuracy)) +
+  geom_histogram() +
+
+ggplot(data, aes(x = competence, y = accuracy)) +
+  geom_point()
+```
+
+### Draw samples, calculate convergence & compare average outcomes
+
+### Randomly draw samples from the population
+
+```{r}
+# 4: randomly assign samples in population
+data <- data %>% mutate(sample_id = rep(1:(population/sample), sample))
+```
+
+### Calculate convergence 
+
+We define convergence as the standard deviation of the answers within a sample (multiplied by -1 so that higher values correspond to greater convergence)
+
+```{r}
+# 5: calculate convergence 
+data <- data %>% 
+  # identify how often a one type of answer occurs in one group
+  group_by(sample_id) %>% 
+  mutate(convergence = -1 * sd(answer)) %>% 
+  ungroup()
+
+ggplot(data, aes(x = convergence)) +
+  geom_histogram()
+```
+
+### Compute average accuracy/competence per sample.
+
+```{r}
+# 6: calculate accuracy and competence per sample
+
+# compute the summary statistics for each sample
+results <- data %>% 
+  group_by(sample_id, convergence) %>% 
+  summarize(competence_mean = mean(competence),
+            accuracy_mean = mean(accuracy)) %>% 
+  # store simulation information
+  mutate(population = population, 
+         sample = sample)
+```
+
+```{r}
+accuracy_plot <- ggplot(results, aes(x = convergence, y = accuracy_mean)) +
+  geom_point() +
+  # Add nice labels
+    labs(x = "Convergence \n(SDs within samples of three)", 
+         y = "Accuracy \n(squared distance to true mean)") +
+  plot_theme 
+
+competence_plot <- ggplot(results, aes(x = convergence, y = competence_mean)) +
+  geom_point() +
+  # Add nice labels
+    labs(x = "Convergence \n(SDs within samples of three)", 
+         y = "Competence \n(SD of data generating function)") +
+  plot_theme 
+
+accuracy_plot + competence_plot
+```
+
+## Functions
+
+### Data generating functions
+
+#### Single population
+
+```{r, echo=FALSE}
+simulate_single_population <- function(population, sample, min_range, max_range, 
+                                       competence_ratio = 1000, alpha, beta) {
+  
+  # Check if population is not divisible by sample without remainder
+  
+  if (population %% sample != 0) {
+    warning("Population is not divisible by sample without remainder.")
+  }
+  
+  # if necessary, alter population size so that it is divisible by sample without rest
+  n_possible_samples <- floor(population/sample)
+  
+  # Biggest possible population to pick
+  possible_population = n_possible_samples * sample
+  
+  # Issue warning if different population size used
+  if (population %% sample != 0) {
+    warning(paste0("Chosen population size is ", possible_population))
+  }
+  # change population value (if divisible without remainder, it'll be the same)
+  population = possible_population
+  
+  # Set variables
+  range = max_range - min_range
+  mean = min_range + (max_range - min_range)/2
+  
+  # 1: Distribution of competence
+  data <- tibble(id = 1:population,
+                 competence = rbeta(population, shape1 = alpha, 
+                                    shape2 = beta)) %>% 
+    # For now competence tending towards one is more competent.
+    # For the data generating, we need the reverse and scale this competence measure.  
+    mutate(
+      # Since competence = standard deviation of estimate generating normal distribution, 
+      # reverse the scale such that 0 corresponds to maximal competence (instead of 1).
+      competence_reversed = 1 - competence, 
+      # Put values on a scale: 
+      # We (arbitrarily) set the lowest competence to the range of possible values, 
+      # in case of our experiments 2000 - 1000 = 1000. 
+      # We set the highest competence to 1/1000 of the range of possible values, 
+      # in our case 1.
+      competence_reversed_scaled = (competence_reversed * range) + range/competence_ratio)
+  
+  # 2: Draw individual answers based on competence levels 
+  
+  data$answer <- data$competence_reversed_scaled %>% 
+    purrr::map_dbl(function(x){ 
+      
+      sd <- x
+      
+      answer = truncnorm::rtruncnorm(1, mean = mean, sd = sd, a = min_range, 
+                                     b = max_range)
+    }
+    )
+  
+  # 3: measure accuracy
+  data <- data %>% 
+    mutate(accuracy = -1 * (mean - answer)^2)
+  
+  # 4: randomly assign samples in population
+  data <- data %>% mutate(sample_id = rep(1:(population/sample), sample))
+  
+  # 5: calculate convergence 
+  data <- data %>% 
+    group_by(sample_id) %>% 
+    mutate(convergence = -1 * sd(answer)) %>% 
+    ungroup()
+  
+  # 6: calculate accuracy and competence levels per sample
+  results <- data %>% 
+    group_by(sample_id, convergence) %>% 
+    summarize(competence_mean = mean(competence),
+              accuracy_mean = mean(accuracy)) %>% 
+    # store simulation information
+    mutate(population = population, 
+           sample = sample) %>% 
+    ungroup()
+  
+  return(results)
+}
+```
+
+```{r, echo=FALSE}
+# test <- simulate_single_population(population = 500, sample = 3,
+#                                    min_range = 1, max_range = 6,
+#                                    competence_ratio = 1000,
+#                                    alpha = 1,
+#                                    beta = 1)
+```
+
+#### Various populations
+
+```{r, echo=FALSE}
+simulate_various_populations <- function(iterations,...) {
+  
+  # create data frame with model results for generated samples
+  various_populations <- 1:iterations %>% 
+    purrr::map_df(function(x){
+      # this is essentially a for loop - do the following for each 
+      # element in 1:iterations
+      
+      results <- simulate_single_population(...)
+      
+      # identify iteration
+      results$iteration <- x
+      
+      # To keep track of progress
+      if (x %% 50 == 0) {print(paste("iteration number ", x))}
+      
+      return(results)
+      
+    }) %>% 
+    # store simulation information
+    mutate(total_iterations = iterations)
+  
+  return(various_populations)
+}
+```
+
+
+```{r, echo=FALSE}
+# # try out code
+# test <- simulate_various_populations(population = 500, sample = 3,
+#                                    min_range = 1, max_range = 6,
+#                                    competence_ratio = 1000,
+#                                    iterations = 100)
+```
+
+
+#### Vary sample size
+
+This function allows us to investigate how accuracy and competence change with varying the sample size. 
+
+The simulations that this function executes will take quite some time. Therefore, we do not want to run it every time we render this document. Instead we want to store the output of the power simulation in a `.csv` file, and have an integrated "stop" mechanism to prevent execution when that file already exists. To achieve this, we make `file_name` a mandatory argument. If a file with that name already exists, the function will not be executed.
+
+```{r, echo=FALSE}
+# function for different sample sizes
+vary_sample <- function(file_name, n, format = "result", ...) {
+  
+  # only run analysis if a file with that name does not yet exists
+  if (!file.exists(paste0("data/", file_name))) {
+    
+    # do the `simulate_various_populations()` function for each sample size 
+    # and store the results in a new data_frame
+    data <- n %>% purrr::map_df(function(n_sample){
+      # this is essentially a for loop - 
+      # do the following for each 
+      # element data$n_subj
+      
+      # To keep track of progress
+      print(paste("tested sample number = ", n_sample))
+      
+      # run power calculation
+      result <- simulate_various_populations(
+        sample = n_sample, ...)
+      
+      return(result)
+      
+    })
+    
+    if(format == "result") {
+      return(data)
+    } else{
+      write_csv(data, paste0("data/", file_name))
+    }
+  }
+}
+```
+
+```{r, echo=FALSE}
+# # try out code
+# n <- c(3, 10)
+# test <- vary_sample(population = 999,
+#                     min_range = 1000, max_range = 2000,
+#                     competence_ratio = 1000,
+#                     iterations = 100,
+#                     file_name = "test.csv",
+#                     n = n)
+```
+
+#### Vary competence
+
+We now want to do the above (simulate a single population, repeat this process, do so for various sample sizes and choice options) for different competence distributions. We vary these distributions with the `alpha` and `beta` parameters for the beta distributions.
+
+```{r, echo=FALSE}
+# set name
+file_name <- "model.csv" # change for new analyses / or delete file to re-use same name
+
+vary_competence <- function(file_name, alpha, beta, names, ...) {
+  
+  # only run analysis if a file with that name does not yet exists
+  if (!file.exists(paste0("data/", file_name))) {
+    
+    competence_data <- tibble(alpha, beta, names) %>% 
+      mutate(competence = paste0(names, "\n(alpha = ", alpha, ", beta = ", beta, ")"))
+    
+    # do all the above functions for different competence distributions
+    data <- competence_data$competence %>% purrr::map_df(function(competence_level){
+      # this is essentially a for loop 
+      
+      # To keep track of progress
+      print(paste("competence_level = ", competence_level))
+      
+      # set alpha and beta
+      alpha = competence_data %>% filter(competence == competence_level) %>% pull(alpha)
+      beta = competence_data %>% filter(competence == competence_level) %>% pull(beta)
+      
+      # run simulation
+      result <- vary_sample(
+        alpha = alpha, beta = beta, file_name = file_name, ...)
+      
+      # add competence level
+      result <- result %>% mutate(competence = competence_level, 
+                                  alpha = alpha,
+                                  beta = beta)
+      
+      return(result)
+      
+    })
+    
+    write_csv(data, paste0("data/", file_name))
+  }
+}
+```
+
+### Plot functions
+
+#### a) Plot various populations
+
+First, we want a function that plots results obtained by the `simulate_various_populations` function. 
+```{r, echo=FALSE}
+plot_results <- function(data, outcome = "everything") {
+  
+  d <- data
+  
+  # extract simulation info
+  caption = paste0("Sample size of informants: ", d$sample[1],
+                     "; Iterations per sample size: ", d$total_iterations[1], 
+                     "; Population size per iteration: ", d$population[1])
+  
+  
+  plot_accuracy <- ggplot(d, aes(x = convergence, y = accuracy_mean)) +
+    geom_hex() +
+    # Add nice labels
+    labs(x = "Convergence \n(SDs of samples)", 
+         y = "Accuracy \n(squared distance to true mean)", 
+         caption = paste0(caption, "; assuming uniform competence distribution")) +
+    plot_theme +
+  scale_fill_viridis_c(option = "plasma", begin = 0.1) 
+  
+  plot_competence <- ggplot(d, aes(x = convergence, y = competence_mean)) +
+    geom_hex() +
+    # Add nice labels
+    labs(x = "Convergence \n(SDs of samples)", 
+         y = "Competence \n(SD for data generating function)",
+         caption = paste0(caption, "; assuming uniform competence distribution")) +
+    plot_theme +
+  scale_fill_viridis_c(option = "plasma", begin = 0.1) 
+  
+  if (outcome == "everything") {
+    
+    return(plot_accuracy | plot_competence)
+  }
+  
+  if (outcome == "accuracy") {
+    
+    return(plot_accuracy)
+  }
+  
+  if (outcome == "competence") {
+    
+    return(plot_competence)
+  }
+  
+}
+```
+
+
+#### b) Plot varying sample & options
+
+Second, we want a function that plots results obtained by the `vary_sample()` function. 
+
+```{r, echo=FALSE}
+plot_results_vary <- function(data, ...) {
+  
+  # get different samples as vector
+  samples <- data %>% 
+    reframe(unique(as.character(sample))) %>% pull()
+  
+  
+  # empty list
+  plot_list <- list()
+  
+  # make plots fro each moderator
+  for (i in samples) {
+    
+    plot_data <- data %>%
+      filter(sample == i)
+    
+    sample_plot <- plot_results(data = plot_data, ...)
+    
+    plot_list[[i]] <- sample_plot
+  }
+  
+  return(plot_list)
+}
+```
+
+#### c) Plot competence distributions
+
+We want to plot the underlying competence distributions.
+
+```{r}
+# Plot competence distributions
+plot_competence_distributions <- function(data) {
+  # Your data frame
+  d <- data %>% 
+    group_by(competence) %>% 
+    reframe(alpha = unique(alpha), beta = unique(beta))
+  
+  # Function to plot the different competence distributions 
+  plot_competence_distributions <- function(alpha, beta) {
+    ggplot() +
+      geom_function(
+        fun = ~dbeta(.x, shape1 = alpha, shape2 = beta)
+      ) +
+      labs(title = paste0("alpha = ", alpha, ", beta = ", beta), 
+           y = "Density", x = "Competence") +
+      plot_theme
+  }
+  
+  # Specify the values of alpha and beta from the data
+  alpha_values <- d$alpha
+  beta_values <- d$beta 
+  
+  # Create a list of ggplot objects
+  plot_list <- map2(alpha_values, beta_values, plot_competence_distributions)
+  
+  # Arrange and display the plots
+  competence_plot <- ggarrange(plotlist = plot_list) %>%
+    ggpubr::annotate_figure(top = ggpubr::text_grob("Competence distributions", 
+                                                    face = "bold",
+                                                    color = "darkgrey",
+                                                    size = 14))
+  
+  
+  return(competence_plot) 
+}
+```
+
+#### d) Plot varying competence distributions by sample 
+
+Fourth, we want another function that plots results by various competence levels by sample sizes. 
+
+```{r}
+plot_competence <- function(data, outcome = "accuracy") {
+  
+  d <- data
+  
+  # extract simulation info
+  caption = paste0("Sample size of informants: ", d$sample[1],
+                     "; Iterations per sample size: ", d$total_iterations[1], 
+                     "; Population size per iteration: ", d$population[1])
+  
+  
+  plot_accuracy <- ggplot(d, aes(x = convergence, y = accuracy_mean)) +
+    geom_hex(alpha = 0.9) +
+    #geom_smooth(method = "lm", se = FALSE) +
+    stat_smooth(geom='line', method = "lm", alpha=0.7, se=FALSE, color = "darkgrey") +
+    # Add nice labels
+    labs(x = "Convergence \n(SDs of samples)", 
+         y = "Accuracy \n(squared distance to true mean)",
+         caption = caption) +
+  scale_fill_viridis_c(option = "plasma", begin = 0.1) +
+    facet_wrap(~competence) +
+    plot_theme + 
+    theme(legend.position = "top", 
+          legend.key.width = unit(1.5, "cm"), 
+          legend.key.height = unit(0.3, "cm"))
+  
+  plot_competence <- ggplot(d, aes(x = convergence, y = competence_mean)) +
+    geom_hex(alpha = 0.9) +
+    #geom_smooth(method = "lm", se = FALSE) +
+    stat_smooth(geom='line', method = "lm", alpha=0.7, se=FALSE, color = "darkgrey") +
+    # Add nice labels
+    labs(x = "Convergence \n(SDs of samples)", 
+         y = "Competence \n(SD for data generating function)",
+         caption = caption) +
+  scale_fill_viridis_c(option = "plasma", begin = 0.1) +
+    facet_wrap(~competence) +
+    plot_theme + 
+    theme(legend.position = "top", 
+          legend.key.width = unit(1.5, "cm"), 
+          legend.key.height = unit(0.3, "cm"))
+  
+  if (outcome == "accuracy") {
+    
+    return(plot_accuracy)
+  }
+  
+  if (outcome == "competence") {
+    
+    return(plot_competence)
+  }
+}
+
+plot_competence_vary <- function(data, ...) {
+  
+  # get different samples as vector
+  samples <- data %>% 
+    reframe(unique(as.character(sample))) %>% pull()
+  
+  
+  # empty list
+  plot_list <- list()
+  
+  # make plots fro each moderator
+  for (i in samples) {
+    
+    plot_data <- data %>%
+      filter(sample == i)
+    
+    sample_plot <- plot_competence(data = plot_data, ...)
+    
+    plot_list[[i]] <- sample_plot
+  }
+  
+  return(plot_list)
+}
+
+plot_competence_vary_relative_majority <- function(data, variable = options, outcome = "Accuracy") {
+  
+  d <- data
+  
+  # Extract variable name as a string
+  variable_name <- deparse(substitute(variable))
+  
+  # retrieve info from choice of variable
+  if (variable_name == "options") {
+    caption = paste0("Sample size of informants: ", d$sample[1],
+                     "; Iterations per sample size: ", d$total_iterations[1], 
+                     "; Population size per iteration: ", d$population[1])
+  }
+  if (variable_name == "sample") {
+    caption = paste0("Number of choice options: ", d$options[1],
+                     "; Iterations per sample size: ", d$total_iterations[1], 
+                     "; Population size per iteration: ", d$population[1])
+  }
+  
+  d <- d %>% 
+    group_by(relative_majority, {{variable}}, competence) %>%
+    summarise(competence_mean = mean(average_relative_competence),
+              accuracy_mean = mean(average_accuracy),
+              accuracy_sd = sd(average_accuracy),
+              competence_sd = sd(average_relative_competence)
+    )
+  
+  # Assign outcome variable
+  if(outcome == "Accuracy") {
+    d$outcome <- d$accuracy_mean
+    d$outcome_sd <- d$accuracy_sd
+  }
+  
+  if(outcome == "Competence") {
+    d$outcome <- d$competence_mean
+    d$outcome_sd <- d$competence_sd
+  }
+  
+  plot_outcome <- ggplot(d, 
+                         aes(x = relative_majority, y = outcome,
+                             color = as.factor({{variable}}))) +
+    geom_point() +
+    geom_line() +
+    # Add nice labels
+    labs(x = "Relative majority \n (share of informants agreeing on an option)", 
+         y = outcome, caption = caption, 
+         color = variable_name) +
+    scale_color_viridis_d(option = "plasma", begin = 0.1, 
+                          #limits = rev(levels(d$constellation)),
+                          direction = -1
+    ) +
+    facet_wrap(~competence) +
+    plot_theme + 
+    theme(legend.position = "top")
+  
+   return(plot_outcome) 
+
+} 
+```
+
+## Simulation
+
+```{r, message=FALSE}
+n <- c(3, 5, 10, 20, 50, 100)
+alpha = c(0.1, 2, 1, 1, 6, 0.9)
+beta = c(1, 6, 1, 0.1, 2, 0.9)
+names = c("very incompetent", "incompetent", "uniform", 
+          "very competent", "competent", "bimodal")
+
+# run simulation and store results in .csv files
+vary_competence(population = 999,
+            min_range = 1000, max_range = 2000,
+            competence_ratio = 1000,
+            iterations = 100,
+            file_name = "sim.csv",
+            n = n, 
+            alpha = alpha, 
+            beta = beta, 
+            names = names)
+
+# read simulated data from .csv files
+test <- read_csv("data/sim.csv")
+```
+
+```{r}
+plot_competence_distributions(test)
+```
+```{r}
+# for accuracy
+plot_competence_vary(data = test, outcome = "accuracy")
+```
+```{r}
+# for competence
+plot_competence_vary(data = test, outcome = "competence")
+```
+

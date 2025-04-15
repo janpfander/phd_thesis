@@ -1,0 +1,1106 @@
+---
+title: "Power Analysis Experiment 6"
+output: 
+  html_document: 
+    keep_md: yes
+author: "Jan Pfänder, Hugo Mercier"
+date: "2023-15-05"
+bibliography: references.bib
+---
+
+
+```r
+# load required packages
+library("lme4")        # model specification / estimation
+library("lmerTest")    # get p-values for mixed models
+library("broom.mixed") # extracting data from model fits 
+library("tidyverse")   # data wrangling and visualisation
+library("patchwork")    # combine plots
+
+# ensure this script returns the same results on each run
+set.seed(912783)
+```
+
+### Credit
+
+The power simulation presented in this document draws heavily on @debruine2021. It is also inspired by @huntington-klein.
+
+# Introduction
+
+Statistical power is the probability by which we are able to detect an effect, assuming that it actually exists. The higher you set the benchmark for statistical power, the less likely you are to miss an effect in your sample.
+
+The aim of a power analysis is find out how big a sample you need to achieve the statistical power you want. If there is an effect, more participants will make it more likely to detect it.
+
+To give an overview of this power analysis, we will
+
+1.  Make assumptions about the data generating process (i.e. a model and its parameters).
+2.  "Draw" (i.e. simulate) a sample with a given sample size.
+3.  Run the statistical analysis we plan to perform on that sample and store the estimates of the model.
+4.  Calculate the power: Repeat steps two and three many times. See for how many samples the model recovers a statistically significant estimate for the parameter we set. Statistical power is just the ratio of significant samples among all samples we look at.
+5.  Calculate power for different sample sizes: Repeat step four for various sample sizes. See at which sample size we achieve sufficiently high power.
+
+# I. Building a power simulation function
+
+## 1. Data generating process
+
+### Variables
+
+-   **Convergence**. We treat `convergence` as a continuous variable (0 = opposing majority; 1 = dissensus; 2 = majority; 3 = consensus).
+
+-   **Number of choice options**. Binary variable indicating whether informants were choosing from `ten` or from `three` choice options.
+
+-   **Accuracy**. We ask participants "What do you think is the probability of player [X] being correct?". Participants answer with a slider from 0 to 100.
+
+-   **Competence**. We ask participants "How competent do you think player [X] is in games like these?" Participants answer on a 7-point Likert scale (from "not competent at all" to "extremely competent").
+
+### Model
+
+In our experiment, we manipulate two factors:
+
+-   `convergence`, i.e. the extent to which several informants agree. We do so within subjects, meaning that each subject rates stimuli for all levels of convergence. Data points of the same subject are thus not independent. To account for that, in our simulation, we model subject differences with random effects.
+
+-   `number_options`, i.e. whether informants were choosing from `ten` or from `three` choice options. We do so between subjects, meaning that a participant saw scenarios of only of one of the two levels.
+
+The model we use to generate accuracy (and competence) is:
+
+$$
+\text{Accuracy} = (\beta_0 + b_{0, Subject}) + (\beta_c + b_{c, Subject}) \text{Convergence} + \beta_i \text{Number_options} + \beta_{ci} \text{Number_options*Convergence} + \epsilon
+$$
+
+with:
+
+-   $b_{0, Subject} \sim N(0, \tau_0)$ (add footnote that this is not quite it yet, see below)
+-   $b_{c, Subject} \sim N(0, \tau_c)$
+-   $\epsilon \sim N(0, \sigma)$
+
+where:
+
+-   $\beta_0$ is the average intercept, i.e. average accuracy rating given that there is an opposing majority (`convergence = 0`)
+
+-   $b_{0, Subject}$ is the subject-specific deviation from the average intercept
+
+-   $\beta_c$ is the average effect of `convergence`, i.e. the average increase in `accuracy` caused by a one unit increase in `convergence`.
+
+-   $b_{c, Subject}$ is the subject-specific deviation from the average convergence effect
+
+-   $\beta_n$ is the average effect of `number_options`, i.e. the average difference in `accuracy` between the level `ten` and the level `three`.
+
+-   $\beta_cn$ is the interaction effect between `number_options` and `convergence`, i.e. the difference in the effect of `convergence` on `accuracy` between the level `ten` and the level `three`.
+
+-   $\epsilon$ is the error term that represents noise not accounted for by the random effects
+
+-   $\sigma$ is the standard deviation of the normal distribution that of the error term.
+
+-   $\tau_0)$ and $\tau_1)$ are the respective standard deviations of the normal distributions that model by-subject deviation from the average effects $\beta_0$ and $\beta_c$, respectively. We assume that the deviations of subjects are normally distributed around the average effects (hence a mean of `0`). Some subjects will have a positive deviation (i.e. larger values than the average); some will have a negative offset (i.e. smaller values than the average).
+
+The modelling of $b_{0, Subject}$ and $b_{c, Subject}$ as described above was simplified. It assumed that both were gnerated from independent normal distributions. But in fact, we do not expect those distributions to be independent of each other. We expect a subject's intercept and effect convergence to be correlated. For example, a subject with a relatively *small intercept* (i.e. assigning very low accuracy when `convergence = 0`) might assign all the more accuracy with increasing convergence (i.e has a relatively *larger effect of convergence*). a larger effect of accuracy - case in which the distributions of both random effects are *negatively* correlated.
+
+Instead of drawing to independent univariate distributions, we model two correlated distributions. We achieve this by modeling a bivariate normal distribution.
+
+$$
+\begin{bmatrix} b_{0, \text{Subject}} \\ b_{c, \text{Subject}} \end{bmatrix} \sim \text{N}\Bigg(\begin{bmatrix} 0 \\ 0 \end{bmatrix}, \begin{bmatrix} \tau_0^2 & \rho \tau_0 \tau_c \\ \rho \tau_0 \tau_c & \tau_c^2 \end{bmatrix}\Bigg)
+$$
+
+where
+
+-   $\begin{bmatrix} \tau_0^2 & \rho \tau_0 \tau_c \\ \rho \tau_0 \tau_c & \tau_c^2 \end{bmatrix}$ is the variance-covariance matrix of the two distributions
+
+-   $\rho$ is the correlation coefficient
+
+### Parameters
+
+We use the following prefixes to designate model parameters and sampled values:
+
+-   `beta_*`: fixed effect parameters
+-   `subj_*`: by-subject random effect parameters
+-   `SU_*`: sampled values for by-subject random effects
+-   `B_*`: sums of added beta's
+-   `e_*`: residual sd
+
+We use the following suffices:
+
+-   `*_0`: intercept
+-   `*_c`: convergence
+-   `*_n`: number_options
+-   `*_cn`: convergence\*number_options
+
+Other terms:
+
+-   `*_rho`: correlation for subject's random effects
+-   `n_*`: sample size
+-   `sigma`: residual (error) sd
+
+The parameters we set differ with regard to our outcome variables. Later when we do the actual simulation, we will set two different sets of parameters, one for `accuracy` and one for `competence`, respectively. The steps before we introduce functions serve demonstration purposes only, so we'll just focus on `accuracy`.
+
+We set the parameters for the by-participant random effects and the error term based on the estimates from experiment 4.
+
+
+```r
+# read data
+d <- read_csv("../experiment_4/data/cleaned.csv") 
+
+# get random effects for accuracy
+
+# calculate model
+model_accuracy <- lmer(accuracy ~ convergence + (1 + convergence | id), 
+                                 data = d)
+
+# store estimates with according parameters in list
+random_effects_accuracy <- tidy(model_accuracy, effects = "ran_pars") %>% 
+  mutate(parameter = case_when(term == "sd__(Intercept)" ~ "subj_0", 
+                               term == "cor__(Intercept).convergence" ~ "subj_rho",
+                               term == "sd__convergence" ~ "subj_c", 
+                               term == "sd__Observation" ~ "sigma")
+         ) %>% 
+  select(parameter, estimate)
+
+# get random effects for competence
+
+# calculate model
+model_competence <- lmer(competence ~ convergence + 
+                           (1 + convergence | id), data = d)
+
+# store estimates with according parameters in list
+random_effects_competence <- tidy(model_competence, effects = "ran_pars") %>% 
+  mutate(parameter = case_when(term == "sd__(Intercept)" ~ "subj_0", 
+                               term == "cor__(Intercept).convergence" ~ "subj_rho",
+                               term == "sd__convergence" ~ "subj_c", 
+                               term == "sd__Observation" ~ "sigma")
+         ) %>% 
+  select(parameter, estimate)
+```
+
+We further use the modeling results to set the parameters for all fixed effects.  
+
+
+```r
+# data from model
+model_data <- read_csv("../experiment_4/data/model_vary_options_3_sample.csv") %>% 
+  filter(options %in% c(3, 10)) %>% 
+  mutate(
+    # make numeric version of convergence
+    convergence = case_when(constellation == "minority" ~ 0, 
+                                 constellation == "dissensus" ~ 1, 
+                                 constellation == "majority" ~ 2, 
+                                 constellation == "consensus" ~ 3),
+    # scale accuracy from 0 to 100 (currently from 0 to 1)
+    average_accuracy = 100*average_accuracy,
+    # scale competence reaching from 1 to 7 (currently from 0 to 1)
+    average_relative_competence = (average_relative_competence * (7 - 1)) + 1,
+    # make choice options a factor
+    options = as.factor(options)
+         )
+
+# we run the model on averages from different iterations
+
+# for accuracy
+model_accuracy <- lm(average_accuracy ~ convergence + options + convergence*options, data = model_data)
+  
+# store estimates with according parameters in list
+fixed_effects_accuracy <- tidy(model_accuracy) %>% 
+  mutate(parameter = case_when(term == "(Intercept)" ~ "beta_0", 
+                               term == "convergence" ~ "beta_c",
+                               term == "options10" ~ "beta_n",
+                               term == "convergence:options10" ~ "beta_cn")
+         ) %>% 
+  select(parameter, estimate)
+
+# for competence
+model_competence <- lm(average_relative_competence ~ convergence + options + convergence*options, data = model_data) 
+
+# store estimates with according parameters in list
+fixed_effects_competence <- tidy(model_competence) %>% 
+  mutate(parameter = case_when(term == "(Intercept)" ~ "beta_0", 
+                               term == "convergence" ~ "beta_c",
+                               term == "options10" ~ "beta_n",
+                               term == "convergence:options10" ~ "beta_cn")
+         ) %>% 
+  select(parameter, estimate)
+```
+
+
+```r
+# parameters for modelling accuracy 
+parameters_accuracy <- bind_rows(random_effects_accuracy, fixed_effects_accuracy)
+# split() creates a list using the values in a dataframe column
+parameters_accuracy <- split(parameters_accuracy$estimate, parameters_accuracy$parameter)
+
+# parameters for modelling competence 
+parameters_competence <- bind_rows(random_effects_competence, fixed_effects_competence)
+parameters_competence <- split(parameters_competence$estimate, parameters_competence$parameter)
+
+parameters_accuracy
+```
+
+```
+## $beta_0
+## [1] 14.8856
+## 
+## $beta_c
+## [1] 27.67769
+## 
+## $beta_cn
+## [1] 5.628913
+## 
+## $beta_n
+## [1] -9.568788
+## 
+## $sigma
+## [1] 10.15888
+## 
+## $subj_0
+## [1] 15.92595
+## 
+## $subj_c
+## [1] 8.639846
+## 
+## $subj_rho
+## [1] -0.808301
+```
+
+```r
+parameters_competence
+```
+
+```
+## $beta_0
+## [1] 3.223067
+## 
+## $beta_c
+## [1] 0.414869
+## 
+## $beta_cn
+## [1] 0.1880216
+## 
+## $beta_n
+## [1] -0.1205849
+## 
+## $sigma
+## [1] 0.553022
+## 
+## $subj_0
+## [1] 0.9286201
+## 
+## $subj_c
+## [1] 0.4974521
+## 
+## $subj_rho
+## [1] -0.8569713
+```
+
+To these effect parameters, we have to add a set of additional parameters. We store a complete list of parameters in a list so that we can call them for functions later. Note that here we'll only set parameters for accuracy, for demonstration purposes. We'll do the same for competence later when running the actual simulations. 
+
+
+```r
+# store parameters in separate objects to be able to call them for demonstration purposes
+# (for accuracy only)
+beta_0   <- parameters_accuracy$beta_0 # intercept
+beta_c   <- parameters_accuracy$beta_c # effect of convergence when 3 choice options
+beta_n   <- parameters_accuracy$beta_n # effect of 10 options (vs. 3) when convergence = 0
+beta_cn  <- parameters_accuracy$beta_cn # difference in effect of convergence when 10 options (vs. 3)
+subj_0   <- parameters_accuracy$subj_0 # by-subject random intercept sd
+subj_c   <- parameters_accuracy$subj_c # by-subject random slope sd
+subj_rho <- parameters_accuracy$subj_rho # correlation between intercept and slope 
+sigma    <- parameters_accuracy$sigma # residual (error) sd (i.e. all varition that the model cannot account for)
+
+# complete list of parameters (including some that will be introduced later)
+parameters <- c(
+  parameters_accuracy,
+  list(
+  # outcome variable
+  outcome = "accuracy", # takes names as input, e.g. "accuracy"
+  # parameters for size of data frame
+  n_subj = 100,              # n participants
+  levels_convergence = 0:3,  # levels of convergence
+  n_stimuli_per_level = 2 # n stimuli per participant
+  )
+  )
+```
+
+## 2. Simulate a single sample
+
+### Stimuli
+
+Each participant sees two stimuli per convergence level, i.e. `8` items in total.
+
+
+```r
+# set stimuli
+levels_convergence <- c(0:3) 
+n_stimuli_per_level  <-  2 
+```
+
+Simulate all stimuli a single participant sees.
+
+
+```r
+# create stimuli per participant data
+stimuli <- data.frame(
+  convergence = rep(levels_convergence, each = n_stimuli_per_level)
+  )
+```
+
+### Subjects
+
+
+```r
+# set number of subjects and items
+n_subj <- 100 # number of subjects we arbitrarily set for this example
+```
+
+When generating the subject data, we need to draw a pair of random effects (intercept + slope of convergence) for each participant. Earlier, we had defined the parameters for the bivariate normal distribution we draw from. We use the function `MASS::mvrnorm` to generate these draws. To be able to use this function, we define the variance-covariance matrix between the two by-subject random effects beforehand.
+
+
+```r
+# calculate random intercept / random slope covariance
+covar <- subj_rho * subj_0 * subj_c
+
+# put values into variance-covariance matrix
+cov_mx  <- matrix(
+  c(subj_0^2, covar,
+    covar,   subj_c^2),
+  nrow = 2, byrow = TRUE)
+
+# generate the by-subject random effects
+subject_rfx <- MASS::mvrnorm(n = n_subj,
+                             mu = c(SU_0 = 0, SU_c = 0),
+                             Sigma = cov_mx)
+
+# make data 
+subjects <- data.frame(
+  # add a subject id
+  id = seq_len(n_subj),
+  # add by participant pair of random effects
+  subject_rfx, 
+  # add `independence` condition
+  number_options = rep(c("3", "10"), length.out = n_subj)
+) %>% 
+  # make a numeric variable to be able to generate competence
+  mutate(number_options_num = ifelse(number_options == "3", 0, 1), 
+         # relevel the number_options variable
+         number_options = relevel(as.factor(number_options), ref = "3"))
+```
+
+Check how simulated values compare to the parameters we set earlier.
+
+
+```r
+data.frame(
+  parameter = c("subj_0", "subj_c", "subj_rho"),
+  value = c(subj_0, subj_c, subj_rho),
+  simulated = c(sd(subjects$SU_0), sd(subjects$SU_c), 
+                cor(subjects$SU_0, subjects$SU_c)
+                )
+)
+```
+
+```
+##   parameter     value  simulated
+## 1    subj_0 15.925952 14.9595846
+## 2    subj_c  8.639846  8.9551758
+## 3  subj_rho -0.808301 -0.7966114
+```
+
+### Trials (Subjects x Stimuli)
+
+We combine the two data frames `subjects` and `stimuli` we generated. We also draw a residual error for each trial/observation (`e_ss` for error term for each combination of subject and stimulus).
+
+
+```r
+# cross subject and item IDs
+trials <- expand_grid(subjects, stimuli)  %>%
+  # add an error term
+  # nrow(.) is the number of trials/observations, i.e. rows in the data frame
+  mutate(e_ss = rnorm(nrow(.), mean = 0, sd = sigma))
+```
+
+### Calculate accuracy values
+
+Our data frame now contains all the information to calculate the accuracy values. Note that our`beta_` parameters are not part of the data frame, but they exist in the environment since we defined them earlier. Once we have added `accuracy` and we removed the helper variables we don't need anymore, we have the data frame that we can run our statistical analysis on.
+
+We truncate the simulated `accuracy` values so that they remain on the scale from 0 to 100. This is to mimic our actual responses. It is conservative for the power calculation, since more extreme values are increasing effect size (thereby increasing power).
+
+
+```r
+dat_sim <- trials %>%
+  mutate(accuracy = beta_0 + SU_0 + (beta_c + SU_c)*convergence + beta_n*number_options_num + beta_cn*convergence*number_options_num + e_ss,
+         # truncate accuracy values so that they lie between 0 and 100 only
+         accuracy = case_when(accuracy < 0 ~ 0, 
+                              accuracy > 100 ~ 100,
+                              TRUE ~ accuracy)) %>% 
+  # retain only variables of interest
+  select(id, convergence, number_options, accuracy)
+```
+
+Plot the data to check values.
+
+
+```r
+# independent condition
+options_10_plot <- ggplot(dat_sim %>% filter(number_options == "10"), 
+       aes(x = as.factor(convergence), y = accuracy, 
+           color = as.factor(convergence)
+       )
+) +
+  # predicted means
+  geom_hline(yintercept = beta_0) +
+  geom_hline(yintercept = (beta_0 + beta_c + beta_cn)) +
+  geom_hline(yintercept = (beta_0 + 2*(beta_c + beta_cn))) +
+  geom_hline(yintercept = (beta_0 + 3*(beta_c + beta_cn))) +
+  # actual data
+  geom_violin(alpha = 0, show.legend = FALSE) +
+  stat_summary(fun = mean, geom="crossbar", show.legend = FALSE) +
+  scale_color_viridis_d() +
+  ggtitle("Predicted versus simulated values") + 
+  facet_wrap(~number_options) +
+  ylim(0, 120)
+
+# conflict condition
+options_3_plot <-ggplot(dat_sim %>% filter(number_options == "3"), 
+       aes(x = as.factor(convergence), y = accuracy, 
+           color = as.factor(convergence)
+           )
+       ) +
+  # predicted means
+  geom_hline(yintercept = beta_0) +
+  geom_hline(yintercept = (beta_0 + beta_c)) +
+  geom_hline(yintercept = (beta_0 + 2*beta_c)) +
+  geom_hline(yintercept = (beta_0 + 3*beta_c)) +
+  # actual data
+  geom_violin(alpha = 0, show.legend = FALSE) +
+  stat_summary(fun = mean, geom="crossbar", show.legend = FALSE) +
+  scale_color_viridis_d() +
+  ggtitle("Predicted versus simulated values")  + 
+  facet_wrap(~number_options) +
+  ylim(0, 120)
+
+options_10_plot + options_3_plot
+```
+
+![](power_Exp6_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
+
+### Data generating function
+
+We put all the steps to generate a single sample into a function we call `draw_single_sample`. We add an argument `outcome` to the function that allows to specify the outcome variable we want to simulate data for.
+
+
+```r
+# set up data generating function
+draw_single_sample <- function(
+  # outcome variable
+  outcome, # takes names as input, e.g. "accuracy"
+  # parameters for size of data frame
+  n_subj,              # n participants
+  levels_convergence,  # levels of convergence
+  n_stimuli_per_level, # n stimuli per participant
+  # parameters for modelling outcome variable
+  beta_0,   # intercept
+  beta_c,   # effect of convergence 
+  beta_n,  # effect of independence (compared to conflict of interest)
+  beta_cn,  # difference in effect of convergence when independence (compared to conflict of interest)
+  subj_0,   # by-subject random intercept sd
+  subj_c,   # by-subject random slope sd
+  subj_rho, # correlation between intercept and slope 
+  sigma     # residual (error) sd (i.e. all variation that the model cannot account for)
+) {
+  
+  # 1. create stimuli per subject data
+  stimuli <- data.frame(
+    convergence = rep(levels_convergence, each = n_stimuli_per_level)
+  )
+  
+  # 2. create subject data
+  
+  # calculate random intercept / random slope covariance
+  covar <- subj_rho * subj_0 * subj_c
+  
+  # put values into variance-covariance matrix
+  cov_mx  <- matrix(
+    c(subj_0^2, covar,
+      covar,   subj_c^2),
+    nrow = 2, byrow = TRUE)
+  
+  # generate the by-subject random effects
+  subject_rfx <- MASS::mvrnorm(n = n_subj,
+                               mu = c(SU_0 = 0, SU_c = 0),
+                               Sigma = cov_mx)
+  
+  # make data 
+  subjects <- data.frame(
+    # add a subject id
+    id = seq_len(n_subj),
+    # add by participant pair of random effects
+    subject_rfx,
+    # add `independence` condition
+    number_options = rep(c("3", "10"), length.out = n_subj)
+    ) %>% 
+    # make a numeric variable to be able to generate competence
+    mutate(number_options_num = ifelse(number_options == "3", 0, 1), 
+           # relevel the number_options variable
+           number_options = relevel(as.factor(number_options), ref = "3")
+           )
+  
+  
+  # 3. create trials data (subjects x stimuli) & simulate outcome variables
+  
+  ## cross subject and item IDs
+  sample <- expand_grid(subjects, stimuli)  %>%
+    # add an error term
+    # nrow(.) is the number of trials/observations, i.e. rows in the data frame
+    mutate(e_ss = rnorm(nrow(.), mean = 0, sd = sigma)) %>%
+    # simulate outcome variable
+    mutate(outcome = beta_0 + SU_0 + (beta_c + SU_c)*convergence + 
+             beta_n*number_options_num + beta_cn*convergence*number_options_num + e_ss, 
+           outcome_variable = {{outcome}}) %>% 
+    # retain only variables of interest
+    select(id, convergence, number_options, outcome, outcome_variable)
+  
+  # Truncate results so that we only get values on the correct scale
+  if (outcome == "accuracy") {
+
+    sample <- sample %>% mutate(
+      # truncate accuracy values so that they lie between 0 and 100 only
+      outcome = case_when(outcome < 0 ~ 0,
+                           outcome > 100 ~ 100,
+                           TRUE ~ outcome)
+      )
+  }
+
+  if (outcome == "competence") {
+
+    sample <- sample %>% mutate(
+      # truncate accuracy values so that they lie between 0 and 100 only
+      outcome = case_when(outcome < 1 ~ 1,
+                           outcome > 7 ~ 7,
+                           TRUE ~ outcome)
+      )
+  }
+  
+  return(sample)
+}
+
+# # You can test the function using the commented code below
+# # (un-comment by highlighting, then command+shit+c)
+# test <- do.call(draw_single_sample, parameters)
+```
+
+## 3. Analyze the simulated data
+
+We run a linear mixed model using the `lme4` package on our simulated sample.
+
+
+```r
+mod_sim <- lmer(accuracy ~ convergence + number_options + 
+                  number_options*convergence + (1 + convergence | id), 
+                dat_sim)
+summary(mod_sim)
+```
+
+```
+## Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+## lmerModLmerTest]
+## Formula: 
+## accuracy ~ convergence + number_options + number_options * convergence +  
+##     (1 + convergence | id)
+##    Data: dat_sim
+## 
+## REML criterion at convergence: 6243.5
+## 
+## Scaled residuals: 
+##      Min       1Q   Median       3Q      Max 
+## -2.83136 -0.53009 -0.03091  0.50564  2.87643 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev. Corr 
+##  id       (Intercept) 128.65   11.343        
+##           convergence  30.05    5.482   -0.78
+##  Residual              99.84    9.992        
+## Number of obs: 800, groups:  id, 100
+## 
+## Fixed effects:
+##                              Estimate Std. Error      df t value Pr(>|t|)    
+## (Intercept)                   14.4852     1.8089 97.9997   8.008 2.44e-12 ***
+## convergence                   25.9571     0.8948 97.9997  29.008  < 2e-16 ***
+## number_options10              -1.4253     2.5581 97.9997  -0.557   0.5787    
+## convergence:number_options10   2.3248     1.2655 97.9997   1.837   0.0692 .  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr) cnvrgn nmb_10
+## convergence -0.782              
+## nmbr_ptns10 -0.707  0.553       
+## cnvrgnc:_10  0.553 -0.707 -0.782
+```
+
+We use the `broom.mixed` package to get a tidy table of the results. Below, we added column "parameter" and "value" to compare the estimate from the model to the parameters used to simulate the data.
+
+
+```r
+# get a tidy table of results
+model_estimates <- broom.mixed::tidy(mod_sim) %>% 
+  mutate_if(is.numeric, round, 3) %>%
+  mutate(
+    parameter = c("beta_0", "beta_c", "beta_n", "beta_cn", "subj_0", "subj_rho", "subj_c", "sigma"),
+    value = c(beta_0, beta_c, beta_n, beta_cn, subj_0, subj_rho, subj_c, sigma),
+  ) %>%
+  select(effect:term, parameter, value, estimate:p.value)
+
+model_estimates %>% knitr::kable()
+```
+
+
+
+|effect   |group    |term                         |parameter |     value| estimate| std.error| statistic| df| p.value|
+|:--------|:--------|:----------------------------|:---------|---------:|--------:|---------:|---------:|--:|-------:|
+|fixed    |NA       |(Intercept)                  |beta_0    | 14.885602|   14.485|     1.809|     8.008| 98|   0.000|
+|fixed    |NA       |convergence                  |beta_c    | 27.677692|   25.957|     0.895|    29.008| 98|   0.000|
+|fixed    |NA       |number_options10             |beta_n    | -9.568788|   -1.425|     2.558|    -0.557| 98|   0.579|
+|fixed    |NA       |convergence:number_options10 |beta_cn   |  5.628913|    2.325|     1.265|     1.837| 98|   0.069|
+|ran_pars |id       |sd__(Intercept)              |subj_0    | 15.925952|   11.343|        NA|        NA| NA|      NA|
+|ran_pars |id       |cor__(Intercept).convergence |subj_rho  | -0.808301|   -0.777|        NA|        NA| NA|      NA|
+|ran_pars |id       |sd__convergence              |subj_c    |  8.639846|    5.482|        NA|        NA| NA|      NA|
+|ran_pars |Residual |sd__Observation              |sigma     | 10.158883|    9.992|        NA|        NA| NA|      NA|
+
+This table provides us with several estimates. What we are ultimately interested in is whether the the `p.value` of the `convergence` effect is smaller than the significance threshold `alpha` we set.
+
+The `p.value` is the probability of obtaining a test statistic at least as extreme (i.e. far away from `0`) as the one observed, given the null hypothesis is true. Even in a world where there is no true effect in the population altogether, there is still a chance that looking at a random sample of that population can (misleadingly) yield an effect, i.e. an estimate other than `0`. That chance is described by the p-value. Everything else equal, the larger the estimate of the effect of convergence, the smaller the p-value.
+
+Our `alpha` is the threshold we set, at which we consider the p-value sufficiently small to "safely" reject the null hypothesis. The smaller we set alpha, the less risk we run in mistakenly detecting an effect. The alpha is commonly set at `0.05`.
+
+We are interested in the p.value of three effects: `convergence`, `independent` and `convergence*independent`
+
+
+```r
+# set alpha
+alpha <- 0.05
+
+# estimates to extract
+estimates = c("convergence", "number_options10", 
+              "convergence:number_options10")
+
+# check significance and store result
+significance <- model_estimates %>% 
+  filter(term %in% estimates) %>% 
+  select(term, p.value) %>% 
+  mutate(significant = ifelse(p.value < alpha, TRUE, FALSE))
+
+significance
+```
+
+```
+## # A tibble: 3 × 3
+##   term                         p.value significant
+##   <chr>                          <dbl> <lgl>      
+## 1 convergence                    0     TRUE       
+## 2 number_options10               0.579 FALSE      
+## 3 convergence:number_options10   0.069 FALSE
+```
+
+### Model estimation function
+
+We put the model estimation into a function.
+
+
+```r
+# set up model estimation function
+estimate_model <- function(alpha = 0.05, ...) {
+  
+  # Alpha is the probability we accept of rejecting the null hypothesis
+  # when in fact it is true. The smaller alpha, the less likely the
+  # results are to have occurred by "accident" (i.e. sampling variation).
+  
+  # ... is a shortcut that forwards any additional arguments to draw_single_sample()
+  
+  # draw a sample
+  sample <- draw_single_sample(...)
+  
+  # estimate model for the drawn sample
+  model_estimates <- lmer(outcome ~ convergence + number_options + 
+                            number_options*convergence + (1 + convergence | id),
+                          sample) %>% 
+    # put into tidy output
+    broom.mixed::tidy()
+  
+  # estimates to extract
+  estimates = c("convergence", "number_options10", 
+              "convergence:number_options10")
+  
+  # check significance and store the result
+  significance <- model_estimates %>% 
+  filter(term %in% estimates)  %>% 
+  mutate(significant = ifelse(p.value < alpha, TRUE, FALSE))
+
+  # return the p_value (as tibble)
+  return(significance)
+}
+
+# # You can test the function using the commented code below 
+# # (un-comment by highlighting, then command+shit+c)
+# test <- do.call(estimate_model, parameters)
+```
+
+## 4. Calculate Power
+
+The idea of a power simulation is to draw many samples, run our statistical model on each, and check how often we get a significant estimate for `convergence`. The share of samples for which we get a significant result among all samples we generate is our estimate of the statistical power - our ability to detect an effect in a sample, *given that there is one in the population*.
+
+To calculate the statistical power, we set the number of samples we want to draw (`iterations`) and then use the functions we created earlier.
+
+
+```r
+# define how many samples to generate
+iterations <- 5
+
+# we run the estimate_model() function as often as specified by `iterations` and store the data
+power_data <- purrr::map_df(1:iterations, 
+                              # We use do.call here since we stored the
+                              # parameters in an external list. We could
+                              # also define them directly in 
+                              # estimate_model().
+                              ~do.call(estimate_model, parameters))
+
+# we group by estimate (or `term`) 
+# the calculate the share of significant estimates
+power <- power_data %>% 
+  group_by(term) %>% 
+  summarize(power = mean(significant))
+```
+
+### Power calculation function
+
+We put the power calculation above into a function. We slightly modify this function compared to above - for example, since that function will take some time to run, we add a print message.
+
+
+```r
+calculate_power <- function(iterations, ...) {
+  
+  # create data frame with model results for generated samples
+  power_data <- 1:iterations %>% 
+    purrr::map_df(function(x){
+      # this is essentially a for loop - do the following for each 
+      # element in 1:iterations
+      
+      results <- estimate_model(...)
+      
+      # To keep track of progress
+      if (x %% 50 == 0) {print(paste("iteration number ", x))}
+      
+      return(results)
+      
+    })
+  
+  # we group by estimate (or `term`) 
+  # the calculate the share of significant estimates
+  power <- power_data %>% 
+    group_by(term) %>% 
+    summarize(power = mean(significant))
+  
+  return(power)
+}
+# # You can test the function using the commented code below 
+# # (un-comment by highlighting, then command+shit+c)
+# test <- do.call(calculate_power, c(parameters, list(iterations = 500)))
+```
+
+## 5. Calculate Power for different sample sizes
+
+The aim of a power analysis is to inform the number of participants to recruit, *given a desired level of statistical power*.
+
+We set this level at 90%.
+
+
+```r
+power_threshold <- 0.9
+```
+
+We are looking for a sample size that let's us detect a statistically significant effect in (at least) 90% of samples.
+
+To do so, we repeat the previous power calculation for various sample sizes. Here, we pick only two and a low number of iterations since it is only for illustration.
+
+
+```r
+# calcluate power for different sample sizes
+
+# make a data frame with sample sizes
+power_by_sample_size <- tibble(n_subj = seq(from = 10, to = 20, by = 10))
+
+# Remove "n_subj" parameter from our initial parameter list since we want to replace it 
+# with the respective sample sizes every time.
+parameters[["n_subj"]] <- NULL
+
+# do the `calculate_power()` function for each sample size and store the results
+# in a new variable called `power`
+power_by_sample_size <- map_df(power_by_sample_size$n_subj, 
+                                      ~do.call(calculate_power, 
+                                               c(parameters,
+                                                 # sets the n_subj value according
+                                                 # to the respective value in
+                                                 # `power_by_sample_size`
+                                                 list(n_subj = .x, 
+                                                      iterations = 100))))
+```
+
+```
+## [1] "iteration number  50"
+## [1] "iteration number  100"
+## [1] "iteration number  50"
+## [1] "iteration number  100"
+```
+
+We can check the resulting data to find the first sample size where power is at least 90%.
+
+
+```r
+power_by_sample_size
+```
+
+```
+## # A tibble: 6 × 2
+##   term                         power
+##   <chr>                        <dbl>
+## 1 convergence                   1   
+## 2 convergence:number_options10  0.15
+## 3 number_options10              0.15
+## 4 convergence                   1   
+## 5 convergence:number_options10  0.27
+## 6 number_options10              0.24
+```
+
+### Power by sample size function
+
+We can put the above power calculation for different sample sizes into a function - which, finally is the function we were looking for.
+
+The simulations that this function executes will take quite some time. Therefore, we do not want to run it every time we render this document. Instead we want to store the output of the power simulation in a `.csv` file, and have an integrated "stop" mechanism to prevent execution when that file already exists. To achieve this, we make `file_name` a mandatory argument. If a file with that name already exists, the function will not be executed.
+
+
+```r
+# file_name <- "power_simulation.csv" # change for new analyses / or delete file to re-use same name
+
+power_by_sample_size <- function(file_name, sample_sizes, iterations, outcome, ...) {
+  
+  # only run analysis if a file with that name does not yet exists
+  if (!file.exists(paste0("data/", file_name))) {
+    
+    # do the `calculate_power()` function for each sample size and store the results
+    # in a new variable called `power`
+    power <- purrr::map_df(sample_sizes, 
+                           function(n){
+                             # this is essentially a for loop - 
+                             # do the following for each 
+                             # element data$n_subj
+                             
+                             # To keep track of progress
+                             print(paste("tested sample size = ", n))
+                             
+                             # run power calculation
+                             result <- calculate_power(n_subj = n, 
+                                                       iterations = iterations, 
+                                                       outcome = outcome, ...)
+                             # identify respective sample size
+                             result$n <- n
+                             
+                             return(result)
+                             
+                           })
+    
+    # add some variables with information about simulation
+    data <- power %>% 
+      mutate(
+        # add identifier variable for number of iterations
+        iterations = iterations, 
+        # add identifier variable for outcome
+        outcome = outcome)
+    
+    write_csv(data, paste0("data/", file_name))
+  }
+}
+
+# # You can test the function using the commented code below
+# # (un-comment by highlighting, then command+shit+c)
+# test <- do.call(power_by_sample_size,
+#                 c(parameters,
+#                   list(file_name = file_name, sample_sizes = c(5, 10),
+#                        iterations = 100)
+#                   )
+#                 )
+```
+
+# II. Running the power analyses
+
+We will run two power analyses: one for `accuracy` and one for `competence`. We try to make reasonable parameter assumptions for both. Our choice of sample size will be based on the analysis that requires the larger sample.
+
+### Set parameters
+
+For accuracy.
+
+
+```r
+# list of parameters for accuracy
+parameters_accuracy <- c(parameters_accuracy, 
+                         list(
+                           # outcome variable
+                           outcome = "accuracy", # takes names as input, e.g. "accuracy"
+                           # parameters for size of data frame
+                           sample_sizes  =  seq(from = 20, to = 200, by = 20), # different n's to simulate power for 
+                           levels_convergence = 0:3,  # levels of convergence
+                           n_stimuli_per_level = 2, # n stimuli per participant
+                           # number of iterations (per sample size)
+                           iterations = 1000
+                           )
+                         )
+```
+
+For competence.
+
+
+```r
+# list of parameters for competence
+parameters_competence <- c(parameters_competence, 
+                         list(
+                           # outcome variable
+                           outcome = "competence", # takes names as input, e.g. "competence"
+                           # parameters for size of data frame
+                           sample_sizes  =  seq(from = 20, to = 300, by = 20), # different n's to simulate power for 
+                           levels_convergence = 0:3,  # levels of convergence
+                           n_stimuli_per_level = 2, # n stimuli per participant
+                           # number of iterations (per sample size)
+                           iterations = 1000
+                           )
+                         )
+```
+
+### Execute functions
+
+For accuracy
+
+
+```r
+do.call(power_by_sample_size, c(parameters_accuracy, 
+                                        list(file_name = "power_accuracy.csv")
+                                        )
+                )
+
+power_accuracy <- read_csv("data/power_accuracy.csv")
+```
+
+For competence
+
+
+```r
+do.call(power_by_sample_size, c(parameters_competence, 
+                                        list(file_name = "power_competence.csv")
+                                        )
+                )
+
+power_competence <- read_csv("data/power_competence.csv")
+```
+
+### Plot results
+
+We can plot the results of this power calculation.
+
+
+```r
+# plot results
+plot_power <- function(data) {
+  
+  # make nicer labels for the term variable
+  data <- data %>% 
+    mutate(term = case_when(
+      term == "independenceindependent" ~ "independence", 
+      term == "convergence:independenceindependent" ~ "interaction", 
+      TRUE ~ term)
+    )
+  
+  ggplot(data, 
+       aes(x = n, y = power, color = term)) +
+  geom_line(size = 1.5) + 
+  # add a horizontal line at 90%, our power_threshold
+  geom_hline(aes(yintercept = .9), linetype = 'dashed') + 
+  # display iterations
+  annotate("text", x = 150, y = 0.25, label = paste("iterations per \nsample size =", max(data$iterations)))+
+  # Prettify!
+  theme_minimal() + 
+    scale_colour_viridis_d(option = "plasma") + 
+  scale_y_continuous(labels = scales::percent) + 
+  labs(x = 'Sample Size', y = 'Power', 
+       title = paste0("Power analysis for ", unique(data$outcome)),
+       subtitle = "(accounting for participant random effects)")
+}
+```
+
+
+```r
+competence_plot <- plot_power(power_competence)
+```
+
+```
+## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+## ℹ Please use `linewidth` instead.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+## generated.
+```
+
+```r
+competence_plot
+```
+
+![](power_Exp6_files/figure-html/plot-power-competence-1.png)<!-- -->
+
+
+```r
+accuracy_plot <- plot_power(power_accuracy)
+accuracy_plot
+```
+
+![](power_Exp6_files/figure-html/plot-power-accuracy-1.png)<!-- -->
+
+### Calculate precise sample size threshold
+
+
+```r
+# accuracy
+power_accuracy %>% filter(term == "convergence:number_options10" & 
+                            power >= 0.9) %>%
+  arrange(power) %>% 
+  slice(1)
+```
+
+```
+## # A tibble: 1 × 5
+##   term                         power     n iterations outcome 
+##   <chr>                        <dbl> <dbl>      <dbl> <chr>   
+## 1 convergence:number_options10 0.928   140       1000 accuracy
+```
+
+
+```r
+# competence
+power_competence %>% filter(term == "convergence:number_options10") %>%
+  arrange(desc(power)) 
+```
+
+```
+## # A tibble: 15 × 5
+##    term                         power     n iterations outcome   
+##    <chr>                        <dbl> <dbl>      <dbl> <chr>     
+##  1 convergence:number_options10 0.872   300       1000 competence
+##  2 convergence:number_options10 0.854   260       1000 competence
+##  3 convergence:number_options10 0.851   280       1000 competence
+##  4 convergence:number_options10 0.777   240       1000 competence
+##  5 convergence:number_options10 0.735   220       1000 competence
+##  6 convergence:number_options10 0.706   200       1000 competence
+##  7 convergence:number_options10 0.659   180       1000 competence
+##  8 convergence:number_options10 0.628   160       1000 competence
+##  9 convergence:number_options10 0.539   140       1000 competence
+## 10 convergence:number_options10 0.5     120       1000 competence
+## 11 convergence:number_options10 0.386   100       1000 competence
+## 12 convergence:number_options10 0.347    80       1000 competence
+## 13 convergence:number_options10 0.286    60       1000 competence
+## 14 convergence:number_options10 0.195    40       1000 competence
+## 15 convergence:number_options10 0.13     20       1000 competence
+```
+
+
+## References

@@ -1,0 +1,97 @@
+# Experiment 3 {#exp3}
+
+
+\FloatBarrier
+
+```{r conditions-exp3}
+# We manipulated two factors: informational dependency (two levels, independence and conflict of interest, see Table \@ref(tab:conditions-exp3); between participants) and convergence (two levels, convergence and divergence; within participants). Participants saw four scenarios, one for each combination of the two factors convergence and informational dependency. 
+
+# The different introductions that participants read before seeing the sets of estimates, according to the conditions 
+# data.frame(
+#   Condition = c("Independence", "Conflict of interest"),
+#   Description = c(
+#     "Experts are independent of each other, and have no conflict of interest in predicting the stock value - they do not personally profit in any way from any future valuation of the stock.",
+#     "All three experts have invested in the specific stock whose value they are predicting, and they benefit if other people believe that the stock will be valued at [mean of respective distribution] in the future."
+#   )
+# ) %>% 
+#   apa_table(align = c("m{3cm}", "m{12cm}")) 
+```
+
+## Attention check
+
+Imagine you are playing video games with a friend and at some point your friend says: “I don’t want to play this game anymore! To make sure that you read the instructions, please write the three following words "I pay attention" in the box below. I really dislike this game, it's the most overrated game ever.”
+
+Do you agree with your friend? (Yes/No)
+
+## Stimuli
+
+Our design required that each participant sees four different sets of predictions--two convergent and two divergent ones. We generated new stimuli: As in experiment 1, estimates would appear on a scale from 1000 to 2000. By contrast with experiment 1, we generated the sets of estimates with random draws from uniform distributions (instead of normal distributions). We varied the range of these distributions according to convergence (60 for convergence, 600 for divergence). Switching from normal distributions to uniform distributions made 'unlucky' draws in which conditions are visually not distinguishable less likely. And additional difference to experiment one was that all scenarios only involved groups of three informants (never ten).
+
+Similar to the previous experiments, we also vary the value on the prediction scale (from 1000 to 2000) across which the range is centered. Considering our within-participant design, this, again, made it seem more likely that participants understand each set of predictions as being the result of a different stock, with a different true value. In order to assure all random draws from the distributions would appear on the response scale, we constrained the center of the uniform distributions to lie between 1300 and 1700. We define four center values -- one per set of predictions -- that divide this interval in (rounded) quartiles (1300, 1430, 1570, 1700). Given a center and a range, we then draw the predictions from uniform distributions. For example, in a draw for a divergent set of estimates with a center of 1700, each value within a range of 1400 and 2000 is equally likely to get selected. To avoid that single draws overlap too much within the same set, we defined a minimum space of 5 between the three predictions of a set.
+
+To minimize confounding of convergence with a certain placement of the center value, we paired center values with conditions such that each condition appears once in each half of the scale and each condition gets one of the extreme values. For example, in one set the convergence condition would get assigned center values of 1300 and 1570, the divergent condition center values of 1430 and 1700). We generated four such series (all possible combinations) and randomly assigned participants to one of them. Additionally, for each participant, we randomized the order of appearance of the sets of predictions within the respective series.
+
+For each set of predictions, we calculated the empirical mean based on the randomly drawn estimates. In the conflict of interest condition, this mean was inserted as the value that participants were be told experts would gain from. Consequently, the convergent predictions converge around what is said to be the incentivized value for the experts to choose.
+
+## Results
+
+Table \@ref(tab:exp3-table) contains descriptive results.
+
+```{r exp3-table}
+exp3_accuracy <- exp3 %>% 
+  group_by(independence, convergence) %>% 
+  summarise(across(accuracy, list(mean = mean, sd = sd))) %>% 
+  rounded_numbers() %>% 
+  mutate(Accuracy = paste0(accuracy_mean, " (sd = ", accuracy_sd, ") ")) %>% 
+  select(independence, convergence, Accuracy) %>% 
+    mutate(convergence = ifelse(convergence == "divergent", "Divergent", 
+                "Convergent")) %>%  
+  pivot_wider(names_from = convergence,
+              values_from = Accuracy) %>% 
+  mutate(independence = ifelse(independence == "conflict", "Conflict of interest", 
+                "Independent") 
+         ) %>% 
+  rename(" " = independence) %>% 
+  as.matrix()
+
+exp3_competence <- exp3 %>% 
+  group_by(independence, convergence) %>% 
+  summarise(across(competence, list(mean = mean, sd = sd))) %>% 
+  rounded_numbers() %>% 
+  mutate(Competence = paste0(competence_mean, " (sd = ", competence_sd, ") ")) %>% 
+  select(independence, convergence, Competence) %>% 
+    mutate(convergence = ifelse(convergence == "divergent", "Divergent", 
+                "Convergent")) %>%  
+  pivot_wider(names_from = convergence,
+              values_from = Competence) %>% 
+  mutate(independence = ifelse(independence == "conflict", "Conflict of interest", 
+                "Independent") 
+         ) %>% 
+  ungroup() %>% 
+  select(-independence) %>% 
+  as.matrix()
+
+table <- cbind(exp3_accuracy, exp3_competence)
+
+# Conditionally format the table based on the output format
+if (knitr::is_latex_output() || knitr::is_html_output()) {
+  # LaTeX or HTML: Use kable and add_header_above
+  table_output <- table %>%
+    kable(booktabs = TRUE, 
+          caption = "") %>%  # Empty caption for cross-referencing
+    kable_styling() %>%
+    add_header_above(c("", "Accuracy" = 2, "Competence" = 2))
+} else {
+  # Word: Use apa_table for APA-style tables
+  table_output <- papaja::apa_table(
+    table, 
+    caption = "Participants vs. Model"
+  )
+}
+
+# Print the table
+table_output
+
+```
+
+

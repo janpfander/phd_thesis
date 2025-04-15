@@ -1,0 +1,228 @@
+# Experiment 4 {#exp4}
+
+\FloatBarrier
+
+## Attention check
+
+Imagine you are playing video games with a friend and at some point your friend says: “I don’t want to play this game anymore! To make sure that you read the instructions, please write the three following words "I pay attention" in the box below. I really dislike this game, it's the most overrated game ever.”
+
+Do you agree with your friend? (Yes/No)
+
+## Stimuli
+
+We manipulate convergence within participants. All participants see all four conditions, with two stimuli (i.e. game results) per condition (see Table \@ref(tab:exp4-stimuli)). Each participant therefore sees eight stimuli in total (4 convergence levels x 2 stimuli)
+
+```{r exp4-stimuli, echo=FALSE}
+# Create a matrix of image file paths as Markdown-formatted strings
+image_paths <- data.frame(condition = c("minority (0)", 
+                                        "dissensus (1)", "majority (2)", 
+                                        "consensus (3)"),
+                          imgage_a = c("![](Experiment_4/figures/stimuli/opp_majority_a.png){ width=60% }", 
+                        "![](Experiment_4/figures/stimuli/divergence_a.png){ width=60% }",
+                        "![](Experiment_4/figures/stimuli/majority_a.png){ width=60% }", 
+                        "![](Experiment_4/figures/stimuli/consensus_a.png){ width=60% }"),
+                        imgage_b = c("![](Experiment_4/figures/stimuli/opp_majority_b.png){ width=60% }", 
+                        "![](Experiment_4/figures/stimuli/divergence_b.png){ width=60% }",
+                        "![](Experiment_4/figures/stimuli/majority_b.png){ width=60% }", 
+                        "![](Experiment_4/figures/stimuli/consensus_b.png){ width=60% }"))
+
+# Use kable() to create the table and print it as Markdown
+kableExtra::kable(image_paths, format = "markdown",
+                  col.names = c("Level", "Version a)", "Version b)"), 
+                  align = "c",
+                  caption = "All stimuli by levels of convergence") 
+# %>%
+#   column_spec(1, width = "2em") %>%
+#   column_spec(2, width = "15em") %>%
+#   column_spec(3, width = "15em") 
+
+```
+
+## Results
+
+Table \@ref(tab:exp4-table) contains descriptive results and Figure \@ref(fig:exp4-plot) visualizes the results.
+
+```{r exp4-table}
+exp4 %>% 
+  group_by(convergence_categorical, convergence) %>% 
+  summarise(across(c(competence, accuracy), list(mean = mean, sd = sd))) %>% 
+  rounded_numbers() %>% 
+  mutate(Accuracy = paste0(accuracy_mean, " (sd = ", accuracy_sd, ")"),
+         Competence = paste0(competence_mean, " (sd = ", competence_sd, ")"),
+         Convergence = paste0(convergence_categorical, " (", convergence, ")")
+         ) %>% 
+  ungroup() %>% 
+  select(Convergence, Accuracy, Competence) %>% 
+  apa_table()
+```
+
+(ref:exp4-plot) Results of Experiment 4, showing the distributions of accuracy and competence by level of convergence.
+
+```{r exp4-plot, fig.cap="(ref:exp4-plot)"}
+# plot for accuracy
+plot_accuracy <- ggplot(exp4,
+       aes(x = convergence_categorical, y = accuracy, fill = convergence_categorical)) +
+  geom_half_violin(position = position_nudge(x = -.2),
+                   adjust=2, alpha = .8,
+                   side = "l") +
+  stat_summary(fun = "mean", geom = "point", size = 1, shape = 21) +
+  stat_summary(fun = "mean", geom = "line", size = 1, linetype = "dashed") +
+  stat_summary(fun.data = "mean_se", geom = "errorbar", width = .2) +
+  # Add nice labels
+  labs(x = "Convergence", y = "Accuracy") +
+  scale_fill_viridis_d(option = "plasma", begin = 0.1) +
+  guides(fill = FALSE) +
+  plot_theme + 
+  theme(axis.text.x = element_text(angle = 20, hjust = 1)) +  
+  rremove("xlab")   # Remove x-axis label
+
+# plot for competence
+plot_competence <- ggplot(exp4,
+       aes(x = convergence_categorical, y = competence, fill = convergence_categorical)) +
+  geom_half_violin(position = position_nudge(x = -.2),
+                   adjust=2, alpha = .8,
+                   side = "l") +
+  stat_summary(fun = "mean", geom = "point", size = 1, shape = 21) +
+  stat_summary(fun = "mean", geom = "line", size = 1, linetype = "dashed") +
+  stat_summary(fun.data = "mean_se", geom = "errorbar", width = .2) +
+  # Add nice labels
+  scale_y_continuous(limits = c(1,7), breaks = seq(1,7)) +
+  labs(x = "Convergence", y = "Competence") +
+  scale_fill_viridis_d(option = "plasma", begin = 0.1) +
+  guides(fill = FALSE) +
+  plot_theme + 
+  theme(axis.text.x = element_text(angle = 20, hjust = 1)) +  
+  rremove("xlab")   # Remove x-axis label
+
+ggarrange(plot_accuracy, plot_competence) %>% 
+  annotate_figure(bottom = textGrob("Convergence",gp = gpar(cex = 1, fontface = "bold")))
+```
+
+## Comparison with simulation
+
+We compared the accuracy and competence ratings of the participants to actual accuracy and competence values from simulated data. The data was generated using the model described in the main paper, and assuming a uniform competence distribution. Compared to this data generating model, participants underestimate the effect of convergence for both accuracy and competence, but more for accuracy. Table \@ref(tab:model-vs-participant-table) compares the results of regressions on participant data and regressions on simulated data. Fig. \@ref(fig:exp4-model) visualizes the results.
+
+```{r}
+# read simulated data from .csv files
+sim_experiment_4 <- read_csv("Experiment_4/data/sim_experiment_4.csv")
+```
+
+```{r}
+# Run model on simulated data
+regression_data <- sim_experiment_4 %>%
+  mutate(
+    # make numeric version of convergence
+    convergence = case_when( 
+      constellation == "minority" ~ 0, 
+      constellation == "dissensus" ~ 1,
+      constellation == "majority" ~ 2,
+      constellation == "consensus" ~ 3), 
+    # scale accuracy to reach from 0 to 100 (instead from 0 to 1)
+    average_accuracy = average_accuracy*100,
+    # scale competence to reach from 1 to 7 (instead of 0 to 1)
+    average_relative_competence = 6*average_relative_competence + 1 
+  ) 
+  
+accuracy_model <- lm(average_accuracy ~ convergence, 
+                     data = regression_data)
+competence_model <- lm(average_relative_competence ~ convergence, 
+                       data = regression_data)
+```
+
+```{r}
+# read participant data
+d <- exp4
+```
+
+
+```{r model-vs-participant-table}
+# Calculate models for participants
+
+# model for accuracy
+# random intercept and slope by participants
+accuracy_participants <- lmer(accuracy ~ convergence + (1 + convergence | id), 
+                                 data = d)
+# model for competence
+# random intercept and slope by participants
+competence_participants <- lmer(competence ~ convergence + 
+                           (1 + convergence | id), data = d)
+
+# main result table
+table_output <- modelsummary::modelsummary(list("Accuracy" = accuracy_participants, 
+                                                "Competence" = competence_participants,
+                                                "Accuracy" = accuracy_model, 
+                                                "Competence" = competence_model
+                                                ),
+                                           title = 'Participants vs. Model (Exp. 4)', 
+                                           stars = TRUE, 
+                                           output = "kableExtra")
+
+# Check if the output format is LaTeX or HTML, apply add_header_above accordingly
+if (knitr::is_latex_output() || knitr::is_html_output()) {
+  table_output <- table_output %>%
+    kableExtra::add_header_above(c(" " = 1, "Participants" = 2, "Model" = 2))
+}
+
+table_output
+```
+
+```{r, echo=FALSE}
+# Participant data
+
+# plot for accuracy
+plot_accuracy <- ggplot(d,
+       aes(x = convergence_categorical, y = accuracy, fill = convergence_categorical)) +
+  geom_half_violin(position = position_nudge(x = -.2),
+                   adjust=2, alpha = .8,
+                   side = "l") +
+  stat_summary(fun = "mean", geom = "point", size = 1, shape = 21) +
+  stat_summary(fun = "mean", geom = "line", size = 1, linetype = "dashed") +
+  stat_summary(fun.data = "mean_se", geom = "errorbar", width = .2) +
+  # Add nice labels
+  labs(x = "Convergence", y = "Accuracy") +
+  scale_fill_viridis_d(option = "plasma", begin = 0.1) +
+  guides(fill = FALSE) +
+  plot_theme + 
+  theme(axis.text.x = element_text(angle = 20, hjust = 1))
+
+# plot for competence
+plot_competence <- ggplot(d,
+       aes(x = convergence_categorical, y = competence, fill = convergence_categorical)) +
+  geom_half_violin(position = position_nudge(x = -.2),
+                   adjust=2, alpha = .8,
+                   side = "l") +
+  stat_summary(fun = "mean", geom = "point", size = 1, shape = 21) +
+  stat_summary(fun = "mean", geom = "line", size = 1, linetype = "dashed") +
+  stat_summary(fun.data = "mean_se", geom = "errorbar", width = .2) +
+  # Add nice labels
+  labs(x = "Convergence", y = "Competence") +
+  scale_fill_viridis_d(option = "plasma", begin = 0.1) +
+  guides(fill = FALSE) +
+  plot_theme + 
+  theme(axis.text.x = element_text(angle = 20, hjust = 1))
+```
+
+```{r}
+# Model data
+plot_accuracy_model <- plot_results(sim_experiment_4, outcome = "accuracy")
+plot_competence_model <- plot_results(sim_experiment_4, outcome = "competence")
+```
+
+(ref:exp4-model) Comparison of accuracy (top) and competence (bottom) ratings in participant data (left) to observed accuracy in simulated data (right), by level of convergence. 
+
+```{r exp4-model, fig.cap="(ref:exp4-model)"}
+# Combine participant and model
+# accuracy
+plot_accuracy <- plot_accuracy + ggtitle("Participants") + labs(caption = NULL)
+plot_accuracy_model <- plot_accuracy_model + ggtitle("Model") + labs(caption = NULL)
+
+# competence
+plot_competence <- plot_competence 
+plot_competence_model <- plot_competence_model
+
+
+
+(plot_accuracy + plot_accuracy_model) / (plot_competence + plot_competence_model)
+```
+
+

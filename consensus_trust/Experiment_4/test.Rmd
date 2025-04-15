@@ -1,0 +1,19 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-03-03"
+---
+
+Import data.
+```{r import}
+d <- read_csv("./data/Convergence_Exp_4_March+16,+2023_13.24.csv")
+names(d)
+
+# delete first two rows
+d <- d %>% 
+  slice(3: nrow(.)) %>% 
+  
+  
+mutate(across(ends_with("_1"), ~str_remove(., "_1")))
+```
+

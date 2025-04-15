@@ -1,0 +1,6 @@
+n,iterations,outcome,power
+10,1000,competence,0.531
+20,1000,competence,0.836
+30,1000,competence,0.962
+40,1000,competence,0.994
+50,1000,competence,1

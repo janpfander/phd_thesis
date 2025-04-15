@@ -1,0 +1,154 @@
+# Simulations {#simulations}
+
+Are we justified in inferring competence and accuracy from convergence? To complement our analytical argument, we ran simulations, intended to mirror our experimental setup. We find that--under certain conditions--more convergent groups indeed tend to be more competent and accurate. In this appendix, we describe these simulations in detail.
+
+## Numerical choice context
+
+When several people estimate a quantity (numeric scenario), their convergence can be measured for example by the empirical variance. The closer the estimates, i.e. the smaller the empirical variance, the greater convergence. This measure is at the group level.
+
+To provide a normative answer, we ran simulations for a scenario in which individuals provide an estimate on a scale from 1000 to 2000. In our simulations, we suppose that an individual's answer is drawn from a normal distribution. Each individual has their own normal distribution. All normal distributions are centered around the true answer - but they differ in their standard deviations. The value of that standard deviation is what we define as an individual's competence. The lower the standard deviation, the higher the competence, i.e. the more likely a guess drawn from the normal distribution will be close to the true answer. We (arbitrarily) define a range of competence: we set the lowest competence equal to the range of possible values, i.e.the largest standard deviation (2000 - 1000) = 1000. We set the highest competence to 0.1% of the range of possible values, i.e.the smallest standard deviation (0.001 x 1000) = 1 (see Fig. \@ref(fig:example-competence-numeric)).
+
+(ref:example-competence-numeric) Range of possible data generating functions for individuals.
+
+```{r example-competence-numeric, fig.cap="(ref:example-competence-numeric)", out.width= "75%"}
+# Define the x-axis values
+x <- seq(1000, 2000, length.out = 1000)
+
+# Define the PDFs for the two distributions
+high_competence_pdf <- dnorm(x, mean = 1500, sd = 1)
+low_competence_pdf <- dnorm(x, mean = 1500, sd = 1000)
+
+# Create the plot
+ggplot() +
+  geom_line(aes(x, high_competence_pdf, color = "Highest Competence Individual \n (SD = 1, Mean = 1500)"), size = 1) +
+  geom_line(aes(x, low_competence_pdf, color = "Lowest Competence Individual \n (SD = 1000, Mean = 1500)"), size = 1) +
+  labs(x = "Competence Level", y = "Density", color = "Data generating function for") +
+  ggtitle("Competence Level Distributions") +
+  scale_color_manual(values = c("Highest Competence Individual \n (SD = 1, Mean = 1500)" = "blue", 
+                                "Lowest Competence Individual \n (SD = 1000, Mean = 1500)" = "red")) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+We suppose that individual competence levels are drawn from a competence distribution, which can be expressed by a beta distribution. This competence distribution can take vary different shapes, depending on the alpha and beta parameters that describe the distribution (see Fig. \@ref(fig:simulations)).
+
+We draw an estimate for each individual based on their respective competence distribution. For each individual, we then measure accuracy as the (squared) distance between their estimate and the true answer. Having a competence and an accuracy value for each individual, we randomly assign individuals to groups of three. For each group, we calculate the average of the three individuals' competence and accuracy. We measure the convergence of a group by calculating the standard deviation of the estimates. We run this simulation on a sample size of roughly 99900 (varying slightly as a function of sample size). We repeat this simulation process for various sample sizes and competence distributions. The results are displayed in Fig. \@ref(fig:simulation-accuracy-numeric) for accuracy, and Fig. \@ref(fig:simulation-competence-numeric) for competence. Across all underlying competence distributions, we find a positive correlation between convergence and accuracy, which tends towards 1 as sample size increases (see Fig. \@ref(fig:simulation-numeric-correlations)). As for competence, we find a positive correlation between convergence and competence across all underlying competence distributions. However, these correlations are weaker than for accuracy, and do not increase with sample size (see Fig. \@ref(fig:simulation-numeric-correlations)).
+
+(ref:simulation-numeric-correlations) Correlation between the convergence of the answers of a group of agents and (left) the average accuracy of their answers; (right) the average competence of the agents, as a function of how many agents are in the group, and of the competence distribution of the agents (see Fig. \@ref(fig:simulations)).
+
+```{r simulation-numeric-correlations, fig.cap="(ref:simulation-numeric-correlations)", out.width="75%"}
+# calculate correlations
+simulation_numeric <- simulation_numeric %>% 
+  group_by(competence, sample) %>% 
+  mutate(correlation_accuracy = cor(accuracy_mean, convergence), 
+         correlation_competence = cor(competence_mean, convergence)) %>% 
+  ungroup()
+
+# accuracy plot
+accuracy_plot <- ggplot(simulation_numeric, aes(x = sample, y = correlation_accuracy, color = competence)) +
+  geom_point() + 
+  geom_line(alpha = 0.5) + 
+  labs(y = "Correlation \nAccuracy/Convergence", 
+       x = "Group size", 
+       color = "Competence distribution") +
+  scale_y_continuous(limits = c(0, 1)) +
+  scale_color_brewer(palette = "Set1") +
+  plot_theme + 
+  theme(
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 8)) +
+  rremove("xlab")
+
+# competence plot
+competence_plot <- ggplot(simulation_numeric, aes(x = sample, y = correlation_competence, color = competence)) +
+  geom_point() + 
+  geom_line(alpha = 0.5) + 
+  labs(y = "Correlation \nCompetence/Convergence", 
+       x = "Group size", 
+       color = "Competence distribution") +
+  scale_y_continuous(limits = c(0, 1)) +
+  scale_color_brewer(palette = "Set1") +
+  plot_theme + 
+  theme(
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 8)) +
+  rremove("xlab")
+
+ggarrange(accuracy_plot, competence_plot, common.legend = TRUE) %>% 
+    annotate_figure(bottom = textGrob("Group size", gp = gpar(cex = 1, fontface = "bold")))
+```
+
+## Categorical choice context
+
+(ref:simulation-accuracy-sample-categorical) Accuracy as a function of convergence, for different population competence distributions and sample sizes. The number of choice options is three.
+
+```{r simulation-accuracy-sample-categorical, fig.cap="(ref:simulation-accuracy-sample-categorical)", out.width="100%"}
+plot_competence_vary_relative_majority_categorical(simulation_sample_categorical,
+                                       outcome = "Accuracy", variable = sample) 
+```
+
+(ref:simulation-competence-sample-categorical) Competence as a function of convergence (i.e. vote share for an option), for different population competence distributions and sample sizes. The number of choice options is three.
+
+```{r simulation-competence-sample-categorical, fig.cap="(ref:simulation-competence-sample-categorical)", out.width="100%"}
+plot_competence_vary_relative_majority_categorical(simulation_sample_categorical,
+                                       outcome = "Competence", variable = sample)
+```
+
+When people make a choice based on several categories, their answers cannot be ranked by their nature (i.e. they are nominal, not ordinal), and that there are fewer of them (e.g. one of three possible products to choose, instead of an estimate between one and two thousand). In this case, convergence can be measured by the share of people agreeing on an answer. The larger the share of informants agreeing on an answer, the greater convergence. This measure is at the response level, nested within the group level.
+
+As for the numeric scenario, we ran simulations to provide a normative answer as to whether it is justified to infer accuracy and competence from greater convergence. We, again, suppose that an individual's answer is drawn from an internal distribution - in this case, a multinomial distribution, that describes how likely the individual is to choose each available option. If there are m choice options, an individual has the probability p of picking the right one, and the probability of (1-p)/(m-1) to pick any other option. Each individual has their own multinomial distribution. We define competence as the probability of making the correct choice. The higher the competence, the greater the probability that an individual will choose the correct option. Competence values range from being at chance for selecting the correct option (p = 1/m) to certainly selecting the correct option (p = 1). As before in the numeric case, suppose that individual competence levels are drawn from a competence distribution, which can be expressed by a beta distribution (see Fig. \@ref(fig:simulations)). Based on their competence level, we draw an estimate for each individual. We measure an individual's accuracy as a binary outcome, namely whether they picked the correct option, or not. We then randomly assign individuals to groups of informants (we vary the sample size from one simulation to another). Within these groups, we calculate the share of individuals voting for an answer option. For example, in a scenario in which three individuals pick among three options (A, B and C), two individuals might vote C and one B. In this case we obtain an average accuracy and an average competence value for a share of 2/3 (option C) and for a share of 1/3 (option B). We simulate this on a population of 99900 individuals. We repeat this procedure varying the underlying population competence distributions, and additionally varying either (a) the sample size of informants, or (b) the number of choice options. If we vary the sample size, we hold the number of choice options constant at n = 3, and vice versa when varying the number of choice options. Fig. \@ref(fig:simulation-accuracy-sample-categorical) shows the average accuracy, and Fig. \@ref(fig:simulation-competence-sample-categorical) the average competence value for each share of votes, for different competence levels and varying the sample size. Fig. \@ref(fig:simulation-accuracy-options-categorical) and Fig. \@ref(fig:simulation-competence-options-categorical) display the same relationship, but varying the number of choice options instead. The figures display that, across all sample sizes and competence levels, the larger the share of votes for an option, the more accurate the option is on average. That relationship appears to follow some sigmoid curve which switches from an average accuracy of 0 to an average accuracy of 1 before a share of 0.5 is attained, and which is steeper for larger sample sizes. For competence, we observe a similar sigmoid-like relationship, but of lesser amplitude and varying considerably as a function of the underlying population competence distributions.
+
+(ref:simulation-accuracy-options-categorical) Accuracy as a function of vote share for an option, for different population competence distributions and number of choice options. Points represent averages across all simulations within the respective segment. The sample size is three.
+
+```{r simulation-accuracy-options-categorical, fig.cap="(ref:simulation-accuracy-options-categorical)", out.width="75%"}
+plot_competence_vary_relative_majority_categorical(simulation_options_categorical,
+                                       outcome = "Accuracy", variable = options)
+```
+
+(ref:simulation-competence-options-categorical) Competence as a function of vote share for an option, for different population competence distributions and number of choice options. Points represent averages across all simulations within the respective segment. The sample size is three.
+
+```{r simulation-competence-options-categorical, fig.cap="(ref:simulation-competence-options-categorical)", out.width="75%"}
+plot_competence_vary_relative_majority_categorical(simulation_options_categorical,
+                                       outcome = "Competence", variable = options)
+```
+
+In sum, given the set of specific assumptions we made, our simulations suggest that people are indeed justified in inferring accuracy and competence from convergence in both numeric and categorical choice settings.
+
+(ref:simulation-accuracy-numeric) Simulation results showing the relationship between convergence and accuracy for different population competence distributions.
+
+```{r, simulation-accuracy-numeric, fig.cap="(ref:simulation-accuracy-numeric)", fig.height= 10, fig.width=10}
+plot_continuous_combined(data = simulation_numeric, outcome = "accuracy")
+```
+
+(ref:simulation-competence-numeric) Simulation results showing the relationship between convergence and competence for different population competence distributions.
+
+```{r, simulation-competence-numeric, fig.cap="(ref:simulation-competence-numeric)", fig.height= 10, fig.width=10}
+plot_continuous_combined(data = simulation_numeric, outcome = "competence")
+```
+
+```{r simulation-accuracy-single, fig.cap="(ref:simulation-accuracy-single)", out.width="75%"}
+# plot_list <- plot_competence_vary_numeric(data = simulation_numeric, outcome = "accuracy")
+# ggarrange(plotlist = plot_list, common.legend = TRUE, ncol = 1)
+
+# Display single plots
+# plot_competence_vary_numeric(data = simulation_numeric, outcome = "accuracy")[[1]]
+# plot_competence_vary_numeric(data = simulation_numeric, outcome = "accuracy")[[2]]
+# plot_competence_vary_numeric(data = simulation_numeric, outcome = "accuracy")[[3]]
+# plot_competence_vary_numeric(data = simulation_numeric, outcome = "accuracy")[[4]]
+# plot_competence_vary_numeric(data = simulation_numeric, outcome = "accuracy")[[5]]
+# plot_competence_vary_numeric(data = simulation_numeric, outcome = "accuracy")[[6]]
+```
+
+```{r simulation-competence-single, fig.cap="(ref:simulation-competence-single)", out.width="75%"}
+# plot_list <- plot_competence_vary_numeric(data = simulation_numeric, outcome = "competence")
+# ggarrange(plotlist = plot_list, common.legend = TRUE, ncol = 1)
+
+# Display single plots
+# plot_competence_vary_numeric(data = simulation_numeric, outcome = "competence")[[1]]
+# plot_competence_vary_numeric(data = simulation_numeric, outcome = "competence")[[2]]
+# plot_competence_vary_numeric(data = simulation_numeric, outcome = "competence")[[3]]
+# plot_competence_vary_numeric(data = simulation_numeric, outcome = "competence")[[4]]
+# plot_competence_vary_numeric(data = simulation_numeric, outcome = "competence")[[5]]
+# plot_competence_vary_numeric(data = simulation_numeric, outcome = "competence")[[6]]
+```
+

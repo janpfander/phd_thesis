@@ -1,0 +1,158 @@
+---
+title: "Data cleaning experiment 2"
+author: "Jan Pfänder, Hugo Mercier"
+date: "2023-03-09"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+```{r packages, message=FALSE}
+library(tidyverse)     # create plots with ggplot, manipulate data, etc.
+library(broom.mixed)   # convert regression models into nice tables
+library(modelsummary)  # combine multiple regression models into a single table
+library(lme4)          # model specification / estimation 
+library(lmerTest)      # provides p-values in the output
+library(ggpubr)        # stile feature of ggplot
+library(gghalves)      # do special plots in ggplot
+library(kableExtra)    # for tables
+```
+
+## Import data
+
+```{r import}
+d <- read_csv("./data/qualtrics.csv")
+head(d)
+
+# delete first two rows
+d <- d[3:202,]
+```
+
+
+## Attention checks
+
+```{r attention}
+# attention check
+# to see different answers given (i.e.levels), transform into factor
+d$attention <- as.factor(d$attention)
+# check levels to see different answer types
+levels(d$attention) 
+```
+All levels are some variation of "I pay attention", so we do not exclude any participants. 
+
+## Variable name correction
+
+There was a coding problem in the data - a variable that start with "dep_conf_b_III" appears twice. Looking at the qualtrics, one of them should in fact identify "dep_guess_b_III", i.e. the numeric guess instead of a confidence rating. We identify this column looking at the values. Large values in the thousands indicate it's a guess and not a confidence rating. 
+
+```{r}
+d %>% 
+  select(starts_with("dep_conf_b_III"))
+```
+
+The output indicates that "dep_conf_b_III_4" captures the guess and should be named "dep_guess_b_III". 
+
+```{r}
+d <- d %>% 
+  rename(dep_guess_b_III = dep_conf_b_III_4)
+```
+
+## Re-shaping data
+
+For now, the data is in a wide format where each combination of stimulus item and dependent variable has its own column. We need to "tidy" the data. 
+
+```{r}
+d <- d %>% 
+  # build an easy-to-read ID variable for subjects
+  mutate(ID = as.factor(1:nrow(.))) %>% 
+  # order data by subjects
+  arrange(ID) %>% 
+  # from wide to long format
+  gather(item, score, dep_guess_b_I_4:dep_comp_a_III,
+               factor_key=TRUE) %>% 
+  # seperate variables 
+  separate(item, into = c("independence", "dependent_variable", 
+                          "stimulus_variant", "sample"), 
+           convert = T, sep = "\\_")  %>% 
+  # remove NA's
+  filter(!is.na(score)) %>% 
+  # make sure data is still ordered by participants
+  arrange(ID) %>%
+  # now for each subject, each condition and each variant the three DVs
+  # can be assigned
+  pivot_wider(names_from = dependent_variable, values_from = score) %>% 
+  # so far, all variables are coded characters (see e.g. str(d))
+  # we want our dependent variables to be numeric
+  mutate(competence = as.numeric(comp),
+         guess = as.numeric(guess), 
+         confidence = as.numeric(conf))
+```
+
+## Recoding some values
+
+To see if there are any weird values, we inspect the distributions of the dependent variables.
+```{r}
+# competence
+ggplot(d, aes(x = competence)) +
+  geom_histogram()# seems like 7s have been coded as 8s
+
+# confidence
+ggplot(d, aes(x = confidence)) +
+  geom_histogram()# same, 7s have been coded as 8s
+
+# guess
+ggplot(d, aes(x = guess)) +
+  geom_histogram() # all guesses are coded withing range, looks good
+```
+
+For the two Likert scale measures (`confidence` and `competence`) the maximum of the scale has been coded as `8` instead of `7`. 
+
+```{r}
+d <- d %>% 
+  mutate(competence = ifelse(competence == 8, 7, competence), 
+         confidence = ifelse(confidence ==8, 7, confidence))
+
+# check again
+ggplot(d, aes(x = competence)) +
+  geom_histogram()# looks good
+
+ggplot(d, aes(x = confidence)) +
+  geom_histogram()# looks good
+```
+
+## Recoding factors
+
+Lastly, we recode the `independence` variable. 
+
+```{r}
+# recode independence
+d <- d %>%
+  mutate(
+    independence = ifelse(independence == "indep", "independent", "dependent"),
+    independence = as.factor(independence),
+    independence = fct_relevel(independence, "dependent", "independent")
+    )
+```
+
+## Rename demographics
+
+```{r}
+d <- d %>% 
+  rename(education = Q5, 
+         age = Q4,
+         gender = Q3) %>% 
+  mutate(gender = case_when(gender == 1 ~ "male", 
+                            gender == 2 ~  "female", 
+                            .default = NA)
+         )
+```
+
+## Export data
+
+```{r}
+write_csv(d, "data/cleaned.csv")
+```
+
+
+
+
+

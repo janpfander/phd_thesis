@@ -1,0 +1,6 @@
+n,iterations,outcome,power
+10,1000,accuracy,0.997
+20,1000,accuracy,1
+30,1000,accuracy,1
+40,1000,accuracy,1
+50,1000,accuracy,1
