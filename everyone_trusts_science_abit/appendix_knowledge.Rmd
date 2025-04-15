@@ -1,0 +1,35 @@
+# Science knowledge {#knowledge}
+
+Figure \@ref(fig:knowledge-overview) shows the distributions of basic science knowledge across the four studies.
+
+Were participants better than chance in their answers? To obtain the expected value (EV) of someone answering at random, for each question, we calculate the probability of answering correctly (since each correct answer gives 1 point), and then sum these probabilities. In the case of Study 1, the EV is 4.666667 out of 11 (1/3 + 1/3 + 1/2 + 1/3 + 1/2 + 1/3 + 1/2 + 1/2 + 1/2 + 1/2 + 1/3) including the additional item on where trees draw most of their materials from. Without this item, the EV is, just as in Studies 2 and 3, 4.333333 out of 10 (1/3 + 1/3 + 1/2 + 1/3 + 1/2 + 1/3 + 1/2 + 1/2 + 1/2 + 1/2). In Study 4 the number of answer options was consistently three, so the EV is 3.333333. 
+
+As visualized in Figure \@ref(fig:knowledge-overview), for Studies 1, 2, and 3, the vast majority of participants obtained a higher score than the EV, strongly suggesting answers not at random. For Study 4, as expected from the very specific, non-standard questions, the knowledge score is centered around the EV, suggesting that most people were at random, and slightly right-skewed, suggesting that a few individuals were either very knowledgeable or looked up some of the answers. 
+
+(ref:knowledge-overview) Distributions of science knowledge.
+
+```{r knowledge-overview, fig.cap="(ref:knowledge-overview)", fig.width=8, fig.height=7}
+plot_data <- combined_data %>%
+  mutate(study = paste0("Study ", study)) %>% 
+  group_by(study, id) %>% 
+  summarize(n_correct = sum(knowledge)) %>% 
+  group_by(study, n_correct) %>% 
+  summarize(n = n_distinct(id)) %>% 
+  group_by(study) %>% 
+  mutate(share = n/sum(n)) %>% 
+  rounded_numbers() %>% 
+  ungroup()
+
+ggplot(plot_data, aes(x = n_correct, y = share)) +
+  geom_col() +
+  scale_y_continuous(labels = scales::percent_format(), breaks = seq(0, 1, 0.1)) +
+  scale_x_continuous(breaks = seq(0, 10, 1)) +
+  labs(x = "Number of correct answers (out of 10 possible)", y = "Share of participants", 
+       caption = "Note: Even though there was a pool of 11 questionsin Study 1, each participant only saw a random sample of 10 of these questions") +
+  geom_text(aes(label = paste0(round(share * 100, 1), "%")),
+            position = position_dodge(width = 0.9),
+            vjust = -0.5, size = 3) +
+  plot_theme +
+  facet_wrap(~study)
+```
+

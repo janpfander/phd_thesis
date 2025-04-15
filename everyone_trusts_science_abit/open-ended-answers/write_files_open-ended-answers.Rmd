@@ -1,0 +1,395 @@
+---
+title: "Write out files for open ended answers"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(kableExtra)
+```
+
+
+# Study 1
+
+Study 1 included open-ended answers for general comments on the survey. 
+
+```{r}
+# read wide version data set
+exp1_wide <- read_csv("../exp_1/data/cleaned_wide.csv") 
+```
+
+
+```{r}
+# make an overview table
+
+# levels(as.factor(exp1_wide$comments))
+table <- exp1_wide %>% 
+  drop_na(comments) %>% 
+  select(id, comments)
+
+# Create the basic table
+if (knitr::is_latex_output() || knitr::is_html_output()) {
+  # For LaTeX or HTML: Use kbl, column_spec, and kable_paper
+  table_output <- table %>%
+    kbl(
+      booktabs = TRUE, 
+      longtable = TRUE,
+      caption = "Comments of participants on Study 1"
+    ) %>%
+    kableExtra::kable_paper(full_width = FALSE) %>%
+    kableExtra::column_spec(1) %>%
+    kableExtra::column_spec(2, width = "40em")
+} else {
+  # For Word: Use flextable for better Word compatibility
+  table_output <- flextable::flextable(table) %>%
+    flextable::set_caption(caption = "Comments of participants on Study 1") %>%
+    flextable::autofit() %>%
+    flextable::width(j = 2, width = 4.5) # Adjust column widths as needed
+}
+
+# Display the table
+# table_output
+```
+
+
+```{r}
+# write out data
+write_csv(table, "study-1_comments.csv")
+```
+
+
+# Study 2
+
+Study 2 included open-ended answers for reasons for consensus rejection.
+
+```{r}
+# read wide version data set
+exp2_wide <- read_csv("../exp_2/data/cleaned_wide.csv") 
+```
+
+
+```{r exp2-reasons-rejection}
+# make an overview table
+
+reasons_rejection <- c("electrons", "antibiotics", "continents", "sex", "lasers", 
+               "orbit", "diamonds", "speed", "salt", "water")
+
+
+table <- exp2_wide %>% 
+  select(id, all_of(reasons_rejection)) %>% 
+  pivot_longer(all_of(reasons_rejection), 
+               names_to = "question",
+               values_to = "answer") %>% 
+  drop_na(answer) %>% 
+  arrange(id)
+
+# Create the basic table
+if (knitr::is_latex_output() || knitr::is_html_output()) {
+  # For LaTeX or HTML: Use kbl, column_spec, and kable_paper
+  table_output <- table %>%
+    kbl(
+      booktabs = TRUE, 
+      longtable = TRUE,
+      caption = "Reasons for consensus rejection (raw answers)"
+    ) %>%
+    kableExtra::kable_paper(full_width = FALSE) %>%
+    kableExtra::column_spec(1) %>%
+    kableExtra::column_spec(2) %>%
+    kableExtra::column_spec(3, width = "30em")
+} else {
+  # For Word: Use flextable for better Word compatibility
+  table_output <- flextable::flextable(table) %>%
+    flextable::set_caption(caption = "Reasons for consensus rejection (raw answers)") %>%
+    flextable::autofit() %>%
+    flextable::width(j = 3, width = 4.5) # Adjust column width for the third column
+}
+
+# Display the table
+# table_output
+```
+
+
+```{r}
+# write out data
+write_csv(table, "study-2_reasons-for-rejection.csv")
+```
+
+# Study 3
+
+Study 3 included open-ended answers for (i) reasons for consensus rejection, (ii) reasons for consensus acceptance if selected `other` and (iii) statements on how participants independently verified information (in case this applied). 
+
+```{r}
+# read wide version data set
+exp3_wide <- read_csv("../exp_3/data/cleaned_wide.csv") 
+```
+
+## Reasons for consensus rejection
+
+```{r exp3-reasons-rejection}
+# store all variables
+reasons_rejection <- c("electrons", "antibiotics", "continents", "sex", "lasers", 
+               "orbit", "diamonds", "speed", "salt", "water")
+
+
+table <- exp3_wide %>% 
+  select(id, all_of(reasons_rejection)) %>% 
+  pivot_longer(all_of(reasons_rejection), 
+               names_to = "question",
+               values_to = "answer") %>% 
+  drop_na(answer) %>% 
+  arrange(id)
+
+# Create the basic table
+if (knitr::is_latex_output() || knitr::is_html_output()) {
+  # For LaTeX or HTML: Use kbl, column_spec, and kable_paper
+  table_output <- table %>%
+    kbl(
+      booktabs = TRUE, 
+      longtable = TRUE,
+      caption = "Reasons for consensus rejection (raw answers)"
+    ) %>%
+    kableExtra::kable_paper(full_width = FALSE) %>%
+    kableExtra::column_spec(1) %>%
+    kableExtra::column_spec(2) %>%
+    kableExtra::column_spec(3, width = "30em")
+} else {
+  # For Word: Use flextable for better Word compatibility
+  table_output <- flextable::flextable(table) %>%
+    flextable::set_caption(caption = "Reasons for consensus rejection (raw answers)") %>%
+    flextable::autofit() %>%
+    flextable::width(j = 3, width = 4.5) # Adjust column width for the third column
+}
+
+# Display the table
+# table_output
+
+```
+
+```{r}
+# write out data
+write_csv(table, "study-3_reasons-for-rejection.csv")
+```
+
+## Reasons for consensus acceptance
+
+```{r exp3-other-reasons-acceptance}
+# store all variables
+table <- exp3_wide %>% 
+  select(id, other_reason_agreement) %>% 
+  drop_na(other_reason_agreement) %>% 
+  arrange(id)
+
+# Create the basic table
+if (knitr::is_latex_output() || knitr::is_html_output()) {
+  # For LaTeX or HTML: Use kbl, column_spec, and kable_paper
+  table_output <- table %>%
+    kbl(
+      booktabs = TRUE, 
+      longtable = TRUE,
+      caption = "Reasons for consensus acceptance (participants who answered 'other')"
+    ) %>%
+    kableExtra::kable_paper(full_width = FALSE) %>%
+    kableExtra::column_spec(1) %>%
+    kableExtra::column_spec(2, width = "30em")
+} else {
+  # For Word: Use flextable for better Word compatibility
+  table_output <- flextable::flextable(table) %>%
+    flextable::set_caption(caption = "Reasons for consensus acceptance (participants who answered 'other')") %>%
+    flextable::autofit() %>%
+    flextable::width(j = 2, width = 4.5) # Adjust column width for the second column
+}
+
+# Display the table
+# table_output
+```
+
+```{r}
+# write out data
+write_csv(table, "study-3_reasons-for-acceptance-if-other.csv")
+```
+
+## How did participants independently verifiy?
+
+```{r exp3-independent-verification}
+# store all variables
+table <- exp3_wide %>% 
+  select(id, reason_followup) %>% 
+  drop_na(reason_followup) %>% 
+  arrange(id)
+
+# Create the basic table
+if (knitr::is_latex_output() || knitr::is_html_output()) {
+  # For LaTeX or HTML: Use kbl, column_spec, and kable_paper
+  table_output <- table %>%
+    kbl(
+      booktabs = TRUE, 
+      longtable = TRUE,
+      caption = "Answers from participants saying they trusted the scientific consensus because they verified independently on how they did so."
+    ) %>%
+    kableExtra::kable_paper(full_width = FALSE) %>%
+    kableExtra::column_spec(1) %>%
+    kableExtra::column_spec(2, width = "30em")
+} else {
+  # For Word: Use flextable for better Word compatibility
+  table_output <- flextable::flextable(table) %>%
+    flextable::set_caption(caption = "Answers from participants saying they trusted the scientific consensus because they verified independently on how they did so.") %>%
+    flextable::autofit() %>%
+    flextable::width(j = 2, width = 4.5) # Adjust column width for the second column
+}
+
+# Display the table
+# table_output
+```
+
+
+```{r}
+# write out data
+write_csv(table, "study-3_reasons-if-independent-verification.csv")
+```
+
+
+# Study 4
+
+Study 3 included open-ended answers for (i) reasons for consensus rejection, (ii) reasons for consensus acceptance if selected `other` and (iii) statements on how participants independently verified information (in case this applied). 
+
+```{r}
+# read data
+
+# read the cleaned long version data set
+exp4_long <- read_csv("../exp_4/data/cleaned_long.csv")
+
+# read wide version data set
+exp4_wide <- read_csv("../exp_4/data/cleaned_wide.csv") 
+
+# read coded justifications
+exp4_justifications <- read_csv("../exp_4/data/justifications_clean.csv")
+```
+
+## Reasons for consensus rejection
+
+```{r exp4-reasons-rejection}
+# store all variables
+reasons_rejection <- unique(exp4_long$subject)
+
+
+table <- exp4_wide %>% 
+  select(id, all_of(reasons_rejection)) %>% 
+  pivot_longer(all_of(reasons_rejection), 
+               names_to = "question",
+               values_to = "answer") %>% 
+  drop_na(answer) %>% 
+  arrange(id)
+
+# Create the basic table
+if (knitr::is_latex_output() || knitr::is_html_output()) {
+  # For LaTeX or HTML: Use kbl, column_spec, and kable_paper
+  table_output <- table %>%
+    kbl(
+      booktabs = TRUE, 
+      longtable = TRUE,
+      caption = "Reasons for consensus rejection (raw answers)"
+    ) %>%
+    kableExtra::kable_paper(full_width = FALSE) %>%
+    kableExtra::column_spec(1) %>%
+    kableExtra::column_spec(2) %>%
+    kableExtra::column_spec(3, width = "30em")
+} else {
+  # For Word: Use flextable for better Word compatibility
+  table_output <- flextable::flextable(table) %>%
+    flextable::set_caption(caption = "Reasons for consensus rejection (raw answers)") %>%
+    flextable::autofit() %>%
+    flextable::width(j = 3, width = 4.5) # Adjust column width for the third column
+}
+
+# Display the table
+# table_output
+```
+
+```{r}
+# write out data
+write_csv(table, "study-4_reasons-for-rejection.csv")
+```
+
+## Reasons for consensus acceptance
+
+```{r exp4-other-reasons-acceptance}
+# store all variables
+table <- exp4_wide %>% 
+  select(id, other_reason_agreement) %>% 
+  drop_na(other_reason_agreement) %>% 
+  arrange(id)
+
+# Create the basic table
+if (knitr::is_latex_output() || knitr::is_html_output()) {
+  # For LaTeX or HTML: Use kbl, column_spec, and kable_paper
+  table_output <- table %>%
+    kbl(
+      booktabs = TRUE, 
+      longtable = TRUE,
+      caption = "Reasons for consensus acceptance (participants who answered 'other')"
+    ) %>%
+    kableExtra::kable_paper(full_width = FALSE) %>%
+    kableExtra::column_spec(1) %>%
+    kableExtra::column_spec(2, width = "30em")
+} else {
+  # For Word: Use flextable for better Word compatibility
+  table_output <- flextable::flextable(table) %>%
+    flextable::set_caption(caption = "Reasons for consensus acceptance (participants who answered 'other')") %>%
+    flextable::autofit() %>%
+    flextable::width(j = 2, width = 4.5) # Adjust column width for the second column
+}
+
+# Display the table
+# table_output
+```
+
+```{r}
+# write out data
+write_csv(table, "study-4_reasons-for-acceptance-if-other.csv")
+```
+
+## How did participants independently verifiy?
+
+```{r exp4-independent-verification}
+# store all variables
+table <- exp4_wide %>% 
+  select(id, reason_followup) %>% 
+  drop_na(reason_followup) %>% 
+  arrange(id)
+
+# Create the basic table
+if (knitr::is_latex_output() || knitr::is_html_output()) {
+  # For LaTeX or HTML: Use kbl, column_spec, and kable_paper
+  table_output <- table %>%
+    kbl(
+      booktabs = TRUE, 
+      longtable = TRUE,
+      caption = "Answers from participants saying they trusted the scientific consensus because they verified independently on how they did so."
+    ) %>%
+    kableExtra::kable_paper(full_width = FALSE) %>%
+    kableExtra::column_spec(1) %>%
+    kableExtra::column_spec(2, width = "30em")
+} else {
+  # For Word: Use flextable for better Word compatibility
+  table_output <- flextable::flextable(table) %>%
+    flextable::set_caption(caption = "Answers from participants saying they trusted the scientific consensus because they verified independently on how they did so.") %>%
+    flextable::autofit() %>%
+    flextable::width(j = 2, width = 4.5) # Adjust column width for the second column
+}
+
+# Display the table
+# table_output
+```
+
+```{r}
+# write out data
+write_csv(table, "study-4_reasons-if-independent-verification.csv")
+```
+
+
+
+
+
+
+
+

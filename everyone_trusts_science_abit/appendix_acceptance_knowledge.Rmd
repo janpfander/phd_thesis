@@ -1,0 +1,43 @@
+# Acceptance conditional on knowledge {#acceptance-knowledge}
+
+Did participants who gave a wrong answer change their minds towards the scientific consensus? In most cases (Studies 1: `r exp1_descriptives$conditional_acceptance$false$Yes$share`; 2: `r exp2_descriptives$conditional_acceptance$false$Yes$share`; 3: `r exp3_descriptives$conditional_acceptance$false$acceptance$Yes$share`; 4: `r exp4_descriptives$conditional_acceptance$false$acceptance$Yes$share`), participants readily accepted the scientific consensus after having initially given the wrong answer to a question. In very few cases, participants changed their mind away from the scientific consensus. These participants initially gave the correct response, but rejected the scientific consensus right after, thereby contradicting their own initial response (Studies 1: `r exp1_descriptives$conditional_acceptance$true$No$share`; 2: `r exp2_descriptives$conditional_acceptance$true$No$share`; 3: `r exp3_descriptives$conditional_acceptance$true$acceptance$No$share`; 4: `r exp4_descriptives$conditional_acceptance$true$acceptance$No$share`). Figure \@ref(fig:acceptance-knowledge) shows acceptance rates conditional on whether the initial answer to the questions was correct or not. 
+
+(ref:acceptance-knowledge) Acceptance/Rejection rate of scientific consensus, based on whether the initial response to the knowledge question was false or true.
+
+```{r acceptance-knowledge, fig.cap="(ref:acceptance-knowledge)", fig.width=8, fig.height=7.5}
+plot_data <- combined_data %>% 
+  mutate(study = paste0("Study ", study)) %>% 
+  group_by(study, knowledge, acceptance) %>% 
+  count() %>% 
+  group_by(study, knowledge) %>% 
+  mutate (share = n/sum(n)) %>% 
+  mutate_if(is.numeric, round, digits = 3)
+
+absolute_numbers <- plot_data %>% 
+  group_by(study, knowledge) %>% 
+  summarise(n = sum(n))
+
+
+ggplot(plot_data, aes(x = knowledge, y = share, fill = acceptance)) +
+  geom_col(position = "dodge") +
+  scale_y_continuous(labels = scales::percent_format(), breaks = seq(0, 1, 0.1), limits = c(0, 1.1)) +
+  geom_text(aes(label = paste0(round(share * 100, 1), "%")),
+            position = position_dodge(width = 0.9),
+            vjust = -0.5, size = 3) +
+  scale_fill_viridis_d(option = "cividis") +
+  labs(x = "Knowledge answer", fill = "Acceptance of consensus", y = "Rate") +
+  plot_theme +
+  geom_bracket(data = absolute_numbers,
+               aes(xmin = as.numeric(factor(knowledge)) - 0.4, 
+                   xmax = as.numeric(factor(knowledge)) + 0.4, 
+                   y.position = 1.05, label =  paste0("n = ", n)),
+               inherit.aes = FALSE,
+               step.increase = 0)+
+  theme(legend.position = "top") +
+  facet_wrap(~study)
+```
+
+
+
+
+

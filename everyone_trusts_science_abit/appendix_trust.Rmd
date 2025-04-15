@@ -1,0 +1,41 @@
+# Trust in science {#trust}
+
+Figure \@ref(fig:trust-overview) shows the distributions of our main trust in science measure across the four studies.  
+
+(ref:trust-overview) Distributions of trust in science.
+
+```{r trust-overview, fig.cap="(ref:trust-overview)", fig.width=8, fig.height=7}
+plot_data <- combined_data %>% 
+  mutate(study = paste0("Study ", study)) %>% 
+  # make a labels version of trust in science
+  mutate(wgm_sciencegeneral = case_when(
+    wgm_sciencegeneral == 1 ~ "1 (Not at all)",
+    wgm_sciencegeneral == 2 ~ "2 (Not much)",
+    wgm_sciencegeneral == 3 ~ "3 (Some)",
+    wgm_sciencegeneral == 4 ~ "4 (A lot)",
+    TRUE ~ as.character(wgm_sciencegeneral)
+    )
+    ) %>% 
+  drop_na(wgm_sciencegeneral) %>% 
+  group_by(study, wgm_sciencegeneral) %>% 
+  summarize(n = n_distinct(id)) %>% 
+  group_by(study) %>% 
+  mutate(share = n/sum(n)) %>% 
+  rounded_numbers() %>% 
+  ungroup()
+
+ggplot(plot_data, aes(x = wgm_sciencegeneral, y = share)) +
+  geom_col() +
+  scale_y_continuous(labels = scales::percent_format(), breaks = seq(0, 1, 0.1)) +
+  labs(x = "'In general, would you say that you trust science...'", y = "Share of participants") +
+  geom_text(aes(label = paste0(round(share * 100, 1), "%")),
+            position = position_dodge(width = 0.9),
+            vjust = -0.5, size = 3) +
+  plot_theme +
+  facet_wrap(~study)
+```
+
+
+
+
+

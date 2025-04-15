@@ -1,0 +1,174 @@
+---
+title: "Data cleaning Study 1"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+```{r packages, message=FALSE}
+library(tidyverse)     # create plots with ggplot, manipulate data, etc.
+library(broom.mixed)   # convert regression models into nice tables
+library(modelsummary)  # combine multiple regression models into a single table
+library(lme4)          # model specification / estimation 
+library(lmerTest)      # provides p-values in the output
+library(ggpubr)        # stile feature of ggplot
+library(gghalves)      # do special plots in ggplot
+library(kableExtra)    # for tables
+```
+
+## Import data
+```{r import, message=FALSE}
+d <- read_csv("./data/qualtrics.csv")
+names(d)
+```
+
+```{r}
+# inspect
+head(d) # you can also use View(d)
+# delete first two rows
+d <- d %>% 
+  slice(3: nrow(.)) 
+```
+
+## Attention check
+```{r attention}
+# attention check
+table(d$attention_check)
+```
+
+There are 6 failed attention checks. 
+
+```{r}
+# filter to only valid attention check responses
+d <- d %>% filter(attention_check == "Never 1")
+```
+
+## Add demographics
+
+## Recode demographics
+
+```{r, message=FALSE}
+prolific_demographics <- read_csv("./data/prolific_demographics.csv")
+
+d <- left_join(d, prolific_demographics, by = c("PROLIFIC_PID" = "Participant id"))
+```
+
+
+```{r}
+d <- d %>% 
+  mutate(gender = case_when(Sex == "Male" ~ "male", 
+                            Sex == "Female" ~  "female", 
+                            .default = NA)
+         ) %>% 
+  rename(age = Age)
+```
+
+## Add survey duration
+
+```{r}
+d <- d %>%
+  mutate(
+    # Parse the datetime
+    StartDate = ymd_hms(StartDate, tz = "UTC"), 
+    EndDate = ymd_hms(EndDate, tz = "UTC"),
+    # Duration in minutes
+    duration_mins = as.numeric(difftime(EndDate, StartDate, units = "mins"))
+    )
+```
+
+
+## Clean and re-shape data
+
+```{r}
+# check all names and their order
+names(d)
+```
+
+Clean wide format data.
+
+```{r}
+# Function to extract numbers from a string for BCTI and SICBS
+extract_numbers <- function(string_var) {
+  as.numeric(gsub("\\D", "", string_var))
+}
+
+# test the function
+# d %>% 
+#   mutate(across(starts_with("BCTI"), ~extract_numbers(.), .names = "{.col}_num")) %>% 
+#   select(BCTI_autism, BCTI_autism_num)
+
+# clean and re-shape
+d_wide <- d %>% 
+  # add an easy to read participant identifier
+  mutate(id = 1:nrow(.)) %>%
+  # make some character variables numeric
+  mutate(across(c(starts_with("BCTI"), starts_with("SICBS"), starts_with("wgm"), 
+                  starts_with("pew")), ~extract_numbers(.)
+  )
+  ) %>% 
+  mutate(across(starts_with("CMQ"), as.numeric)
+  ) %>% 
+  # add average conspiracy measures 
+  rowwise() %>% 
+  mutate(BCTI_avg = mean(c_across(starts_with("BCTI")
+                                  ),
+                         na.rm = TRUE
+                         ),
+         CMQ_avg = mean(c_across(starts_with("CMQ")
+                                  ),
+                         na.rm = TRUE
+                         )
+         ) %>% 
+  ungroup() 
+```
+
+Make long format data.
+
+```{r}
+d_long <- d_wide %>% 
+  # bring to long format
+  pivot_longer(cols = electrons_know:water_accept, 
+               names_to = "subject_question", values_to = "correct_accept") %>% 
+  # separate conditions into CONVERGENCE_OUTCOME_STIMULUS
+  separate_wider_delim(subject_question, "_", names = c("subject", "question")
+                       ) %>%
+  # necessary because each participant only saw ten out of 11 questions
+  drop_na(correct_accept) %>% 
+  pivot_wider(names_from = question, values_from = correct_accept) %>% 
+# create better variable names
+  rename(knowledge = know, 
+         acceptance = accept) 
+```
+
+Add knowledge and acceptance by-participant averages to wide format data.
+
+```{r}
+# make a version with averages per participant
+d_avg <- d_long %>% 
+  # make numeric versions
+  mutate(acceptance_num = ifelse(acceptance == "Yes", 1, 0), 
+         knowledge_num = ifelse(knowledge == TRUE, 1, 0)
+  ) %>% 
+  group_by(id) %>% 
+  # calculate by-participant averages
+  summarize(avg_acceptance  = sum(acceptance_num)/n(), 
+            avg_knowledge = sum(knowledge_num)/n()
+  )
+
+# make data frame with average particpant data and wide format
+d_wide <- left_join(d_wide %>% 
+                 select(-c(ends_with("know"), ends_with("accept"))), 
+               d_avg, 
+               by = "id")
+```
+
+
+## Export data
+
+```{r}
+# wide format
+write_csv(d_wide, "data/cleaned_wide.csv")
+
+# long format
+write_csv(d_long, "data/cleaned_long.csv")
+```

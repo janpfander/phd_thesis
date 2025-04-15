@@ -14,13 +14,17 @@ book:
     - intro.qmd
     - summary.qmd
     - consensus_trust/consensus_trust.qmd
+    - everyone_trusts_science_abit/everyone_trusts_science_abit.qmd
     - references.qmd
   search: true
   repo-url: https://github.com/jjallaire/hopr/
   repo-actions: [edit]
   downloads: [pdf, epub]
 
-bibliography: references.bib
+bibliography: 
+  - references.bib # the intro and discussion references
+  - consensus_trust/references.bib  
+  - everyone_trusts_science_abit/references.bib
 
 format:
   html:

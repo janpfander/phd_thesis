@@ -1,0 +1,40 @@
+# Conspiracy Thinking {#conspiracy-thinking}
+
+Figure \@ref(fig:conspiracy-thinking-overview) shows the distributions of conspiracy thinking across the four studies.  
+
+(ref:conspiracy-thinking-overview) Distributions of conspiracy thinking.
+
+```{r conspiracy-thinking-overview, fig.cap="(ref:conspiracy-thinking-overview)", fig.width=8, fig.height=7}
+# Define breaks for each integer from 1 to 9
+breaks <- seq(0, 100, by = 20)
+
+# Define labels for each bin in the desired format
+labels <- paste0(c(0, 20, 40, 60, 80), "-", c(20, 40, 60, 80, 100))
+
+plot_data <- combined_data %>% 
+  mutate(study = paste0("Study ", study)) %>% 
+  drop_na(CMQ_avg) %>% 
+  # Create the binned version of CMQ_avg
+  mutate(CMQ_avg_binned = cut(CMQ_avg, breaks = breaks, labels = labels, include.lowest = TRUE, right = FALSE)) %>% 
+  group_by(study, CMQ_avg_binned) %>% 
+  summarize(n = n_distinct(id)) %>% 
+  group_by(study) %>% 
+  mutate (share = n/sum(n)) %>% 
+  rounded_numbers() %>% 
+  ungroup()
+
+ggplot(plot_data, aes(x = CMQ_avg_binned, y = share)) +
+  geom_col() +
+  scale_y_continuous(labels = scales::percent_format(), breaks = seq(0, 1, 0.1)) +
+  labs(x = "Conspiracy Thinking", y = "Share of participants") +
+  geom_text(aes(label = paste0(round(share * 100, 1), "%")),
+            position = position_dodge(width = 0.9),
+            vjust = -0.5, size = 3) +
+  plot_theme +
+  facet_wrap(~study)
+```
+
+
+
+
+

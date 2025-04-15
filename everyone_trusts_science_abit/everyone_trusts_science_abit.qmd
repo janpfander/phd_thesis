@@ -1,0 +1,1305 @@
+---
+author:
+  - name: Jan Pfänder
+  - name: Lou Kerzreho
+  - name: Hugo Mercier
+abstract: >
+  Many people report a low degree of trust in science, or endorse conspiracy theories that violate basic scientific knowledge. This might indicate a wholesale rejection of science in substantial segments of the population. In four studies, we asked 782 US participants questions about trust in science, conspiracy beliefs, and basic science (e.g. the relative size of electrons and atoms). Participants were provided with the scientifically consensual answer to the basic science questions, and asked whether they accept it. Acceptance of the scientific consensus was very high in the sample as a whole (95.1%), but also in every sub-sample (e.g., no trust in science: 87.3%; complete endorsement of flat Earth theory: 87.2%). This quasi-universal acceptance of basic science suggests that people are motivated to reject specific scientific beliefs, and not science as a whole. This could be leveraged in science communication.
+doi: 10.31219/osf.io/qc43v_v2
+---
+
+## Quasi-universal acceptance of basic science in the US
+
+```{r setup, include=FALSE}
+## Figure out output format
+is_docx <- knitr::pandoc_to("docx") | knitr::pandoc_to("odt")
+is_latex <- knitr::pandoc_to("latex")
+is_html <- knitr::pandoc_to("html")
+
+## Word-specific things
+table_format <- ifelse(is_docx, "huxtable", "kableExtra")  ## Huxtable tables
+conditional_dpi <- ifelse(is_docx, 300, 300)  ## Higher DPI
+conditional_align <- ifelse(is_docx, "default", "center")  ## Word doesn't support align
+
+## Knitr options
+knitr::opts_chunk$set(
+  echo = FALSE, warning = FALSE, message = FALSE,
+  ## tidy.opts = list(width.cutoff = 120),  ## Code width
+  ## fig.retina = 3, dpi = conditional_dpi,
+  ## fig.width = 7, fig.asp = 0.618,
+  ## fig.align = conditional_align, out.width = "100%",
+  fig.path = "output/figures/",
+  cache.path = "output/_cache/",
+  fig.process = function(x) {  ## Remove "-1" from figure names
+    x2 = sub('-\\d+([.][a-z]+)$', '\\1', x)
+    if (file.rename(x, x2)) x2 else x
+  },
+  options(scipen = 99999999)  ## Prevent scientific notation
+)
+
+## R options
+options(
+  width = 90,  ## Output width
+  dplyr.summarise.inform = FALSE,  ## Turn off dplyr's summarize() auto messages
+  knitr.kable.NA = "",  ## Make NAs blank in kables
+  kableExtra.latex.load_packages = FALSE,  ## Don't add LaTeX preamble stuff
+  modelsummary_factory_default = table_format,  ## Set modelsummary backend
+  modelsummary_format_numeric_latex = "plain"  ## Don't use siunitx
+)
+```
+
+```{r packages, include=FALSE}
+## load required packages
+library("papaja")      ## For APA style manuscript   
+library("lme4")        ## model specification / estimation
+library("lmerTest")    ## provides p-values in the output
+library("tidyverse")   ## data wrangling and visualisation
+library("afex")        ## anova and deriving p-values from lmer
+library("broom")       ## extracting data from model fits 
+library("broom.mixed") ## extracting data from mixed models
+library("metafor")     ## doing mata analysis
+library("patchwork")   ## put several plots together
+library("ggridges")    ## for plots
+library("gghalves")    ## for plots
+library("ggbeeswarm")  ## Special distribution-shaped point jittering
+library("knitr")       ## for tables
+library("kableExtra")  ## also for tables
+library("ggpubr")      ## for combining plots with ggarrange() 
+library("grid")        ## for image plots   
+library("gridExtra")   ## for image plots
+library("png")         ## for image plots
+library("modelsummary") ## for regression tables
+library("ggrepel") ## for better random patterns in plots
+```
+
+```{r functions}
+## load plot theme
+source("functions/plot_theme.R") 
+
+## load other functions
+source("functions/own_functions.R")
+```
+
+::: {.callout-note}
+### available as a preprint here: 
+
+Pfänder, J., Kerzreho, L., & Mercier, H. (2025). *Quasi-universal acceptance of basic science in the US.* [https://doi.org/10.31219/osf.io/qc43v_v2](https://doi.org/10.31219/osf.io/qc43v_v2)
+
+For supplementary materials, please refer to the preprint.
+:::
+
+## Introduction
+
+Trust in science is related to many desirable outcomes, from acceptance of anthropogenic climate change [@colognaRoleTrustClimate2020] or vaccination [@sturgisTrustScienceSocial2021; @lindholtPublicAcceptanceCOVID192021] to following recommendations during COVID [@alganTrustScientistsTimes2021, which suggests that trust in science was the most important predictor of these behaviors].
+
+Although recent global evidence shows that trust in science is moderately high [@colognaTrustScientistsTheir2024], it is far from being at ceiling. Large-scale polls have shown that people who report a high degree of trust in science are a minority in most countries, and they are outnumbered by people who have low trust in science in many areas, e.g., most of Africa and significant parts of Asia [@wellcomeglobalmonitorWellcomeGlobalMonitor2018; @wellcomeglobalmonitorWellcomeGlobalMonitor2020]. Moreover, trust in science has recently been declining in some countries [@alganTrustScientistsTimes2021; @brianAmericansTrustScientists2023; although see @wellcomeglobalmonitorPublicTrustScientists2021; and @funkPublicConfidenceScientists2020] and in the US it is increasingly polarizing [@gauchatPoliticizationSciencePublic2012; @krauseTrendsAmericansTrust2019a; @liPolarizationPublicTrust2022].
+
+Besides low answers on general trust in science questions, another indicator of distrust in science is the belief in conspiracy theories that question the scientific consensus on issues such as vaccination, climate change, and even the shape of the Earth. Conspiracy theories–in the realm of science or elsewhere–typically accuse a small group of powerful people to pursue nefarious goals in secrecy [@douglasUnderstandingConspiracyTheories2019; @medeSciencerelatedPopulismConceptualizing2020]. Some of these conspiracy theories are widespread [@rutjensConspiracyBeliefsScience2022]. In 2023, a survey in eight different countries found that up to 24% of respondents agreed that “climate change is a hoax and scientists touting its existence are lying” [@stockemerUnderstandingClimateChange2024]. Similarly, in 2021, 40% of Americans believed that “the dangers of genetically-modified foods are being hidden from the public” [down from 45% in 2020, @uscinskiHaveBeliefsConspiracy2022]. People who hold such views not only reject the relevant scientifically consensual facts, but also tend to believe in other conspiracy theories [@lewandowskyRoleConspiracistIdeation2013; @hornseyPsychologicalRootsAntivaccination2018; @hornseyRelationshipsConspiratorialBeliefs2018], and tend to say that they distrust science more generally [@vranicDidMyOwn2022; @stockemerUnderstandingClimateChange2024]. In spite of these correlations, the causal relationship between declaring general distrust in science and believing in one or several anti-science conspiracy theories is not clear. Although conspiracy thinking has been identified as a "root cause" of anti-science attitudes [@hornseyAttitudeRootsJiu2017] in the past, these claims rest largely on observational data.
+
+What does this apparent lack of trust in science actually entail? Do people who say they do not trust science, or who believe in conspiracy theories at odds with well-established science, reject most of science? Or, on the contrary, do they object to a few specific facets of science, while still accepting the overwhelming majority of basic science?
+
+A common conception of trust is a willingness to be vulnerable to another party, whether an individual, a group, or an institution [@mayerIntegrativeModelOrganizational1995a; @rousseauIntroductionSpecialTopic1998]. Accordingly, trust in science has been defined as “one’s willingness to rely on science and scientists (as representatives of the system) despite having a bounded understanding of science” [@wintterlinPredictingPublicTrust2022, p. 2]. Past research has disentangled this general concept of trust in science in various ways. Some research has identified different components of trust, the number of which varies, but which generally cover an epistemological and ethical dimension [@wilholtEpistemicTrustScience2013; @intemannScienceCommunicationPublic2023]. For example, @hendriksMeasuringLaypeoplesTrust2015 suggest distinguishing between expertise/competence, integrity, and benevolence, while @besleyReassessingVariablesUsed2021 add openness. Other research has highlighted differences in trust between scientific disciplines [@altenmullerExplainingPolarizedTrust2024; @gligoricHowSocialEvaluations2024; @gauchatCulturalCognitiveMappingScientific2018]. However, little research has assessed trust in specific scientific findings, besides contentious topics such as vaccines [e.g. @hornseyPsychologicalRootsAntivaccination2018], climate change [e.g. @stockemerUnderstandingClimateChange2024], evolution [e.g. @nadelsonTrustScienceScientists2015], genetically modified organisms (GMOs) [e.g. @fernbachExtremeOpponentsGenetically2019], or a combination of such topics [see e.g. @lewandowskyRoleConspiracistIdeation2013]. To the best of our knowledge, no research has investigated the extent to which people trust basic science facts (e.g. electrons are smaller than atoms). An extensive literature on science literacy has assessed whether people know such facts [@nationalacademiesofsciencesengineeringandmedicineScienceLiteracyConcepts2016], but not whether they accept the facts once presented to them.
+
+Why does it matter whether trust in science is or is not related to trust in specific scientific findings? First, this question has theoretical implications. According to the most prominent explanation of (dis)trust in science–the deficit model–science knowledge is the main driver of attitudes towards science in general. A prediction of this model is that average trust in science on specific facts should be strongly associated with general trust in science. By contrast, a disconnect between the two would be in line with motivated reasoning accounts of trust in science. According to these accounts, science rejection serves to maintain coherence with other beliefs or behaviors [@lewandowskyMotivatedRejectionScience2016; @hornseyWhyFactsAre2020]. For example, someone might say they do not trust science in general because they are skeptical towards vaccines, not because they actually distrust most of science. A prediction of the motivated reasoning account is that general trust in science should be strongly correlated with conspiracy beliefs. Second, the present question has practical implications: Many communication attempts leverage the scientific consensus [e.g. on vaccination, climate change, etc., for review, see @vanstekelenburgScientificConsensusCommunicationContested2022; see also @veckalov27countryTestCommunicating2024]. These attempts are more likely to be successful if everyone trusts basic science than if some people reject science wholesale.
+
+### The present studies
+
+In a series of four pre-registered online studies (total n = 782), we asked US participants questions about well-established, consensual scientific facts. For each question, we asked participants what they thought the correct answer was (testing their knowledge of science), we informed them of the scientifically accepted answer, and asked them whether they accepted it (measuring their trust in basic science). We also measured participants’ trust in science using standard measures, as well as their beliefs in various conspiracy theories and their tendency to engage in conspiratorial thinking. The four studies, including materials, hypotheses, and analyses, were pre-registered and all materials and data are accessible via the Open Science Framework (<https://osf.io/8utsj/?view_only=364478f01fc548d0a42b9962918d871d>). The differences between the four studies are summarized presently, and the methods are detailed below.
+
+#### Materials
+
+In Study 1 (data collected on March 5, 2024), we used questions drawn from questionnaires of scientific knowledge (e.g. "Are electrons smaller, larger, or the same size as atoms? [Smaller; Same size; Larger]"), supplemented by a ‘trick’ question ("Where do trees mainly draw the materials with which they create their mass? [Earth; Water; Air]"; correct answer: Air). In Studies 2 (data collected on April 3, 2024) and 3 (data collected on April 22, 2024), this last question was removed. The scientific facts used in Studies 1 to 3 represent long-established and basic knowledge. In Study 4 (data collected on August 13, 2024) we used more recent, much less basic scientific discoveries (e.g. "What is the electric charge of the Higgs Boson, as established in 2012? [1.602176634 × 10-19; 0; 3.2×10-19C]"; correct answer: 0, i.e. electrically neutral).
+
+#### Presentation of the scientific consensus
+
+In Study 1, we simply told participants that they would be provided with the scientifically consensual answer. However, for participants to accept this answer, they must not only trust science, but also trust that we are presenting them with the actual scientifically consensual answer. To remove this issue, in Studies 2 to 3, we presented participants with a short explanation of the correct answer, as well as links to three sources per answer (e.g. Wikipedia, National Geographic or NASA). In Study 4, as the topics were more complex, we did not provide an explanation, but still provided two sources per answer.
+
+#### Measure of acceptance of the scientific consensus
+
+In Study 1, we simply looked at whether participants accept the scientifically consensual answer or not. In the subsequent studies, we asked participants to explain cases in which they disagreed with the scientific consensus. This revealed that a number of participants had made a mistake (misunderstanding, selecting the wrong answer). As a result, in Studies 3 and 4, participants who have indicated that they rejected the scientifically consensual answer were offered the option to revise their answer, or to keep rejecting it.
+
+#### Additional questions
+
+In Studies 3 and 4, we attempted to understand how some people who say they do not trust science still accept scientifically consensual answers, by asking them whether they accepted the answers on the basis of trust in science or because they had independently verified them.
+
+#### Samples
+
+Studies 1 and 2 were conducted on the standard sample of US participants recruited on the platform Prolific Academic. In order to increase the share of participants with low trust in science, and who endorse conspiracy theories, Studies 3 and 4 used the same platform, but only recruited participants who had declared previously being skeptical of vaccination.
+
+#### Hypotheses
+
+The main goal of the present studies is descriptive: to find out whether participants who report not trusting science, or who believe in conspiracy theories, still accept most well-established scientific facts. However, based on our literature review, we also tested two directional hypotheses (pre-registered as research questions in the Study 1):
+
+**H1: Higher trust in science is associated with more science knowledge and more acceptance of the scientific consensus**
+
+**H2: Higher conspiracy thinking/belief is associated with less science knowledge and less acceptance of the scientific consensus**
+
+## Methods
+
+```{r exp1}
+## Analyze data of experiments and store results
+
+## Experiment 1
+
+## read the cleaned long version data set
+exp1_long <- read_csv("exp_1/data/cleaned_long.csv")
+
+## read wide version data set
+exp1_wide <- read_csv("exp_1/data/cleaned_wide.csv") 
+
+## Research questions
+
+## RQ3
+cor_trust_knowledge <- cor.test(exp1_wide$wgm_sciencegeneral, exp1_wide$avg_knowledge) %>% text_ready()
+
+cor_trust_acceptance <- cor.test(exp1_wide$wgm_sciencegeneral, exp1_wide$avg_acceptance) %>% text_ready()
+
+## RQ4
+cor_conspiracy_knowledge <- cor.test(exp1_wide$BCTI_avg, exp1_wide$avg_knowledge) %>% text_ready()
+
+cor_conspiracy_acceptance <- cor.test(exp1_wide$BCTI_avg, exp1_wide$avg_acceptance)%>% text_ready()
+
+## Exploratory: Acceptance and trust in science/conspiracy thinking conditional on false answers only
+exp1_false_knowledge <- exp1_long %>% 
+  ## make numeric versions
+  mutate(acceptance_num = ifelse(acceptance == "Yes", 1, 0)
+  ) %>% 
+  group_by(id, knowledge) %>% 
+  ## calculate by-participant averages
+  summarize(
+    n = n(),
+    n_accepted = sum(acceptance_num),
+    avg_acceptance  = sum(acceptance_num)/n(), 
+    wgm_sciencegeneral = mean(wgm_sciencegeneral), 
+    BCTI_avg = mean(BCTI_avg), 
+    ## add additonal measures for robustness checks
+    CMQ_avg = mean(CMQ_avg), 
+    SICBS = mean(SICBS),
+    wgm_scientists = mean(wgm_scientists), 
+    pew = mean(pew)
+  ) %>% 
+  ## filter to only false responses
+  filter(knowledge == FALSE) %>% 
+  ungroup()
+
+false_answers_cor_trust_acceptance <- cor.test(exp1_false_knowledge$wgm_sciencegeneral, exp1_false_knowledge$avg_acceptance) %>% text_ready()
+
+false_answers_cor_conspiracy_acceptance <- cor.test(exp1_false_knowledge$BCTI_avg, exp1_false_knowledge$avg_acceptance) %>% text_ready()
+
+
+## extract descriptives for inline reporting
+exp1_descriptives <- list(
+  ## Demographics
+  n_subj = n_distinct(exp1_wide$id),
+  gender = exp1_wide %>% group_by(gender) %>% summarize(n = n_distinct(id)) %>% split(.$gender),
+  age = exp1_wide %>% summarize(across(age,list(mean = mean, median = median, sd = sd), 
+                                       .names = "{.fn}")) %>% rounded_numbers(),
+  ## RQ1 & RQ2
+  means = exp1_wide %>% 
+    summarize(across(c(avg_knowledge, avg_acceptance), 
+                     list(mean = mean, sd = sd), 
+                     .names = "{.col}_{.fn}")) %>%
+    rename_with(~sub("^avg_", "", .), everything()) %>% 
+    mutate_if(is.numeric, round, digits = 2) %>% 
+    mutate(across(ends_with("_mean"), ~paste0(.*100, " %"))),
+  means_numeric = exp1_wide %>% 
+    summarize(across(c(avg_knowledge, avg_acceptance,), 
+                     list(mean = mean, sd = sd), 
+                     .names = "{.col}_{.fn}")) %>%
+    rename_with(~sub("^avg_", "", .), everything()),
+  ## RQ3
+  cor_trust_knowledge = cor_trust_knowledge,
+  cor_trust_acceptance = cor_trust_acceptance,
+  ## RQ4
+  cor_conspiracy_knowledge = cor_conspiracy_knowledge,
+  cor_conspiracy_acceptance = cor_conspiracy_acceptance, 
+  ## Exploratory
+  ## acceptance and knowledge
+  conditional_acceptance = exp1_long %>% 
+    group_by(knowledge, acceptance) %>% 
+    count() %>% 
+    group_by(knowledge) %>% 
+    mutate (share = n/sum(n), 
+            ## rename knowledge values
+            knowledge = ifelse(knowledge == FALSE, "false", "true")) %>% 
+    mutate_if(is.numeric, round, digits = 3) %>% 
+    mutate (share = paste0(share*100, " %")) %>% 
+    super_split(knowledge, acceptance),
+  ## acceptance and trust in science/conspiracy thinking
+  false_answers_cor_trust_acceptance = false_answers_cor_trust_acceptance,
+  false_answers_cor_conspiracy_acceptance = false_answers_cor_conspiracy_acceptance
+)
+```
+
+```{r exp2}
+## Analyze data of experiments and store results
+
+## Experiment 2
+
+## read the cleaned long version data set
+exp2_long <- read_csv("exp_2/data/cleaned_long.csv")
+
+## read wide version data set
+exp2_wide <- read_csv("exp_2/data/cleaned_wide.csv") 
+
+## read coded justifications
+exp2_justifications <- read_csv("exp_2/data/justifications_clean.csv")
+
+## Research questions
+
+## H1a
+cor_trust_knowledge <- cor.test(exp2_wide$wgm_sciencegeneral, exp2_wide$avg_knowledge) %>% text_ready()
+
+## H2a
+cor_conspiracy_knowledge <- cor.test(exp2_wide$BCTI_avg, exp2_wide$avg_knowledge) %>% text_ready()
+
+## Exploratory: Acceptance and trust in science/conspiracy thinking conditional on false answers only
+exp2_false_knowledge <- exp2_long %>% 
+  ## make numeric versions
+  mutate(acceptance_num = ifelse(acceptance == "Yes", 1, 0)
+  ) %>% 
+  group_by(id, knowledge) %>% 
+  ## calculate by-participant averages
+  summarize(
+    n = n(),
+    n_accepted = sum(acceptance_num),
+    avg_acceptance  = sum(acceptance_num)/n(), 
+    wgm_sciencegeneral = mean(wgm_sciencegeneral), 
+    BCTI_avg = mean(BCTI_avg), 
+    ## add additonal measures for robustness checks
+    CMQ_avg = mean(CMQ_avg), 
+    SICBS = mean(SICBS),
+    wgm_scientists = mean(wgm_scientists), 
+    pew = mean(pew)
+  ) %>% 
+  ## filter to only false responses
+  filter(knowledge == FALSE) %>% 
+  ungroup()
+
+## H1b
+## conditional on false answers
+false_answers_cor_trust_acceptance <- cor.test(exp2_false_knowledge$wgm_sciencegeneral, exp2_false_knowledge$avg_acceptance) %>% text_ready()
+## pooled across all cases (in line with all other studies' analysis)
+cor_trust_acceptance <- cor.test(exp2_wide$wgm_sciencegeneral, exp2_wide$avg_acceptance) %>% text_ready()
+
+## H2b
+## conditional on false answers
+false_answers_cor_conspiracy_acceptance <- cor.test(exp2_false_knowledge$BCTI_avg, exp2_false_knowledge$avg_acceptance) %>% text_ready()
+## pooled across all cases (in line with all other studies' analysis)
+cor_conspiracy_acceptance <- cor.test(exp2_wide$BCTI_avg, exp2_wide$avg_acceptance) %>% text_ready()
+
+
+## extract descriptives for inline reporting
+exp2_descriptives <- list(
+  ## Demographics
+  n_subj = n_distinct(exp2_wide$id),
+  gender = exp2_wide %>% group_by(gender) %>% summarize(n = n_distinct(id)) %>% split(.$gender),
+  age = exp2_wide %>% summarize(across(age,list(mean = mean, median = median, sd = sd), 
+                                       .names = "{.fn}")) %>% rounded_numbers(),
+  ## RQ1 & RQ2
+  means = exp2_wide %>% 
+    summarize(across(c(avg_knowledge, avg_acceptance), 
+                     list(mean = mean, sd = sd), 
+                     .names = "{.col}_{.fn}")) %>%
+    rename_with(~sub("^avg_", "", .), everything()) %>% 
+    mutate_if(is.numeric, round, digits = 2) %>% 
+    mutate(across(ends_with("_mean"), ~paste0(.*100, " %"))) ,
+  means_numeric = exp2_wide %>% 
+    summarize(across(c(avg_knowledge, avg_acceptance,), 
+                     list(mean = mean, sd = sd), 
+                     .names = "{.col}_{.fn}")) %>%
+    rename_with(~sub("^avg_", "", .), everything()),
+  ## H1
+  ## a
+  cor_trust_knowledge = cor_trust_knowledge,
+  ## b (conditional on false responses)
+  false_answers_cor_trust_acceptance = false_answers_cor_trust_acceptance,
+  ## b (all cases)
+  cor_trust_acceptance = cor_trust_acceptance,
+  ## H2
+  ## a
+  cor_conspiracy_knowledge = cor_conspiracy_knowledge,
+  ## b (conditional on false responses)
+  false_answers_cor_conspiracy_acceptance = false_answers_cor_conspiracy_acceptance,
+  ## b(all cases)
+  cor_conspiracy_acceptance = cor_conspiracy_acceptance, 
+  ## Exploratory
+  ## acceptance and knowledge
+  conditional_acceptance = exp2_long %>% 
+    group_by(knowledge, acceptance) %>% 
+    count() %>% 
+    group_by(knowledge) %>% 
+    mutate (share = n/sum(n), 
+            ## rename knowledge values
+            knowledge = ifelse(knowledge == FALSE, "false", "true")) %>% 
+    mutate_if(is.numeric, round, digits = 3) %>% 
+    mutate (share = paste0(share*100, " %")) %>% 
+    super_split(knowledge, acceptance),
+  ## Justifications
+  justifications_n = nrow(exp2_justifications), 
+  justifications_n_participants = n_distinct(exp2_justifications$id),
+  justification_by_category = exp2_justifications %>%
+    group_by(category)%>%
+    summarize(n = n(), 
+              n_subjects = n_distinct(id)) %>%
+    mutate(share = n/sum(n)) %>%
+    mutate_if(is.numeric, round, digits=3) %>% 
+    mutate(share = paste0(share*100, "%")) %>% 
+    split(.$category)
+)
+```
+
+```{r exp3}
+## Analyze data of experiments and store results
+
+## Experiment 3
+
+## read the cleaned long version data set
+exp3_long <- read_csv("exp_3/data/cleaned_long.csv")
+
+## read wide version data set
+exp3_wide <- read_csv("exp_3/data/cleaned_wide.csv") 
+
+## read coded justifications
+exp3_justifications <- read_csv("exp_3/data/justifications_clean.csv")
+
+## Research questions
+
+## H1
+cor_trust_knowledge <- cor.test(exp3_wide$wgm_sciencegeneral, exp3_wide$avg_knowledge,
+  use = "complete.obs") %>% text_ready()
+cor_trust_acceptance <- cor.test(exp3_wide$wgm_sciencegeneral, exp3_wide$avg_acceptance,
+  use = "complete.obs") %>% text_ready()
+
+## H2
+cor_conspiracy_knowledge <- cor.test(exp3_wide$BCTI_avg, exp3_wide$avg_knowledge,
+  use = "complete.obs") %>% text_ready()
+cor_conspiracy_acceptance <- cor.test(exp3_wide$BCTI_avg, exp3_wide$avg_acceptance,
+  use = "complete.obs") %>% text_ready()
+
+## Exploratory: Acceptance and trust in science/conspiracy thinking conditional on false answers only
+exp3_false_knowledge <- exp3_long %>% 
+  ## make numeric versions
+  mutate(acceptance_num = ifelse(acceptance == "Yes", 1, 0)
+  ) %>% 
+  group_by(id, knowledge) %>% 
+  ## calculate by-participant averages
+  summarize(
+    n = n(),
+    n_accepted = sum(acceptance_num),
+    avg_acceptance  = sum(acceptance_num)/n(), 
+    wgm_sciencegeneral = mean(wgm_sciencegeneral), 
+    BCTI_avg = mean(BCTI_avg), 
+    ## add additonal measures for robustness checks
+    CMQ_avg = mean(CMQ_avg), 
+    SICBS = mean(SICBS),
+    wgm_scientists = mean(wgm_scientists), 
+    pew = mean(pew)
+  ) %>% 
+  ## filter to only false responses
+  filter(knowledge == FALSE) %>% 
+  ungroup()
+
+## H1b conditional on false answers
+false_answers_cor_trust_acceptance <- cor.test(exp3_false_knowledge$wgm_sciencegeneral, exp3_false_knowledge$avg_acceptance,
+  use = "complete.obs") %>% 
+  text_ready()
+
+## H2b conditional on false answers
+false_answers_cor_conspiracy_acceptance <- cor.test(exp3_false_knowledge$BCTI_avg, exp3_false_knowledge$avg_acceptance,
+  use = "complete.obs") %>% 
+  text_ready()
+
+## Exploratory: Differences by reason 
+
+## trust
+trust_by_reason_model <- run_regression(exp3_wide, dependent_var = "wgm_sciencegeneral", independent_var = "reason_agreement")
+
+## acceptance
+acceptance_by_reason_model <-run_regression(exp3_wide, dependent_var = "avg_acceptance", independent_var = "reason_agreement")
+
+## BCTI (conspiracy beliefs)
+BCTI_by_reason_model <- run_regression(exp3_wide, dependent_var = "BCTI_avg", independent_var = "reason_agreement")
+
+## survey time
+time_by_reason_model <- run_regression(exp3_wide %>% filter(duration_mins < 30), dependent_var = "duration_mins", independent_var = "reason_agreement")
+
+## extract descriptives for inline reporting
+exp3_descriptives <- list(
+  ## Demographics
+  n_subj = n_distinct(exp3_wide$id),
+  n_subject_by_outcome = exp3_wide %>% 
+    summarize(across(c("wgm_sciencegeneral", "reason_agreement", "BCTI_avg"), 
+                     ~sum(!is.na(.x)
+                     )
+    )
+    ),
+  gender = exp3_wide %>% group_by(gender) %>% summarize(n = n_distinct(id)) %>% split(.$gender),
+  age = exp3_wide %>% summarize(across(age,list(mean = mean, median = median, sd = sd), 
+                                       .names = "{.fn}")) %>% rounded_numbers(),
+  ## RQ1 & RQ2
+  means = exp3_wide %>% 
+    summarize(across(c(avg_knowledge, avg_acceptance, avg_acceptance_initial), 
+                     list(mean = mean, sd = sd), 
+                     .names = "{.col}_{.fn}")) %>%
+    rename_with(~sub("^avg_", "", .), everything()) %>% 
+    mutate_if(is.numeric, round, digits = 2) %>% 
+  mutate(across(ends_with("_mean"), ~paste0(.*100, " %"))) ,
+  means_numeric = exp3_wide %>% 
+    summarize(across(c(avg_knowledge, avg_acceptance, avg_acceptance_initial), 
+                     list(mean = mean, sd = sd), 
+                     .names = "{.col}_{.fn}")) %>%
+    rename_with(~sub("^avg_", "", .), everything()),
+  ## H1
+  ## a
+  cor_trust_knowledge = cor_trust_knowledge,
+  ## b (conditional on false responses)
+  false_answers_cor_trust_acceptance = false_answers_cor_trust_acceptance,
+  ## b (all cases)
+  cor_trust_acceptance = cor_trust_acceptance,
+  ## H2
+  ## a
+  cor_conspiracy_knowledge = cor_conspiracy_knowledge,
+  ## b (conditional on false responses)
+  false_answers_cor_conspiracy_acceptance = false_answers_cor_conspiracy_acceptance,
+  ## b(all cases)
+  cor_conspiracy_acceptance = cor_conspiracy_acceptance, 
+  ## Exploratory
+  ## acceptance and knowledge
+  conditional_acceptance = exp3_long %>% 
+    pivot_longer(c(acceptance, acceptance_initial), 
+                 names_to = "measure", 
+                 values_to = "acceptance") %>% 
+    group_by(knowledge, measure, acceptance) %>% 
+    count() %>% 
+    group_by(knowledge, measure) %>% 
+    mutate (share = n/sum(n), 
+            ## rename knowledge values
+            knowledge = ifelse(knowledge == FALSE, "false", "true")) %>% 
+    mutate_if(is.numeric, round, digits = 3) %>% 
+    mutate (share = paste0(share*100, " %")) %>% 
+    super_split(knowledge,  measure, acceptance),
+  ## Justifications
+  justifications_n = nrow(exp3_justifications), 
+  justifications_n_participants = n_distinct(exp3_justifications$id),
+  justification_by_category = exp3_justifications %>%
+    group_by(category)%>%
+    summarize(n = n(), 
+              n_subjects = n_distinct(id)) %>%
+    mutate(share = n/sum(n)) %>%
+    mutate_if(is.numeric, round, digits=3) %>% 
+    mutate(share = paste0(share*100, "%")) %>% 
+    split(.$category),
+  ## Consensus acceptance
+  acceptance_n = exp3_wide %>% 
+    filter(!is.na(reason_agreement)) %>% 
+    nrow(.),
+  acceptance_by_reason = exp3_wide %>% 
+    group_by(reason_agreement) %>% 
+    summarize(n = n()) %>%
+    drop_na(reason_agreement) %>% 
+    mutate(share = n/sum(n)) %>%
+    mutate_if(is.numeric, round, digits=3) %>% 
+    mutate(share = paste0(share*100, "%")) %>% 
+    split(.$reason_agreement),
+  reason_followup_n = exp3_wide %>% 
+    filter(!is.na(reason_followup)) %>% 
+    nrow(.),
+  ## Exploratory: Differences by reason for trust
+  reason_means = exp3_wide %>% 
+    group_by(reason_agreement) %>% 
+    summarize(across(c(wgm_sciencegeneral, avg_acceptance, BCTI_avg), 
+                     list(mean = ~mean(.x, na.rm = TRUE), 
+                          sd = ~sd(.x, na.rm = TRUE)), 
+                     .names = "{.col}_{.fn}")) %>%
+    rename_with(~sub("^avg_", "", .), everything()) %>% 
+    mutate_if(is.numeric, round, digits = 2) %>% 
+    mutate(across(acceptance_mean, ~paste0(.*100, " %"))) %>% 
+    split(.$reason_agreement), 
+  reason_trust_model = trust_by_reason_model %>% split(.$term), 
+  reason_acceptance_model = acceptance_by_reason_model %>% split(.$term),
+  reason_BCTI_model = BCTI_by_reason_model %>%  split(.$term),
+  reason_time_model = time_by_reason_model %>%  split(.$term), 
+  n_participants_over30mins = exp3_wide %>% 
+    filter(duration_mins >= 30) %>% 
+    nrow(.)
+)
+```
+
+```{r exp4}
+## Analyze data of experiments and store results
+
+## Experiment 4
+
+## read the cleaned long version data set
+exp4_long <- read_csv("exp_4/data/cleaned_long.csv")
+
+## read wide version data set
+exp4_wide <- read_csv("exp_4/data/cleaned_wide.csv") 
+
+## read coded justifications
+exp4_justifications <- read_csv("exp_4/data/justifications_clean.csv")
+
+## Research questions
+
+## H1
+cor_trust_knowledge <- cor.test(exp4_wide$wgm_sciencegeneral, exp4_wide$avg_knowledge,
+  use = "complete.obs") %>% text_ready()
+cor_trust_acceptance <- cor.test(exp4_wide$wgm_sciencegeneral, exp4_wide$avg_acceptance,
+  use = "complete.obs") %>% text_ready()
+
+## H2
+cor_conspiracy_knowledge <- cor.test(exp4_wide$BCTI_avg, exp4_wide$avg_knowledge,
+  use = "complete.obs") %>% text_ready()
+cor_conspiracy_acceptance <- cor.test(exp4_wide$BCTI_avg, exp4_wide$avg_acceptance,
+  use = "complete.obs") %>% text_ready()
+
+## Exploratory: Acceptance and trust in science/conspiracy thinking conditional on false answers only
+exp4_false_knowledge <- exp4_long %>% 
+  ## make numeric versions
+  mutate(acceptance_num = ifelse(acceptance == "Yes", 1, 0)
+  ) %>% 
+  group_by(id, knowledge) %>% 
+  ## calculate by-participant averages
+  summarize(
+    n = n(),
+    n_accepted = sum(acceptance_num),
+    avg_acceptance  = sum(acceptance_num)/n(), 
+    wgm_sciencegeneral = mean(wgm_sciencegeneral), 
+    BCTI_avg = mean(BCTI_avg), 
+    ## add additonal measures for robustness checks
+    CMQ_avg = mean(CMQ_avg), 
+    SICBS = mean(SICBS),
+    wgm_scientists = mean(wgm_scientists), 
+    pew = mean(pew)
+  ) %>% 
+  ## filter to only false responses
+  filter(knowledge == FALSE) %>% 
+  ungroup()
+
+## H1b conditional on false answers
+false_answers_cor_trust_acceptance <- cor.test(exp4_false_knowledge$wgm_sciencegeneral, exp4_false_knowledge$avg_acceptance,
+  use = "complete.obs") %>% 
+  text_ready()
+
+## H2b conditional on false answers
+false_answers_cor_conspiracy_acceptance <- cor.test(exp4_false_knowledge$BCTI_avg, exp4_false_knowledge$avg_acceptance,
+  use = "complete.obs") %>% 
+  text_ready()
+
+## Exploratory: Differences by reason 
+
+## trust
+trust_by_reason_model <- run_regression(exp4_wide, dependent_var = "wgm_sciencegeneral", independent_var = "reason_agreement")
+
+## acceptance
+acceptance_by_reason_model <-run_regression(exp4_wide, dependent_var = "avg_acceptance", independent_var = "reason_agreement")
+
+## BCTI (conspiracy beliefs)
+BCTI_by_reason_model <- run_regression(exp4_wide, dependent_var = "BCTI_avg", independent_var = "reason_agreement")
+
+## survey time
+time_by_reason_model <- run_regression(exp4_wide %>% filter(duration_mins < 30), dependent_var = "duration_mins", independent_var = "reason_agreement")
+
+## clicks
+clicks_by_reason_model <- run_regression(exp4_wide, dependent_var = "sum_link_clicks", independent_var = "reason_agreement")
+
+## extract descriptives for inline reporting
+exp4_descriptives <- list(
+  ## Demographics
+  n_subj = n_distinct(exp4_wide$id),
+  n_subject_by_outcome = exp4_wide %>% 
+    summarize(across(c("wgm_sciencegeneral", "reason_agreement", "BCTI_avg"), 
+                     ~sum(!is.na(.x)
+                     )
+    )
+    ),
+  gender = exp4_wide %>% group_by(gender) %>% summarize(n = n_distinct(id)) %>% split(.$gender),
+  age = exp4_wide %>% summarize(across(age,list(mean = mean, median = median, sd = sd), 
+                                       .names = "{.fn}")) %>% rounded_numbers(),
+  ## RQ1 & RQ2
+  means = exp4_wide %>% 
+    summarize(across(c(avg_knowledge, avg_acceptance, avg_acceptance_initial), 
+                     list(mean = mean, sd = sd), 
+                     .names = "{.col}_{.fn}")) %>%
+    rename_with(~sub("^avg_", "", .), everything()) %>% 
+    mutate_if(is.numeric, round, digits = 2) %>% 
+    mutate(across(ends_with("_mean"), ~paste0(.*100, " %"))) ,
+  means_numeric = exp4_wide %>% 
+    summarize(across(c(avg_knowledge, avg_acceptance, avg_acceptance_initial), 
+                     list(mean = mean, sd = sd), 
+                     .names = "{.col}_{.fn}")) %>%
+    rename_with(~sub("^avg_", "", .), everything()),
+  ## H1
+  ## a
+  cor_trust_knowledge = cor_trust_knowledge,
+  ## b (conditional on false responses)
+  false_answers_cor_trust_acceptance = false_answers_cor_trust_acceptance,
+  ## b (all cases)
+  cor_trust_acceptance = cor_trust_acceptance,
+  ## H2
+  ## a
+  cor_conspiracy_knowledge = cor_conspiracy_knowledge,
+  ## b (conditional on false responses)
+  false_answers_cor_conspiracy_acceptance = false_answers_cor_conspiracy_acceptance,
+  ## b(all cases)
+  cor_conspiracy_acceptance = cor_conspiracy_acceptance, 
+  ## Exploratory
+  ## acceptance and knowledge
+  conditional_acceptance = exp4_long %>% 
+    pivot_longer(c(acceptance, acceptance_initial), 
+                 names_to = "measure", 
+                 values_to = "acceptance") %>% 
+    group_by(knowledge, measure, acceptance) %>% 
+    count() %>% 
+    group_by(knowledge, measure) %>% 
+    mutate (share = n/sum(n), 
+            ## rename knowledge values
+            knowledge = ifelse(knowledge == FALSE, "false", "true")) %>% 
+    mutate_if(is.numeric, round, digits = 3) %>% 
+    mutate (share = paste0(share*100, " %")) %>% 
+    super_split(knowledge,  measure, acceptance),
+  ## Justifications
+  justifications_n = nrow(exp4_justifications), 
+  justifications_n_participants = n_distinct(exp4_justifications$id),
+  justification_by_category = exp4_justifications %>%
+    group_by(category)%>%
+    summarize(n = n(), 
+              n_subjects = n_distinct(id)) %>%
+    mutate(share = n/sum(n)) %>%
+    mutate_if(is.numeric, round, digits=3) %>% 
+    mutate(share = paste0(share*100, "%")) %>% 
+    split(.$category),
+  ## Consensus acceptance
+  acceptance_n = exp4_wide %>% 
+    filter(!is.na(reason_agreement)) %>% 
+    nrow(.),
+  acceptance_by_reason = exp4_wide %>% 
+    group_by(reason_agreement) %>% 
+    summarize(n = n()) %>%
+    drop_na(reason_agreement) %>% 
+    mutate(share = n/sum(n)) %>%
+    mutate_if(is.numeric, round, digits=3) %>% 
+    mutate(share = paste0(share*100, "%")) %>% 
+    split(.$reason_agreement),
+  reason_followup_n = exp4_wide %>% 
+    filter(!is.na(reason_followup)) %>% 
+    nrow(.),
+  ## Exploratory: Differences by reason for trust
+  reason_means = exp4_wide %>% 
+    group_by(reason_agreement) %>% 
+    summarize(across(c(wgm_sciencegeneral, avg_acceptance, sum_link_clicks, BCTI_avg), 
+                     list(mean = mean, sd = sd), 
+                     .names = "{.col}_{.fn}")) %>%
+    rename_with(~sub("^avg_", "", .), everything()) %>% 
+    mutate_if(is.numeric, round, digits = 2) %>% 
+    mutate(across(acceptance_mean, ~paste0(.*100, " %"))) %>% 
+    split(.$reason_agreement), 
+  reason_trust_model = trust_by_reason_model %>% split(.$term), 
+  reason_acceptance_model = acceptance_by_reason_model %>% split(.$term), 
+  reason_clicks_model = clicks_by_reason_model %>% split(.$term),
+  reason_BCTI_model = BCTI_by_reason_model %>%  split(.$term),
+  reason_time_model = time_by_reason_model %>%  split(.$term), 
+  n_participants_over30mins = exp4_wide %>% 
+    filter(duration_mins >= 30) %>% 
+    nrow(.)
+)
+```
+
+```{r combined-data}
+## combine data of all three studies
+combined_data <- bind_rows(exp1_long %>% 
+                             mutate(study = "1"), 
+                           exp2_long %>% 
+                             mutate(study = "2"), 
+                           exp3_long %>% 
+                             mutate(study = "3"),
+                           exp4_long %>% 
+                             mutate(study = "4")
+                           ) %>% 
+  ## make a unique id variable
+  mutate(id = paste0("study", study, "_", id))
+
+## add a binned version for Conspiracy Thinking
+
+## Define breaks 
+breaks <- seq(0, 100, by = 20)
+## Define labels for each bin in the desired format
+labels <- paste0(c(0, 20, 40, 60, 80), "-", c(20, 40, 60, 80, 100))
+
+combined_data <- combined_data %>% 
+    ## Create the binned version of CMQ_avg
+  mutate(CMQ_avg_binned = cut(CMQ_avg, breaks = breaks, labels = labels, 
+                              include.lowest = TRUE, right = FALSE)) 
+
+## Compute the correlation between conspiracy belief and general trust
+cor_trust_conspiracy_data <- combined_data |> 
+  group_by(id) |> 
+  summarise(BCTI_avg = mean(BCTI_avg, na.rm=TRUE), 
+            wgm_sciencegeneral = mean(wgm_sciencegeneral, na.rm=TRUE))
+
+cor_trust_conspiracy <- cor.test(cor_trust_conspiracy_data$wgm_sciencegeneral, cor_trust_conspiracy_data$BCTI_avg,
+  use = "complete.obs") %>% text_ready()
+
+
+## extract descriptives for inline reporting
+combined_descriptives <- list(
+  ## acceptance
+  mean_acceptance = combined_data %>% 
+  group_by(acceptance) %>% 
+  count() %>% 
+    ungroup() %>% 
+    mutate(share = n/sum(n)) %>% 
+    mutate_if(is.numeric, round, digits = 3) %>% 
+    mutate(share = paste0(share*100, " %")) %>% 
+    split(.$acceptance), 
+  ## acceptance by trust
+  acceptance_by_trust = combined_data %>% 
+    group_by(acceptance, wgm_sciencegeneral) %>% 
+    count() %>% 
+    group_by(wgm_sciencegeneral) %>% 
+    mutate(share = n/sum(n)) %>% 
+    mutate_if(is.numeric, round, digits = 3) %>% 
+    mutate(share = paste0(share*100, " %")) %>% 
+    super_split(wgm_sciencegeneral, acceptance), 
+  participants_by_trust = combined_data %>% 
+  group_by(wgm_sciencegeneral) %>% 
+  summarize(n_participants = n_distinct(id)) %>% 
+    mutate(share = n_participants/sum(n_participants)) %>% 
+    mutate_if(is.numeric, round, digits = 3) %>% 
+    mutate(share = paste0(share*100, " %")) %>% 
+    split(.$wgm_sciencegeneral),
+  ## acceptance by conspiracy thinking
+  acceptance_by_conspiracy_thinking = combined_data %>% 
+    group_by(acceptance, CMQ_avg_binned) %>% 
+    count() %>% 
+    group_by(CMQ_avg_binned) %>% 
+    mutate(share = n/sum(n)) %>% 
+    mutate_if(is.numeric, round, digits = 3) %>% 
+    mutate(share = paste0(share*100, " %")) %>% 
+    super_split(CMQ_avg_binned, acceptance),
+  participants_by_conspiracy_thinking  = combined_data %>% 
+    group_by(CMQ_avg_binned) %>% 
+    summarize(n_participants = n_distinct(id)) %>% 
+    mutate(share = n_participants/sum(n_participants)) %>% 
+    mutate_if(is.numeric, round, digits = 3) %>% 
+    mutate(share = paste0(share*100, " %")) %>% 
+    split(.$CMQ_avg_binned),
+  ## acceptance by conspiracy belief
+  acceptance_by_conspiracy_belief = combined_data %>% 
+    ## bring to long format
+    pivot_longer(cols = BCTI_apollo:BCTI_evolution, 
+                 names_to = "BCTI_item", values_to = "score") %>% 
+    mutate(BCTI_item = sub("^BCTI_", "", BCTI_item)) %>% 
+    group_by(acceptance, BCTI_item, score) %>% 
+    count() %>% 
+    group_by(BCTI_item, score) %>% 
+    mutate(share = n/sum(n)) %>% 
+    mutate_if(is.numeric, round, digits = 3) %>% 
+    mutate(share = paste0(share*100, " %")) %>% 
+    super_split(acceptance, BCTI_item, score),
+  participants_by_conspiracy_belief  = combined_data %>% 
+    ## bring to long format
+    pivot_longer(cols = BCTI_apollo:BCTI_evolution, 
+                 names_to = "BCTI_item", values_to = "score") %>% 
+    mutate(BCTI_item = sub("^BCTI_", "", BCTI_item)) %>% 
+    group_by(BCTI_item, score) %>% 
+    summarize(n_participants = n_distinct(id)) %>% 
+    mutate(share = n_participants/sum(n_participants)) %>% 
+    mutate_if(is.numeric, round, digits = 3) %>% 
+    mutate(share = paste0(share*100, " %")) %>% 
+    super_split(BCTI_item, score),
+  ## knowledge
+  mean_knowledge = combined_data %>% 
+    group_by(knowledge) %>% 
+    count() %>% 
+    ungroup() %>% 
+    mutate (share = n/sum(n), 
+            ## rename knowledge values
+            knowledge = ifelse(knowledge == FALSE, "false", "true")) %>% 
+    mutate_if(is.numeric, round, digits = 3) %>% 
+    mutate(share = paste0(share*100, " %")) %>% 
+    split(.$knowledge),
+  ## flat earthers with no trust at all in science
+  ## number of participants
+  flat_earth_no_trust_nparticipants = combined_data %>% 
+    filter(BCTI_flatearth == 9 & wgm_sciencegeneral == 1) %>%
+    summarize(n_participants = n_distinct(id)) %>% 
+    pull(),
+  ## acceptance
+  flat_earth_no_trust_acceptance = combined_data %>% 
+    filter(BCTI_flatearth == 9 & wgm_sciencegeneral == 1) %>%
+    group_by(acceptance) %>% 
+    summarise(n = n()) %>% 
+    mutate(share = n/sum(n)) %>% 
+    mutate_if(is.numeric, round, digits = 3) %>% 
+    mutate(share = paste0(share*100, " %")) %>% 
+    split(.$acceptance), 
+  ## Lowest decile acceptance
+  lowest_decile_acceptance = combined_data %>% 
+    group_by(id) %>% 
+    summarise(acceptance_rate = sum(acceptance == "Yes")/n(), 
+              n = n()) %>% 
+    arrange(acceptance_rate) %>% 
+    slice(1:(n() * 0.1)) %>%  ## Get the lowest 10% (decile)
+    summarize(mean_acceptance_rate = mean(acceptance_rate, na.rm = TRUE), 
+              n_smaller_or_equalto_0.5 = sum(acceptance_rate <=0.5)) %>% 
+    mutate_if(is.numeric, round, digits = 3) %>% 
+    mutate(mean_acceptance_rate = paste0(mean_acceptance_rate*100, " %")), 
+  ## Lowest decile knowledge
+  lowest_decile_knowledge = combined_data %>% 
+    group_by(id) %>% 
+    summarise(acceptance_rate = sum(acceptance == "Yes")/n(), 
+              knowledge_rate = mean(knowledge, na.rm=TRUE),
+              n = n()) %>% 
+    arrange(knowledge_rate) %>% 
+    slice(1:(n() * 0.1)) %>%  ## Get the lowest 10% (decile)
+    summarize(mean_acceptance_rate = mean(acceptance_rate, na.rm = TRUE), 
+              mean_knowledge_rate = mean(knowledge_rate, na.rm = TRUE)) %>% 
+    mutate_if(is.numeric, round, digits = 3) %>% 
+    mutate(mean_acceptance_rate = paste0(mean_acceptance_rate*100, " %"), 
+           mean_knowledge_rate = paste0(mean_knowledge_rate*100, " %")), 
+  ## overall correlation between conspiracy belief and general trust
+  cor_trust_conspiracy = cor_trust_conspiracy 
+)
+```
+
+### Deviations from preregistration
+
+For Study 2, we restricted our main hypotheses about acceptance to cases in which participants initially provided a wrong answer. However, this meant the more participants had initially provided correct answers, the fewer opportunities they had for accepting correct answers. We provide results on these conditional correlations--for Study 2 and for all other studies--in the ESM [^1]. However, for the analysis presented here, we proceeded as preregistered for all other studies, by reporting unconditional correlations between acceptance and trust in science, or, respectively, conspiracy belief.
+
+[^1]: Only in Study 4 do we find evidence that changing one's mind towards the scientific consensus is associated with (more) trust in science (Studies 1: r = `r exp1_descriptives$false_answers_cor_trust_acceptance$estimate`, p `r exp1_descriptives$false_answers_cor_trust_acceptance$p.value`; 2: r = `r exp2_descriptives$false_answers_cor_trust_acceptance$estimate`, p `r exp2_descriptives$false_answers_cor_trust_acceptance$p.value`; 3: r = `r exp3_descriptives$false_answers_cor_trust_acceptance$estimate`, p `r exp3_descriptives$false_answers_cor_trust_acceptance$p.value`; 4: r = `r exp4_descriptives$false_answers_cor_trust_acceptance$estimate`, p `r exp4_descriptives$false_answers_cor_trust_acceptance$p.value`) and only in Study 2 evidence that it is associated with (less) conspiracy beliefs and (less) conspiracy thinking (Studies 1: r = `r exp1_descriptives$false_answers_cor_conspiracy_acceptance$estimate`, p `r exp1_descriptives$false_answers_cor_conspiracy_acceptance$p.value`; 2: r = `r exp2_descriptives$false_answers_cor_conspiracy_acceptance$estimate`, p `r exp2_descriptives$false_answers_cor_conspiracy_acceptance$p.value`; 3: r = `r exp3_descriptives$false_answers_cor_conspiracy_acceptance$estimate`, p `r exp3_descriptives$false_answers_cor_conspiracy_acceptance$p.value`; 4: r = `r exp4_descriptives$false_answers_cor_conspiracy_acceptance$estimate`, p `r exp4_descriptives$false_answers_cor_conspiracy_acceptance$p.value`).
+
+### Procedure
+
+After providing their consent to participate in the study, participants were given an attention check "While watching the television, have you ever had a fatal heart attack?" [1-6; 1 = Never, 6 = Often]. All participants who did not answer "1 = Never" were excluded. Participants then read the following instructions:"We will ask you 10 questions about science. After each question, we will provide you with the scientifically consensual answer and ask whether you accept it." Next, participants answered a set of 10 basic science questions in random order. After each question, participants were presented with an answer reflecting the scientific consensus, and asked whether they accepted it. In Studies 2 and 3, participants additionally saw a short explanation, partly based on explanations generated by ChatGPT, and three links to authoritative sources supporting the answer. In Study 4, we provided only two links and no explanation. Participants then answered questions on conspiracy thinking, conspiracy beliefs, and trust in science.
+
+In Studies 2, 3, and 4, we presented participants with open-ended questions so they could explain their rejection of the scientific consensus. In Studies 3 and 4, we additionally gave participants the option to change their answer and accept the scientific consensus. Finally, at the end of Studies 3 and 4, we asked participants: "For the questions in which you agreed with the scientific consensus, would you say that...?" The answer options were: (i) "You mostly agree with the consensus because, on that question, you trust scientists", (ii) "You mostly agree with the consensus because you have been able to independently verify it", and (iii) "Other", with a text box for participants to explain. Participants who selected “You mostly agree with the consensus because you have been able to independently verify it”, were asked the open-ended follow-up question: "Could you please tell us how you independently verified the information?".
+
+### Participants
+
+After removing failed attention checks, the total sample size was `r exp1_descriptives$n_subj + exp2_descriptives$n_subj + exp3_descriptives$n_subj + exp4_descriptives$n_subj` (`r exp1_descriptives$n_subj` in Study 1, six failed attention checks; `r exp2_descriptives$n_subj` in Study 2, 11 failed attention checks; `r exp3_descriptives$n_subj` in Study 3, no failed attention checks; `r exp4_descriptives$n_subj` in Study 4, two failed attention checks) participants in the US, recruited through Prolific. Details and demographics can be found in the online supplemental material. While samples for Studies 1 and 2 were convenience samples, Studies 3 and 4 were conducted on a sample holding vaccine-skeptic beliefs. Prolific allows selecting participants based on their answers to a range of questions. We picked three of these questions and only recruited participants who met our criteria for each of them:
+
+1.  "Please describe your attitudes towards the COVID-19 (Coronavirus) vaccines: [For (I feel positively about the vaccines); Against (I feel negatively about the vaccines); Neutral (I don't have strong opinions either way); Prefer not to say]". We selected participants who answered "Against".
+2.  "Have you received a coronavirus (COVID-19) vaccination? [Yes (at least one dose); No; Prefer not to answer]". We select only people who answered "No".
+3.  "On a scale from 1-7, please rate to what extent you agree with the following statement: I believe that scheduled immunizations are safe for children. [1 (totally disagree); 2 (disagree); 3 (somewhat disagree); 4 (neither agree nor disagree); 5 (somewhat agree); 6 (agree); 7 (totally agree); rather not say]". We select only people who answered "1", "2", or "3".
+
+### Materials
+
+#### Scientific facts
+
+Studies 1 to 3 used 10 facts drawn from widely used questionnaires about science knowledge [@allumScienceKnowledgeAttitudes2008; @durantPublicUnderstandingScience1989; @millerMeasurementCivicScientific1998a] sometimes referred to as the "Oxford scale" [@gauchatCulturalAuthorityScience2011]. A ‘trick’ question was added in Study 1 and removed as its wording proved unclear. Study 4 used 10 more recent scientific discoveries. @tbl-knowledge) shows all questions and their answer options.
+
+```{r knowledge}
+#| label: tbl-knowledge
+
+## Function to replace special characters in all cells of a data frame
+replace_special_characters <- function(df) {
+  df %>%
+    mutate(across(everything(), ~ gsub("\u2013|\u2014|\u2212", "-", .))) %>% ## Replace en-dash, em-dash, and Unicode minus with ASCII hyphen-minus
+    mutate(across(everything(), ~ iconv(., from = "UTF-8", to = "ASCII//TRANSLIT"))) ## Ensure all text is ASCII
+}
+
+## Read the CSV file
+items <- read_csv("exp_4/materials/overview_questions.csv")
+
+## Replace special characters
+items_cleaned <- replace_special_characters(items) %>% 
+  mutate(id = 1:nrow(.)) %>%
+  select(id, everything())  ## Ensure 'id' is the first column
+
+## add footnote for the tree items
+items_cleaned[11, 2] <- paste0("*", 
+                               items_cleaned[11, 2])
+  
+
+## Output the table
+## Create the basic table
+if (knitr::is_latex_output() || knitr::is_html_output()) {
+  ## For LaTeX or HTML: Use kable, column_spec, and kable_styling
+  table_output <- items_cleaned %>%
+    knitr::kable(
+      booktabs = TRUE, 
+      longtable = TRUE,
+      caption = "Science knowledge items",
+      full_width = TRUE,
+      col.names = c("", "Study 1-3", "Study 4")
+    ) %>%
+    kableExtra::kable_styling(font_size = 8) %>%
+    kableExtra::column_spec(1, width = "2em") %>%
+    kableExtra::column_spec(2, width = "22em") %>%
+    kableExtra::column_spec(3, width = "22em") %>%
+    kableExtra::footnote(
+      symbol = "Only used in Study 1"
+    )
+} else {
+  ## For Word: Use apa_table
+  table_output <- papaja::apa_table(
+    items_cleaned, 
+    caption = "Science knowledge items",
+    note = "*Only used in Study 1",
+    col.names = c("", "Study 1-3", "Study 4")
+    #,align = c("l", "m{8cm}", "m{8cm}")
+  )
+}
+
+## Display the table
+table_output
+
+```
+
+#### Conspiracy beliefs
+
+We selected 10 science/health related conspiracy theories from the Belief in Conspiracy Theory Inventory (BCTI) [@pennycookOverconfidentlyConspiratorialConspiracy2022] (Table @tbl-conspiracy)). Participants were asked: "Below is a list of events for which the official version has been disputed. For each event, we would like you to indicate to what extent you believe the cover-up version of events is true or false. [1-9; labels: 1 - completely false, 5 - unsure, 9 - completely true]".
+
+#### Conspiracy thinking
+
+For all results presented here, we used the four-item conspiracy mentality questionnaire (CMQ) [@bruderMeasuringIndividualDifferences2013]. We also assessed the single item conspiracy beliefs scale (SICBS) [@lantianMeasuringBeliefConspiracy2016]. Details and comparisons between the scales can be found in the ESM.
+
+```{r conspiracy, echo=FALSE}
+#| label: tbl-conspiracy
+
+
+## Create the data frame
+items <- c(
+  "The Apollo moon landings never happened and were staged in a Hollywood film studio.",
+  "A cure for cancer was discovered years ago, but this has been suppressed by the pharmaceutical industry and the U.S. Food and Drug Administration (FDA).",
+  "The spread of certain viruses and/or diseases is the result of the deliberate, concealed efforts of vested interests.",
+  "The claim that the climate is changing due to emissions from fossil fuels is a hoax perpetrated by corrupt scientists who want to spend more taxpayer money on climate research.",
+  "The Earth is flat (not spherical) and this fact has been covered up by scientists and vested interests.",
+  "There is a causal link between vaccination and autism that has been covered up by the pharmaceutical industry.",
+  "In the 1950s and 1960s more than 100 million Americans received a polio vaccine contaminated with a potentially cancer-causing virus.",
+  "Proof of alien contact is being concealed from the public.",
+  "Hydroxychloroquine has been demonstrated to be a safe and effective treatment of COVID and this information is being suppressed.",
+  "Dinosaurs never existed, evolution is not real, and scientists have been faking the fossil record.")
+
+conspiracy_items <- data.frame(id = 1:length(items), items = items)
+
+## Create the basic table
+if (knitr::is_latex_output() || knitr::is_html_output()) {
+  ## For LaTeX or HTML: Use kbl, column_spec, and kable_styling
+  table_output <- conspiracy_items %>%
+    kbl(
+      booktabs = TRUE, 
+      longtable = TRUE,
+      col.names = NULL,
+      caption = "Conspiracy items",
+      full_width = TRUE
+    ) %>%
+    kableExtra::kable_styling(font_size = 8) %>%
+    kableExtra::column_spec(1, width = "3em") %>%
+    kableExtra::column_spec(2, width = "40em") %>%
+    kableExtra::footnote(
+      general = "Participants were asked to rate their belief in the conspiracy on a scale from 1 to 9, with the labels: `1 - completely false, 5 - unsure, 9 - completely true`.",
+      escape = FALSE,
+      footnote_as_chunk = TRUE,
+      threeparttable = TRUE
+    )
+} else {
+  ## For Word: Use apa_table
+  table_output <- papaja::apa_table(
+    conspiracy_items, 
+    caption = "Conspiracy items",
+    note = "Participants were asked to rate their belief in the conspiracy on a scale from 1 to 9, with the labels: `1 - completely false, 5 - unsure, 9 - completely true`.",
+    col.names = c("", "") ## Replace with specific column names if desired
+  )
+}
+
+## Display the table
+table_output
+```
+
+#### Trust in science
+
+In all analyses reported in the main paper, we measure trust in science via a question selected from the Wellcome Global Monitor surveys [@wellcomeglobalmonitorWellcomeGlobalMonitor2018; @wellcomeglobalmonitorWellcomeGlobalMonitor2020]: "In general, would you say that you trust science a lot, some, not much, or not at all? [1 = Not at all, 2 = Not much, 3 = Some, 4 = A lot]". We chose this question as it seemed to be the most general one. In the ESM, we additionally report results for two alternative measures of trust included in our studies: Another from the WGM surveys ("How much do you trust scientists in this country? Do you trust them a lot, some, not much, or not at all? [1 = Not at all, 2 = Not much, 3 = Some, 4 = A lot]"), and one from the Pew Research Center [e.g. @funkKeyFindingsPublic2019] ("How much confidence do you have in scientists to act in the best interests of the public? [1-5; 1 = No confidence at all, 5 = A great deal of confidence]"), the latter having been used in a recent international study on trust in science [@colognaTrustScientistsTheir2024]. We selected these items so that we could compare the answers in our sample to global survey results. We find that all three items are highly correlated throughout all studies, and that our results reported here generally replicate when using either of the alternatives measures[^2] (see ESM).
+
+[^2]: With two exceptions: In Study 3, we find no correlation between acceptance and the Pew question; In Study 4, we find a correlation between knowledge and both alternative trust measures, but not with our main measure (see ESM)
+
+## Results
+
+```{r summary-plot, fig.cap="(ref:summary-plot)", fig.height= 10, fig.width=10}
+#| label: fig-summary-plot
+#| fig-cap: 'Points represent the average share of acceptance and numbers the absolute count of participants as a function of: **A** the level of trust in science ("In general, would you say that you trust science a lot, some, not much, or not at all? [1 = Not at all, 2 = Not much, 3 = Some, 4 = A lot]"); **B** the average conspiracy thinking (CMQ, five items on a scale from 0 to 100); **C** the belief in specific conspiracy theories (i.e. participants who answered 9, "completely true", for a given theory, see Table @tbl-conspiracy) for the list of the theories).'
+
+
+## make plot data for trust
+plot_trust <- combined_data %>% 
+  drop_na(wgm_sciencegeneral, acceptance) %>% 
+  ## make a labels version of trust in science
+  mutate(wgm_sciencegeneral = case_when(
+    wgm_sciencegeneral == 1 ~ "1 (Not at all)",
+    wgm_sciencegeneral == 2 ~ "2 (Not much)",
+    wgm_sciencegeneral == 3 ~ "3 (Some)",
+    wgm_sciencegeneral == 4 ~ "4 (A lot)",
+    TRUE ~ as.character(wgm_sciencegeneral)  ## Handle any other cases (optional)
+  )) %>% 
+  group_by(study, wgm_sciencegeneral, acceptance) %>% 
+  summarize(n = n(), 
+            n_participants = n_distinct(id)) %>% 
+  group_by(study, wgm_sciencegeneral) %>% 
+  mutate (share = n/sum(n), 
+          n_participants = max(n_participants)) %>% 
+  mutate_if(is.numeric, round, digits = 3)
+
+## make trust plot
+trust <- ggplot(plot_trust %>% 
+                  filter(acceptance == "Yes"), 
+                aes(x = wgm_sciencegeneral, y = share, color = study, shape = study)) +
+  geom_pointrange(aes(ymin = 0, ymax = share), 
+                  position = position_dodge(width = 0.8), 
+                  alpha = 0.5, 
+                  show.legend = FALSE) +
+  geom_text(aes(label = n_participants, y = share + 0.01),  ## Align text labels with dodged points
+            position = position_dodge(width = 0.8), 
+            vjust = -0.5, 
+            size = 3, 
+            show.legend = FALSE) +
+  #geom_point(position = "dodge", alpha = 0.5) +
+  ## geom_text_repel(aes(label = paste0(n_participants)),
+  ##                 vjust = -0.5, size = 3,
+  ##                 show.legend = FALSE) +
+  scale_y_continuous(labels = scales::percent_format(), breaks = seq(0, 1, 0.1), limits = c(0, 1.02)) +
+  scale_color_viridis_d(option = "plasma", end = 0.8) +
+  labs(x = "Trust in science", y = "Acceptance rate of consensus", color = "Study", shape = "Study") +
+  plot_theme + 
+  theme(legend.position = "top")
+
+## make plot data for conspiracy belief
+plot_conspiracy <- combined_data %>% 
+  ## bring to long format
+  pivot_longer(cols = BCTI_apollo:BCTI_evolution, 
+               names_to = "BCTI_item", values_to = "score") %>% 
+  ## make a belief variable if participant indicates a numeric answer above the
+  ## a belief threshold 
+  mutate(belief = ifelse(score == 9, TRUE, 
+                         ifelse(is.na(score), NA, FALSE)
+                         ),
+         BCTI_item = sub("^BCTI_", "", BCTI_item),
+         ## rename BCTI items
+         BCTI_item = case_when(
+           BCTI_item == "apollo" ~ "Moon landing", 
+           BCTI_item == "cancer" ~ "Cancer cure", 
+           BCTI_item == "viruses" ~ "Viruses",
+           BCTI_item == "climatechange" ~ "Climate change",
+           BCTI_item == "flatearth" ~ "Flat earth",
+           BCTI_item == "autism" ~ "Vaccine autism",
+           BCTI_item == "polio" ~ "Vaccine cancer",
+           BCTI_item == "alien" ~ "Aliens",
+           BCTI_item == "hydorxychlor" ~ "Covid hydroxychloroquine",
+           BCTI_item == "evolution" ~ "Evolution"
+         )
+         ) %>% 
+  group_by(study, BCTI_item, belief, acceptance) %>% 
+  summarize(n = n(),
+            n_participants = n_distinct(id)) %>% 
+  group_by(study, BCTI_item, belief) %>% 
+  mutate (share = n/sum(n), 
+          n_participants = max(n_participants)) %>% 
+  mutate_if(is.numeric, round, digits = 3) %>% 
+  ungroup()
+
+## make conspiracy belief plot
+conspiracy <- ggplot(plot_conspiracy %>% 
+         filter(acceptance == "Yes" & belief == TRUE), 
+         aes(x = BCTI_item, y = share, color = study, shape = study)) +
+  geom_pointrange(aes(ymin = 0, ymax = share), 
+                  position = position_dodge(width = 0.8), 
+                  alpha = 0.5, 
+                  show.legend = FALSE) +
+  geom_text(aes(label = n_participants, y = share + 0.01),  ## Align text labels with dodged points
+            position = position_dodge(width = 0.8), 
+            vjust = -0.5, 
+            size = 3, 
+            show.legend = FALSE) +
+  ## geom_point(position = "dodge", alpha = 0.5) +
+  ## geom_text_repel(aes(label = paste0(n_participants)),
+  ##                 vjust = -0.5, size = 3,
+  ##                 show.legend = FALSE) +
+  scale_y_continuous(labels = scales::percent_format(), breaks = seq(0, 1, 0.1), limits = c(0, 1.02)) +
+  scale_color_viridis_d(option = "plasma", end = 0.8) +
+  labs(x = "Conspiracy theory belief", y = "Acceptance rate of consensus", color = "Study", shape = "Study") +
+  plot_theme +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1)) 
+
+## Conspiracy Thinking
+
+## Define breaks for each integer from 1 to 9
+breaks <- seq(0, 100, by = 20)
+
+## Define labels for each bin in the desired format
+labels <- paste0(c(0, 20, 40, 60, 80), "-", c(20, 40, 60, 80, 100))
+
+plot_data <- combined_data %>% 
+  drop_na(CMQ_avg) %>% 
+  ## Create the binned version of CMQ_avg
+  mutate(CMQ_avg_binned = cut(CMQ_avg, breaks = breaks, labels = labels, include.lowest = TRUE, right = FALSE)) %>% 
+  group_by(study, CMQ_avg_binned, acceptance) %>% 
+  summarize(n = n()) %>% 
+  group_by(study, CMQ_avg_binned) %>% 
+  mutate (share = n/sum(n)) %>% 
+  mutate_if(is.numeric, round, digits = 3)
+
+n_participants <- combined_data %>% 
+  drop_na(CMQ_avg) %>% 
+  ## Create the binned version of CMQ_avg
+  mutate(CMQ_avg_binned = cut(CMQ_avg, breaks = breaks, labels = labels, include.lowest = TRUE, right = FALSE)) %>% 
+  group_by(study, CMQ_avg_binned) %>% 
+  summarize(n_participants = n_distinct(id))
+
+plot_conspiracy_thinking <- left_join(plot_data, n_participants)
+
+## make plot
+conspiracy_thinking  <- ggplot(plot_conspiracy_thinking  %>% 
+                                 filter(acceptance == "Yes"), 
+                               aes(x = CMQ_avg_binned, y = share, color = study, shape = study)) +
+  geom_pointrange(aes(ymin = 0, ymax = share), 
+                  position = position_dodge(width = 0.8), 
+                  alpha = 0.5) +
+  geom_text(aes(label = n_participants, y = share + 0.01),  ## Align text labels with dodged points
+            position = position_dodge(width = 0.8), 
+            vjust = -0.5, 
+            size = 3, 
+            show.legend = FALSE) +
+  ## geom_point(position = "dodge", alpha = 0.5) +
+  ## geom_text_repel(aes(label = paste0(n_participants)),
+  ##                 vjust = -0.5, size = 3,
+  ##                 show.legend = FALSE) +
+  scale_color_viridis_d(option = "plasma", end = 0.8) +
+  scale_y_continuous(labels = scales::percent_format(), breaks = seq(0, 1, 0.1), limits = c(0, 1.02)) +
+  labs(x = "Conspiracy Thinking", y = "Acceptance rate of consensus", color = "Study", shape = "Study") +
+  plot_theme + 
+  theme(legend.position = "top")
+
+## remove elements of plots for better overall plot
+conspiracy_thinking <- conspiracy_thinking + 
+  #rremove("ylab") +
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank()) 
+  #guides(color = "none", shape = "none") 
+
+conspiracy <- conspiracy +
+  rremove("ylab") +
+  guides(color = "none", shape = "none")
+
+trust <- trust +
+  rremove("ylab") 
+
+## common plot
+patchwork <- (trust + conspiracy_thinking)/conspiracy + 
+  plot_layout(guides = 'collect', widths = c(1, 1)) +
+  plot_annotation(tag_levels = 'A')  & theme(legend.position = "top")
+
+wrap_elements(patchwork) +
+  labs(tag = "Rate of acceptance of consensual scientific facts") +
+    theme(
+    plot.tag = element_text(angle = 90, , face = "bold", size = 12),
+    plot.tag.position = "left"
+  )
+```
+
+The main outcome of interest is acceptance of the scientifically consensual facts presented. Overall, acceptance was very high (aggregating across all studies: `r combined_descriptives$mean_acceptance$Yes$share`; Studies 1: `r exp1_descriptives$means$acceptance_mean`; 2: `r exp2_descriptives$means$acceptance_mean`; 3: `r exp3_descriptives$means$acceptance_mean`; 4: `r exp4_descriptives$means$acceptance_mean`). Note that this includes both participants who had previously correctly answered the knowledge question, and participants who changed their mind when presented with the scientific consensus. In Studies 3 and 4, we gave participants a second chance in case they had initially rejected the consensus, which slightly increased acceptance rates in those studies (initial acceptance in Studies 3: `r exp3_descriptives$means$acceptance_initial_mean`; 4: `r exp4_descriptives$means$acceptance_initial_mean`).
+
+As shown in @fig-summary-plot, these very high rates of acceptance hold for: participants who do not trust science at all (`r combined_descriptives$participants_by_trust$'1'$share` of participants, acceptance rate of `r combined_descriptives$acceptance_by_trust$'1'$Yes$share`), participants who rank in the top two deciles of the conspiracy thinking scale (`r combined_descriptives$participants_by_conspiracy_thinking$'80-100'$share` of participants, acceptance rate of `r combined_descriptives$acceptance_by_conspiracy_thinking$'80-100'$Yes$share`), participants who consider as "completely true" (the maximum of the 9-point scale) conspiracy theories stating that the earth is flat (`r combined_descriptives$participants_by_conspiracy_belief$flatearth$'9'$share` of participants, acceptance rate of `r combined_descriptives$acceptance_by_conspiracy_belief$Yes$flatearth$'9'$share`), or that climate change due to fossil emissions is a hoax (`r combined_descriptives$participants_by_conspiracy_belief$climatechange$'9'$share` of participants, acceptance rate of `r combined_descriptives$acceptance_by_conspiracy_belief$Yes$climatechange$'9'$share`).
+
+```{r}
+#combined_descriptives$flat_earth_no_trust_nparticipants
+```
+
+Participants in the lowest decile of acceptance still had an average acceptance rate of `r combined_descriptives$lowest_decile_acceptance$mean_acceptance_rate`. Even the three participants who considered as "completely true" that the earth is flat and who said they do "not trust science at all" had an average acceptance rate of `r combined_descriptives$flat_earth_no_trust_acceptance$Yes$share`.
+
+These high acceptance rates do not merely reflect science knowledge: participants only correctly answered `r combined_descriptives$mean_knowledge$true$share` of the questions (Studies 1: `r exp1_descriptives$means$knowledge_mean`; 2: `r exp2_descriptives$means$knowledge_mean`; 3: `r exp3_descriptives$means$knowledge_mean`; 4: `r exp4_descriptives$means$knowledge_mean`) before they were provided with the scientifically consensual answer. Even the lowest decile in science knowledge, which on average answered correctly only on `r combined_descriptives$lowest_decile_knowledge$mean_knowledge_rate` of the questions, had an average acceptance rate of `r combined_descriptives$lowest_decile_knowledge$mean_acceptance_rate`.
+
+Did participants who had initially provided a wrong answer change their minds towards the scientific consensus? Yes. In most cases (Studies 1: `r exp1_descriptives$conditional_acceptance$false$Yes$share`; 2: `r exp2_descriptives$conditional_acceptance$false$Yes$share`; 3: `r exp3_descriptives$conditional_acceptance$false$acceptance$Yes$share`; 4: `r exp4_descriptives$conditional_acceptance$false$acceptance$Yes$share`), participants readily accepted the scientific consensus after having initially given the wrong answer to a question.
+
+How do knowledge and acceptance relate to declared general trust in science and conspiracy belief (two strongly correlated variables, pooled r = `r combined_descriptives$cor_trust_conspiracy$estimate`, p `r combined_descriptives$cor_trust_conspiracy$p.value`)?
+
+Regarding H1, we find a consistent association between trust in science and acceptance of the scientific consensus (Studies 1: r = `r exp1_descriptives$cor_trust_acceptance$estimate`, p `r exp1_descriptives$cor_trust_acceptance$p.value`; 2: r = `r exp2_descriptives$cor_trust_acceptance$estimate`, p `r exp2_descriptives$cor_trust_acceptance$p.value`; 3: r = `r exp3_descriptives$cor_trust_acceptance$estimate`, p `r exp3_descriptives$cor_trust_acceptance$p.value`; 4: r = `r exp4_descriptives$cor_trust_acceptance$estimate`, p `r exp4_descriptives$cor_trust_acceptance$p.value`), but a less consistent relation between trust in science and science knowledge (Studies 1: r = `r exp1_descriptives$cor_trust_knowledge$estimate`, p `r exp1_descriptives$cor_trust_knowledge$p.value`; 2: r = `r exp2_descriptives$cor_trust_knowledge$estimate`, p `r exp2_descriptives$cor_trust_knowledge$p.value`; 3: r = `r exp3_descriptives$cor_trust_knowledge$estimate`, p `r exp3_descriptives$cor_trust_knowledge$p.value`; 4: r = `r exp4_descriptives$cor_trust_knowledge$estimate`, p `r exp4_descriptives$cor_trust_knowledge$p.value`).
+
+Regarding H2, the results are mixed for the relation of conspiracy beliefs (measured as the average acceptance of all the conspiracy beliefs) with both acceptance of the scientific consensus (Studies 1: r = `r exp1_descriptives$cor_conspiracy_acceptance$estimate`, p `r exp1_descriptives$cor_conspiracy_acceptance$p.value`; 2: r = `r exp2_descriptives$cor_conspiracy_acceptance$estimate`, p `r exp2_descriptives$cor_conspiracy_acceptance$p.value`; 3: r = `r exp3_descriptives$cor_conspiracy_acceptance$estimate`, p `r exp3_descriptives$cor_conspiracy_acceptance$p.value`; 4: r = `r exp4_descriptives$cor_conspiracy_acceptance$estimate`, p `r exp4_descriptives$cor_conspiracy_acceptance$p.value`) and science knowledge (Studies 1: r = `r exp1_descriptives$cor_conspiracy_knowledge$estimate`, p `r exp1_descriptives$cor_conspiracy_knowledge$p.value`; 2: r = `r exp2_descriptives$cor_conspiracy_knowledge$estimate`, p `r exp2_descriptives$cor_conspiracy_knowledge$p.value`; 3: r = `r exp3_descriptives$cor_conspiracy_knowledge$estimate`, p `r exp3_descriptives$cor_conspiracy_knowledge$p.value`; 4: r = `r exp4_descriptives$cor_conspiracy_knowledge$estimate`, p `r exp4_descriptives$cor_conspiracy_knowledge$p.value`).
+
+n an exploratory analysis, we find that
+
+While actual acceptance of scientific knowledge is only weakly correlated with trust in science,
+
+Why did participants reject the scientific consensus? We collected a total of `r exp4_descriptives$justifications_n + exp3_descriptives$justifications_n + exp2_descriptives$justifications_n` answers (Studies 2: `r exp2_descriptives$justifications_n`; 3: `r exp3_descriptives$justifications_n`; 4: `r exp4_descriptives$justifications_n`) from `r exp4_descriptives$justifications_n_participants + exp3_descriptives$justifications_n_participants + exp2_descriptives$justifications_n_participants` (Studies 2: `r exp2_descriptives$justifications_n_participants`; 3: `r exp3_descriptives$justifications_n_participants`; 4: `r exp4_descriptives$justifications_n_participants`) participants to the open-ended questions on why they had rejected the scientific consensus on a particular question. Based on the answers, we created five categories (Table @tbl-justifications)). All individual answers can be accessed in cleaned data sheets via the OSF project page.
+
+```{r justifications}
+### make a common table of exp 2 and exp 3
+justifications <- bind_rows(exp2_justifications %>% 
+                              mutate(study = "study 2"), 
+                            exp3_justifications %>% 
+                              mutate(study = "study 3", 
+                                     final_coding = as.character(final_coding)),
+                            exp4_justifications %>% 
+                              mutate(study = "study 4"))
+
+table <- justifications %>%
+  group_by(category)%>%
+  summarize(n = n(), 
+            n_subjects = n_distinct(id)) %>%
+  mutate(Share = n/sum(n)) %>%
+  mutate_if(is.numeric, round, digits=3) %>% 
+  mutate(Share = paste0(Share*100, "%")) %>% 
+  arrange(desc(n)) %>% 
+  select(category, n, Share, n_subjects) %>% 
+  ungroup() %>% 
+  rename(
+    Category = category,
+    `N (instances)` = n, 
+    `Share (instances)` = Share, 
+    `N (participans)*` = n_subjects
+  ) %>% 
+  ## remove decimal places
+  mutate_if(is.numeric, ~as.integer(.x)) 
+
+table %>%
+  apa_table(caption = "Justifications for rejecting the scientific consensus by category, Studies 2, 3 and 4 combined.", 
+            note = "*Participants with at least one answer in that category")
+
+## table %>% kbl(
+##   booktabs = T, longtable = T,
+##     caption = "Justifications for rejecting the scientific consensus by category, Studies 2, 3 and 4 combined.", 
+##   full_width = T) %>%
+##   footnote(general = "*Participans with at least one answer in that category",
+##            escape = FALSE,
+##            footnote_as_chunk = TRUE,
+##            threeparttable = TRUE)
+```
+
+Why did participants say they accept the scientific consensus? In Studies 3 and 4--the vaccine hesitant samples--we had asked participants about cases in which they agreed with the scientific consensus. A total of `r exp3_descriptives$acceptance_n + exp4_descriptives$acceptance_n` (Studies 3: `r exp3_descriptives$acceptance_n`; 4: `r exp4_descriptives$acceptance_n`) participants answered this question. There were more participants saying they accepted the scientific consensus because they independently verified the fact (Studies 3: `r exp3_descriptives$acceptance_by_reason[["independent verification"]]$share`; 4: `r exp4_descriptives$acceptance_by_reason[["independent verification"]]$share` ), than participants saying it was because they trust scientists (Studies 3: `r exp3_descriptives$acceptance_by_reason[["trust in scientists"]]$share`; 4: `r exp4_descriptives$acceptance_by_reason[["trust in scientists"]]$share`)[^3]. Answers to a question about how they had done so can be found in the ESM.
+
+[^3]: `r exp3_descriptives$acceptance_by_reason[["other"]]$share` in Study 3 and `r exp4_descriptives$acceptance_by_reason[["other"]]$share` in Study 4 answered with "other" and gave an open-ended explanation.
+
+```{r}
+#exp4_descriptives$reason_time_model$'reason_agreementtrust in scientists'$estimate %>% round(digits = 0) %>% abs()
+#median(combined_data$duration_mins) %>% round(digits = 0)
+#exp3_descriptives$n_participants_over30mins
+#exp4_descriptives$n_participants_over30mins
+```
+
+In an exploratory analysis, we ran linear regressions to test whether there are differences between participants who said they had trusted science and those who said they had verified the information independently. Participants who said they accepted the consensus because of trust in scientists reported trusting science more (Studies 3: mean = `r exp3_descriptives$reason_means$'trust in scientists'$wgm_sciencegeneral_mean`; $\hat{\beta}_{\text{Trust}}$ = `r exp3_descriptives$reason_trust_model$'reason_agreementtrust in scientists'$estimate`, p `r exp3_descriptives$reason_trust_model$'reason_agreementtrust in scientists'$p.value` on a scale from 1 to 4; 4: mean = `r exp4_descriptives$reason_means$'trust in scientists'$wgm_sciencegeneral_mean`; $\hat{\beta}_{\text{Trust}}$ = `r exp4_descriptives$reason_trust_model$'reason_agreementtrust in scientists'$estimate`, p `r exp4_descriptives$reason_trust_model$'reason_agreementtrust in scientists'$p.value`) than those who said they verified independently (Studies 3 mean = `r exp3_descriptives$reason_means$'independent verification'$wgm_sciencegeneral_mean`; 4: mean = `r exp4_descriptives$reason_means$'independent verification'$wgm_sciencegeneral_mean`). We did not find a difference regarding acceptance (Studies 3: $\hat{\beta}_{\text{Acceptance}}$ = `r exp3_descriptives$reason_acceptance_model$'reason_agreementtrust in scientists'$estimate`, p `r exp3_descriptives$reason_acceptance_model$'reason_agreementtrust in scientists'$p.value` on a scale from 0 to 1; 4: $\hat{\beta}_{\text{Acceptance}}$ = `r exp4_descriptives$reason_acceptance_model$'reason_agreementtrust in scientists'$estimate`, p `r exp4_descriptives$reason_acceptance_model$'reason_agreementtrust in scientists'$p.value`) or regarding beliefs in conspiracy theories (Studies 3: $\hat{\beta}_{\text{BCTI}}$ = `r exp3_descriptives$reason_BCTI_model$'reason_agreementtrust in scientists'$estimate`, p `r exp3_descriptives$reason_BCTI_model$'reason_agreementtrust in scientists'$p.value` on a scale from 1 to 9; 4: $\hat{\beta}_{\text{BCTI}}$ = `r exp4_descriptives$reason_BCTI_model$'reason_agreementtrust in scientists'$estimate`, p `r exp4_descriptives$reason_BCTI_model$'reason_agreementtrust in scientists'$p.value`). We also did not find a difference in time spent on the survey in Study 3 ($\hat{\beta}_{\text{Time}}$ = `r exp3_descriptives$reason_time_model$'reason_agreementtrust in scientists'$estimate`, p `r exp3_descriptives$reason_time_model$'reason_agreementtrust in scientists'$p.value`; median = `r median(exp3_wide$duration_mins)` mins), but in Study 4, people who said they had accepted the consensus because they they trust scientists tended to spend on average two minutes less on the survey ($\hat{\beta}_{\text{Time}}$ = `r exp4_descriptives$reason_time_model$'reason_agreementtrust in scientists'$estimate`, p `r exp4_descriptives$reason_time_model$'reason_agreementtrust in scientists'$p.value`; median = `r median(exp4_wide$duration_mins)` mins).[^4] In Study 4, in which we used facts that participants were unlikely to have encountered before, we tracked whether people clicked on the source links provided--a behavior that you would expect from people who report verifying facts independently. On average, participants clicked only on `r exp4_descriptives$reason_means$'trust in scientists'$sum_link_clicks_mean` links (out of 20 possible clicks) and there was no difference between the two groups ($\hat{\beta}_{\text{Clicks}}$ = `r exp4_descriptives$reason_clicks_model$'reason_agreementtrust in scientists'$estimate`, p `r exp4_descriptives$reason_clicks_model$'reason_agreementtrust in scientists'$p.value`).
+
+[^4]: For these analyses, we excluded outliers who took over 30 mins for the survey, which was estimated to take around 10 mins, and for which the median time was seven minutes. As a result, we excluded one participant in Study 3 and four in Study 4. Significance levels are not affected by these exclusions.
+
+More detailed results addressing all our pre-registered research questions can be found in the ESM.
+
+## Discussion
+
+In four studies, we asked US participants whether they accepted scientifically consensual answers on basic science questions. We found quasi-universal acceptance of basic science, with an overall rate of acceptance of `r combined_descriptives$mean_acceptance$Yes$share`, which remained very high for participants who declared not trusting science at all (`r combined_descriptives$acceptance_by_trust$'1'$Yes$share` of acceptance), or who endorsed theories blatantly violating scientific knowledge, such as flat earth (`r combined_descriptives$acceptance_by_conspiracy_belief$Yes$flatearth$'9'$share` of acceptance).
+
+This disconnect between declared general trust in science and average trust in (basic) scientific findings goes against predictions from the knowledge–attitudes model of trust in science [see, e.g., @bauerWhatCanWe2007], which posits that knowledge of scientific results is the main cause of trust in science. In line with past research [@allumScienceKnowledgeAttitudes2008], we find that both knowledge and acceptance of science are only weakly correlated with general trust in science. This supports recent definitions of science literacy, which suggest that for science literacy to be a meaningful concept for science attitudes, it needs to go beyond measuring knowledge of isolated science facts [@nationalacademiesofsciencesengineeringandmedicineScienceLiteracyConcepts2016].
+
+By contrast, our findings align with a motivated reasoning account of trust in science [@lewandowskyMotivatedRejectionScience2016], in which “people tend to reject findings that threaten their core beliefs or worldview” (p. 217). A number of participants in our studies endorsed specific conspiracy theories questioning basic tenets of science (on evolution, the shape of the earth, etc.), while still accepting the vast majority of basic scientific facts presented to them. This suggests that these participants had reasons to reject only specific scientific knowledge, and that this rejection prompted them to express a lower trust in science when asked general questions on the topic. Consistent with this explanation, we found a strong association between belief in anti-science conspiracy theories and general trust in science.
+
+Some of the present results also speak to the alienation model [@gauchatCulturalAuthorityScience2011], and more specifically to the need for epistemic autonomy [@frickerTestimonyEpistemicAutonomy2006]. Declaring not trusting science, or endorsing conspiracy theories [@harrisConspiracyTheoriesPopulism2023] might reflect a desire to maintain epistemic autonomy and not appear to ‘blindly’ accept epistemic authority. Such a need to appear epistemically autonomous could be reconciled with the acceptance of basic science facts if it was thought to stem from independent evaluation instead of trust. The majority of participants in Studies 3 and 4, two samples of vaccine-skeptical participants who scored high across a range of different conspiracy beliefs (see ESM), tended to claim that they had accepted the scientific consensus based on their own evaluation, however implausible that might be: it is not clear how participants could independently verify, say, the ratio of glial cells to neurons. These participants did also not engage (more than others) in simple forms of verification, i.e. clicking on sources provided in the answers. This result aligns with other results on conspiracy thinking: Recent studies have shown that, although they claim not to be, conspiracy theorists are in fact just as susceptible to social influence as others [@pummererConspiracyBeliefsMajority2024; @altayConspiracyBelieversClaim2023].
+
+In applied terms, the present results have implications for science communication. Across various domains of science knowledge such as climate change [@veckalov27countryTestCommunicating2024] or vaccination [@salmonVaccineHesitancyCauses2015], researchers have observed a consensus gap: a gap between the scientific consensus and public opinion. Some of the most worrying consensus gaps relate to climate change, as substantial segments of the population disagree with scientists on what is happening and what to do about it [e.g., @eganClimateChangeUS2017]. Yet, we found that for much of basic, non-contentious science, such consensus gaps are absent: The vast majority of our participants--including two vaccine-skeptical samples (Studies 3 and 4)--did not appear to have general grounds for distrusting science, which should have led them to reject most or all of the science knowledge presented to them. Since even people who say they distrust science, or who reject specific scientific facts appear to accept most of basic science, stressing the basic science components of publicly controversial fields, from GMOs to climate change, might help reduce the consensus gaps observed in these domains [on climate change, see, e.g. @ranneyClimateChangeConceptual2016].
+
+The present studies have a number of limitations, in particular the lack of representative samples, and the focus on a single country. While our results support motivated reasoning accounts of trust in science, they leave important questions unaddressed, in particular: Why do people reject specific scientific findings but not others? Suggestions have already been made for a number of issues such as vaccination [@mitonCognitiveObstaclesProVaccination2015], GMOs [@blanckeFatalAttractionIntuitive2015], or nuclear energy [@hacquinDisgustSensitivityPublic2021]. However, research is still needed to better understand what motivates these rejections [see e.g., @hornseyWhyFactsAre2020]. Moreover, rejection of scientific facts can manifest in various ways, for example calling into question the integrity of scientists [@medeSciencerelatedPopulismConceptualization2023a; @medeWhoSupportsSciencerelated2022], or denying the very possibility of scientifically investigating certain issues [@munroScientificImpotenceExcuse2010]. The classification of justifications we present here does not address these processes in detail. Finally, by design, most of the basic science knowledge presented in this study didn't directly relate to anything controversial for most people. Future studies could look at basic science that does relate to scientific topics which are the object of public and policy-relevant debates (e.g. GM food, climate science, vaccines), or scientific findings for which there is a more obvious potential conflict of interest (e.g. non-publicly funded medical research).
+
+
+
+
+
+

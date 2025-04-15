@@ -1,0 +1,41 @@
+# R stuff
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# Ignore all elements in subfolders called "data"
+#**/data/*
+
+# ignore all figures in .pdf format
+output*/figures/*.pdf
+
+# Ignore Word files
+*.doc
+*.docx
+
+# Ignore DS store files
+.DS_Store
+
+# Ignore HTML files
+*.html
+
+# Ignore Keynote files
+*.key
+
+# Ingore other files
+*.aux
+*.toc
+*.tex
+author_info*
+
+# Ignore text files
+*.rtf
+
+# ignore folders
+output/
+pus_journal/
+liquin*/
+lou*/
+no_git*/
+

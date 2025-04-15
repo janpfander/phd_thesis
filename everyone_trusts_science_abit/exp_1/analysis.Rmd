@@ -1,0 +1,434 @@
+---
+title: "Analysis Study 1"
+output:
+  bookdown::pdf_document2: default
+  bookdown::word_document2: default
+  bookdown::html_document2:
+      keep_md: yes
+always_allow_html: true
+bibliography: ../references.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
+```{r packages, message=FALSE, echo=FALSE, include=FALSE}
+library(tidyverse)     # create plots with ggplot, manipulate data, etc.
+library(broom.mixed)   # convert regression models into nice tables
+library(modelsummary)  # combine multiple regression models into a single table
+library(lme4)          # model specification / estimation 
+library(lmerTest)      # provides p-values in the output
+library(ggpubr)        # stile feature of ggplot
+library(gghalves)      # do special plots in ggplot
+library(kableExtra)    # for tables
+library("grid")        # for image plots   
+library("gridExtra")   # for image plots
+library("png")         # for image plots
+library(stargazer)
+```
+
+```{r, include=FALSE, message=FALSE}
+# read the cleaned long version data set
+data_long <- read_csv("data/cleaned_long.csv")
+
+# read wide version data set
+data_wide <- read_csv("data/cleaned_wide.csv") 
+
+# rename d wide
+d <- data_wide
+d_avg <- data_wide
+```
+
+# RQ1
+
+**RQ1: What is the average science knowledge score (1)?**
+
+```{r}
+# as table
+# d_avg %>% 
+#   mutate(avg_knowledge = as.factor(avg_knowledge)) %>% 
+#   group_by(avg_knowledge) %>% 
+#   count() %>% 
+#   ungroup() %>% 
+#   mutate(share = n / sum(n)) %>% 
+#   mutate_if(is.numeric, round, digits = 3)
+
+# as plot
+# Calculate the mean
+mean_value <- mean(d_avg$avg_knowledge)
+
+ggplot(d_avg, aes(x = avg_knowledge)) +
+  geom_bar() + 
+  geom_vline(xintercept = mean_value, color = "red", linetype = "dashed") +
+  geom_text(aes(x = mean_value, y = 40, label = paste("Mean =", round(mean_value, 2))), 
+            vjust = -0.5, hjust = 1.2) +
+  scale_x_continuous(breaks = seq(0, 1, 0.1)) +
+  labs(x = "Average science knowledge", 
+       y = "N")
+```
+
+
+# RQ2
+
+**RQ2: What is the average acceptance of the scientific consensus (2)?**
+
+```{r}
+# Calculate the mean
+mean_value <- mean(d_avg$avg_acceptance)
+
+ggplot(d_avg, aes(x = avg_acceptance)) +
+  geom_bar() + 
+  geom_vline(xintercept = mean_value, color = "red", linetype = "dashed") +
+  geom_text(aes(x = mean_value, y = 60, label = paste("Mean =", round(mean_value, 2))), 
+            vjust = -0.5, hjust = 1.2) +
+  scale_x_continuous(breaks = seq(0, 1, 0.1)) +
+  labs(x = "Average consensus acceptance", 
+       y = "N")
+```
+
+# RQ3
+
+**RQ3: What is the relationship between trust in science and, respectively, knowledge and acceptance?**
+
+```{r}
+plot_data <- d %>% 
+  group_by(wgm_sciencegeneral, avg_knowledge) %>% 
+  summarise(n = n())
+
+# Plot as a tile plot
+ggplot(plot_data, aes(x = avg_knowledge, y = wgm_sciencegeneral, fill = n)) +
+  geom_tile() +  # Add black border around tiles for better visibility
+  geom_jitter(inherit.aes = FALSE, data = d, aes(x = avg_knowledge, y = wgm_sciencegeneral),
+              width = 0.03, height = 0.08) +  # Scatter points within each tile
+    geom_smooth(method = "lm") +
+  scale_fill_viridis_c(option = "plasma") +  # Use Viridis color scale (Plasma)
+  scale_x_continuous(breaks = seq(0, 1, 0.1)) +
+  scale_y_continuous(breaks = 1:5) +
+  labs(x = "Average science knowledge", 
+       y = "Trust in science", 
+       fill = "N") +  # Update fill legend title
+  theme_minimal() 
+```
+
+```{r}
+plot_data <- d %>% 
+  group_by(wgm_sciencegeneral, avg_acceptance) %>% 
+  summarise(n = n())
+
+# Plot as a tile plot
+ggplot(plot_data, aes(x = avg_acceptance, y = wgm_sciencegeneral, fill = n)) +
+  geom_tile() +  # Add black border around tiles for better visibility
+  geom_jitter(inherit.aes = FALSE, data = d, aes(x = avg_acceptance, y = wgm_sciencegeneral),
+              width = 0.03, height = 0.08) +  # Scatter points within each tile
+  scale_fill_viridis_c(option = "plasma") +  # Use Viridis color scale (Plasma)
+  scale_x_continuous(breaks = seq(0, 1, 0.1)) +
+  scale_y_continuous(breaks = 1:5) +
+  labs(x = "Average consensus Acceptance", 
+       y = "Trust in science", 
+       fill = "N") +  # Update fill legend title
+  theme_minimal() 
+```
+
+## Difference between false and true answer acceptance
+
+```{r}
+# make a version with averages per participant, grouped by false/true ansers 
+veracity_data_avg <- data_long %>% 
+  # make numeric versions
+  mutate(acceptance_num = ifelse(acceptance == "Yes", 1, 0)
+  ) %>% 
+  group_by(id, knowledge) %>% 
+  # calculate by-participant averages
+  summarize(
+    n = n(),
+    n_accepted = sum(acceptance_num),
+    avg_acceptance  = sum(acceptance_num)/n(), 
+    wgm_sciencegeneral = mean(wgm_sciencegeneral)
+  ) %>% 
+  mutate(knowledge = ifelse(knowledge == FALSE, "False answers", "Correct answers"))
+
+# make data frame with average particpant data and wide format
+# false_data <- left_join(false_data, false_data_avg, by = "id")
+
+ggplot(veracity_data_avg, aes(x = avg_acceptance, y = wgm_sciencegeneral)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  scale_x_continuous(breaks = seq(0, 1, 0.1)) +
+  labs(x = "Average consensus acceptance", 
+       y = "Average trust in science") +  # Update fill legend title
+  theme_minimal() +
+  facet_wrap(~knowledge)
+
+```
+
+
+# RQ4 
+
+**RQ4: What is the relationship between conspiracy thinking and, respectively, knowledge and acceptance?**
+
+```{r}
+# Plot as a tile plot
+ggplot(d, aes(x = avg_knowledge, y = BCTI_avg)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  scale_x_continuous(breaks = seq(0, 1, 0.1)) +
+  labs(x = "Average science knowledge", 
+       y = "Average conspiracy thinking") +  # Update fill legend title
+  theme_minimal() 
+```
+
+```{r}
+ggplot(d, aes(x = avg_acceptance, y = BCTI_avg)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  scale_x_continuous(breaks = seq(0, 1, 0.1)) +
+  labs(x = "Average consensus acceptance", 
+       y = "Average conspiracy thinking") +  # Update fill legend title
+  theme_minimal() 
+```
+
+## Difference between false and true answer acceptance
+
+```{r}
+# make a version with averages per participant, grouped by false/true ansers 
+false_data_avg <- data_long %>% 
+  # make numeric versions
+  mutate(acceptance_num = ifelse(acceptance == "Yes", 1, 0)
+  ) %>% 
+  group_by(id, knowledge) %>% 
+  # calculate by-participant averages
+  summarize(
+    n = n(),
+    n_accepted = sum(acceptance_num),
+    avg_acceptance  = sum(acceptance_num)/n(), 
+    BCTI_avg = mean(BCTI_avg)
+  ) %>% 
+  mutate(knowledge = ifelse(knowledge == FALSE, "False answers", "Correct answers"))
+
+# make data frame with average particpant data and wide format
+# false_data <- left_join(false_data, false_data_avg, by = "id")
+
+ggplot(false_data_avg, aes(x = avg_acceptance, y = BCTI_avg)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  scale_x_continuous(breaks = seq(0, 1, 0.1)) +
+  labs(x = "Average consensus acceptance", 
+       y = "Average conspiracy thinking") +  # Update fill legend title
+  theme_minimal() +
+  facet_wrap(~knowledge)
+
+```
+
+Alternative plot
+
+```{r}
+plot_data <- data_long %>% 
+  mutate(BCTI_avg = round(BCTI_avg, digits = 0)) %>% 
+  group_by(knowledge, acceptance, BCTI_avg) %>% 
+  count() %>% 
+  group_by(knowledge, BCTI_avg) %>% 
+  mutate (share = n/sum(n)) %>% 
+  mutate_if(is.numeric, round, digits = 3) %>% 
+  mutate(knowledge = ifelse(knowledge == FALSE, "False answers", "Correct answers"))
+
+
+ggplot(plot_data, aes(x = BCTI_avg, y = share, fill = acceptance)) +
+  geom_col(position = "dodge") +
+  scale_y_continuous(labels = scales::percent_format(), breaks = seq(0, 1, 0.1)) +
+  scale_x_continuous(breaks = seq(1, 9, 1)) +
+  geom_text(aes(label = paste0(round(share * 100, 1), "%")),
+            position = position_dodge(width = 0.9),
+            vjust = -0.5, size = 3) +
+  scale_fill_viridis_d(option = "cividis") +
+  labs(x = "Average conspiracy thinking", fill = "Acceptance \nof consensus") +
+  theme_minimal() +
+  facet_wrap(~knowledge) +
+  theme(legend.position = "top")
+
+```
+
+
+
+# Additional RQs
+
+## Knowledge and Acceptance by science question
+
+```{r}
+# calculate share
+plot_data <- data_long %>% 
+  group_by(subject) %>% 
+  summarize(share_true = sum(knowledge == TRUE, na.rm = TRUE)/n(),
+            share_accepted = sum(acceptance == "Yes", na.rm = TRUE)/n()) 
+```
+
+```{r}
+# plot knowledge
+ggplot(plot_data, aes(x = reorder(subject, share_true), y = share_true)) +
+  geom_col() +
+  scale_y_continuous(labels = scales::percent_format(), breaks = seq(0, 1, 0.1)) +
+  labs(x = "Question", y = "Share of correct responses") +
+  coord_flip()
+```
+
+```{r}
+# plot acceptance
+ggplot(plot_data, aes(x = reorder(subject, share_accepted), y = share_accepted)) +
+  geom_col() +
+  scale_y_continuous(labels = scales::percent_format(), breaks = seq(0, 1, 0.1)) +
+  labs(x = "Question", y = "Share of acceptance") +
+  coord_flip()
+```
+
+## Open ended comments
+```{r}
+levels(as.factor(d$comments))
+```
+
+## Is the share of correct responses associated with the share of acceptance ?
+
+```{r}
+plot_data <- d %>% 
+  group_by(avg_knowledge, avg_acceptance) %>% 
+  summarise(n = n())
+
+# Plot as a tile plot
+ggplot(plot_data, aes(x = avg_knowledge, y = avg_acceptance, fill = n)) +
+  geom_tile() +  # Add black border around tiles for better visibility
+  geom_jitter(inherit.aes = FALSE, data = d, aes(x = avg_knowledge, y = avg_acceptance),
+              width = 0.03, height = 0.04) +  # Scatter points within each tile
+  scale_fill_viridis_c(option = "plasma") +  # Use Viridis color scale (Plasma)
+  scale_x_continuous(breaks = seq(0, 1, 0.1)) +
+  scale_y_continuous(breaks = seq(0, 1, 0.1)) +
+  labs(x = "Average science knowledge", 
+       y = "Average consensus acceptance", 
+       fill = "N") +  # Update fill legend title
+  theme_minimal() 
+```
+
+## What were the acceptance rates among true and false answers? 
+
+```{r}
+plot_data <- data_long %>% 
+  group_by(knowledge, acceptance) %>% 
+  count() %>% 
+  group_by(knowledge) %>% 
+  mutate (share = n/sum(n)) %>% 
+  mutate_if(is.numeric, round, digits = 3)
+
+
+ggplot(plot_data, aes(x = knowledge, y = share, fill = acceptance)) +
+  geom_col(position = "dodge") +
+  scale_y_continuous(labels = scales::percent_format(), breaks = seq(0, 1, 0.1)) +
+  geom_text(aes(label = paste0(round(share * 100, 1), "%")),
+            position = position_dodge(width = 0.9),
+            vjust = -0.5, size = 3) +
+  scale_fill_viridis_d(option = "cividis") +
+  labs(x = "Knowledge answer", fill = "Acceptance \nof consensus") +
+  theme_minimal()
+```
+
+## To which extent did people believe the different conspiracy items ? 
+
+```{r}
+BCTI_data <- data_long %>% 
+  # bring to long format
+  pivot_longer(cols = BCTI_apollo:BCTI_evolution, 
+               names_to = "BCTI_item", values_to = "score") %>% 
+  select(id, c(starts_with("BCTI"), score)) %>% 
+  group_by(BCTI_item) %>% 
+  summarize(avg_score = mean(score)) %>% 
+  ungroup()
+
+ggplot(BCTI_data, aes(x = reorder(BCTI_item, avg_score), y = avg_score)) +
+    geom_pointrange(aes(ymin = 1, ymax = avg_score),
+                  # Make the lines a little thicker and the dots a little bigger
+                  fatten = 2, size = 1) +
+  scale_y_continuous(limits = c(1, 9), breaks = seq(1, 9, 1)) +
+  labs(x = "Conspiracy item", y = "Average score") +
+  coord_cartesian(ylim = c(1, 9)) +
+  coord_flip()
+```
+
+## New plots
+
+```{r}
+plot_data <- data_long %>% 
+  drop_na(wgm_sciencegeneral) %>% 
+  group_by(wgm_sciencegeneral, acceptance) %>% 
+  count() %>% 
+  group_by(wgm_sciencegeneral) %>% 
+  mutate (share = n/sum(n)) %>% 
+  mutate_if(is.numeric, round, digits = 3)
+
+absolute_numbers <- plot_data %>% 
+  group_by(wgm_sciencegeneral) %>% 
+  summarise(n = sum(n))
+
+
+ggplot(plot_data, aes(x = wgm_sciencegeneral, y = share, fill = acceptance)) +
+  geom_col(position = "dodge") +
+  scale_y_continuous(labels = scales::percent_format(), breaks = seq(0, 1, 0.1)) +
+  geom_text(aes(label = paste0(round(share * 100, 1), "%")),
+            position = position_dodge(width = 0.9),
+            vjust = -0.5, size = 3) +
+  scale_fill_viridis_d(option = "cividis") +
+  labs(x = "Trust in science", fill = "Acceptance \nof consensus") +
+  theme_minimal() +
+  geom_bracket(data = absolute_numbers,
+               aes(xmin = as.numeric(factor(wgm_sciencegeneral)) - 0.4, 
+                   xmax = as.numeric(factor(wgm_sciencegeneral)) + 0.4, 
+                   y.position = 1.05, label =  paste0("n = ", n)),
+               inherit.aes = FALSE,
+               step.increase = 0)
+```
+
+```{r}
+# Define breaks for each integer from 1 to 9
+breaks <- seq(1, 9, by = 1)
+
+# Define labels for each bin in the desired format
+labels <- paste0(1:8, "-", 2:9)
+
+plot_data <- data_long %>% 
+  drop_na(BCTI_avg) %>% 
+  # # Create the binned version of BCTI_avg
+  mutate(BCTI_avg_binned = cut(BCTI_avg, breaks = breaks, labels = labels, include.lowest = TRUE, right = FALSE)) %>% 
+  group_by(BCTI_avg_binned, acceptance) %>% 
+  summarize(n = n()) %>% 
+  group_by(BCTI_avg_binned) %>% 
+  mutate (share = n/sum(n)) %>% 
+  mutate_if(is.numeric, round, digits = 3)
+
+n_participants <-  data_long %>% 
+  drop_na(BCTI_avg) %>% 
+  # # Create the binned version of BCTI_avg
+  mutate(BCTI_avg_binned = cut(BCTI_avg, breaks = breaks, labels = labels, include.lowest = TRUE, right = FALSE)) %>% 
+  group_by(BCTI_avg_binned) %>% 
+  summarize(n_participants = n_distinct(id))
+
+plot_data <- left_join(plot_data, n_participants)
+
+absolute_numbers <- plot_data %>% 
+  group_by(BCTI_avg_binned) %>% 
+  summarise(n_participants = sum(n_participants), 
+            n = sum(n))
+
+
+ggplot(plot_data, aes(x = BCTI_avg_binned, y = share, fill = acceptance)) +
+  geom_col(position = "dodge") +
+  scale_y_continuous(labels = scales::percent_format(), breaks = seq(0, 1, 0.1)) +
+  geom_text(aes(label = paste0(round(share * 100, 1), "%")),
+            position = position_dodge(width = 0.9),
+            vjust = -0.5, size = 3) +
+  scale_fill_viridis_d(option = "cividis") +
+  labs(x = "Average conspiracy thinking (binned)", fill = "Acceptance \nof consensus") +
+  theme_minimal() +
+  geom_bracket(data = absolute_numbers,
+               aes(xmin = as.numeric(factor(BCTI_avg_binned)) - 0.4, 
+                   xmax = as.numeric(factor(BCTI_avg_binned)) + 0.4, 
+                   y.position = 1.05, label =  paste0("n = ", n)),
+               inherit.aes = FALSE,
+               step.increase = 0, 
+               label.size = 3)
+```

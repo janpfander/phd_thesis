@@ -1,0 +1,49 @@
+# Acceptance and knowledge by question {#by-question-variation}
+
+Figure \@ref(fig:knowledge-overview) shows the share of correct answers, and Figure \@ref(fig:knowledge-overview) the acceptance rate of the scientific consensus, for each knowledge question asked in the respective study. 
+
+```{r}
+# calculate share
+plot_data <- combined_data %>% 
+  mutate(study = paste0("Study ", study), 
+         subject = ifelse(study == "Study 4", 
+                          paste0(subject, " (non-basic)"), 
+                          subject)
+         ) %>% 
+  group_by(study, subject) %>% 
+  summarize(share_true = sum(knowledge == TRUE, na.rm = TRUE)/n(),
+            share_accepted = sum(acceptance == "Yes", na.rm = TRUE)/n())
+```
+
+(ref:questions-knowledge) Share of correct answers by question. 
+
+```{r questions-knowledge, fig.cap="(ref:questions-knowledge)", fig.width=8, fig.height=8}
+# plot knowledge
+ggplot(plot_data, aes(x = reorder(subject, share_true), y = share_true)) +
+    geom_pointrange(aes(ymin = 0, ymax = share_true),
+                  # Make the lines a little thicker and the dots a little bigger
+                  fatten = 2, size = 1) +
+  scale_y_continuous(labels = scales::percent_format(), breaks = seq(0, 1, 0.2), limits = c(0, 1.02)) +
+  labs(x = "Question", y = "Share of correct responses") +
+  coord_flip() + 
+  plot_theme + 
+  facet_wrap(~study)
+```
+
+(ref:questions-acceptance) Acceptance rate of consensus by question. 
+
+```{r questions-acceptance, fig.cap="(ref:questions-acceptance)", fig.width=8, fig.height=8}
+# plot acceptance
+ggplot(plot_data, aes(x = reorder(subject, share_true), y = share_accepted)) +
+  geom_pointrange(aes(ymin = 0, ymax = share_accepted),
+                  # Make the lines a little thicker and the dots a little bigger
+                  fatten = 2, size = 1) +
+  scale_y_continuous(labels = scales::percent_format(), breaks = seq(0, 1.02, 0.2), limits = c(0, 1.02)) +
+  labs(x = "Question", y = "Acceptance rate") +
+  coord_flip() +
+  plot_theme +
+  facet_wrap(~study)
+```
+
+
+

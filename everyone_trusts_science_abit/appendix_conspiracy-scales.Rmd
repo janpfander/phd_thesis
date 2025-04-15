@@ -1,0 +1,59 @@
+# Conspiracy Measures {#exp1}
+
+In addition to the Belief in Conspiracy Theory Inventory (BCTI) by @pennycookOverconfidentlyConspiratorialConspiracy2022 which report in the main study, we also assessed two other consipiracy thinking measures: The conspiracy mentality questionnaire (CMQ) by @bruderMeasuringIndividualDifferences2013 and the Single Item Conspiracy Beliefs Scale (SICBS) by @lantianMeasuringBeliefConspiracy2016 (Table \@ref(tab:overview-conspiracy-measures)).  
+
+```{r overview-conspiracy-measures}
+# Create the data for the table
+conspiracy_measures <- data.frame(
+  Measure = c(
+    "Belief in Conspiracy Theory Inventory (BCTI)", 
+    "Conspiracy Mentality Questionnaire (CMQ)", 
+    "", "", "", "", "",
+    "Single Item Conspiracy Beliefs Scale (SICBS)"
+  ),
+  Description = c(
+    "By Pennycook et al., 2022, presented in the main article.", 
+    "By Bruder et al., 2013. Respondents are asked how much they agree with the following statements:", 
+    "- Many important things happen in the world, which the public is never informed about.",
+    "- Politicians usually do not tell us the true motives for their decisions.",
+    "- Government agencies closely monitor all citizens.",
+    "- Events which seem unrelated are often the result of secret activities.",
+    "- There are secret organizations that greatly influence political decisions.",
+    "By Lantian et al., 2016. The item is: 'I think that the official version of events given by the authorities very often hides the truth.'"
+  ),
+  Scale = c(
+    "1 - 9 (1 = Completely false, 5 = Unsure, 9 = Completely true)", 
+    "0% - 100% (0 = certainly not, 100 = certain)",
+    "", "", "", "", "",
+    "1 - 9 (1 = Completely false, 5 = Unsure, 9 = Completely true)"
+  )
+)
+
+# Create the basic table
+if (knitr::is_latex_output() || knitr::is_html_output()) {
+  # For LaTeX or HTML: Use kbl, column_spec, and kable_styling
+  table_output <- conspiracy_measures %>%
+    kbl(
+      booktabs = TRUE, 
+      longtable = TRUE,
+      caption = "Conspiracy measures",
+      full_width = TRUE
+    ) %>%
+    kableExtra::kable_styling(font_size = 8) %>%
+    kableExtra::column_spec(1, width = "10em") %>%
+    kableExtra::column_spec(2, width = "20em") %>%
+    kableExtra::column_spec(3, width = "10em")
+} else {
+  # For Word: Use flextable for better Word compatibility
+  table_output <- flextable::flextable(conspiracy_measures) %>%
+    flextable::set_caption(caption = "Conspiracy measures") %>%
+    flextable::autofit() %>%
+    flextable::width(j = 1, width = 2) %>%
+    flextable::width(j = 2, width = 4) %>%
+    flextable::width(j = 3, width = 2) # Adjust widths as needed
+}
+
+# Display the table
+table_output
+```
+

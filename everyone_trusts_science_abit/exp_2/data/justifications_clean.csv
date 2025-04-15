@@ -1,0 +1,36 @@
+id,question,answer,category
+45,lasers,I read the article.,No justification
+45,salt,Read the article provided.,No justification
+47,diamonds,Are diamonds made of carbon? Scientific consensus: Diamonds are made of carbon. Do you think you could explain why you answered differently?,No justification
+78,sex,no,No justification
+78,salt,no,No justification
+109,electrons,Maybe,No justification
+172,salt,no,No justification
+47,lasers,"The statement ""lasers do not work by focusing sound waves"" is correct according to scientific consensus. Lasers operate on the principles of stimulated emission of radiation, wherein photons are emitted in a coherent, focused beam through the process of stimulated emission.",Mistake
+47,water,it likely arose from a mistake or miscommunication.,Mistake
+50,orbit,I honestly couldn't remember.,Mistake
+71,water,"After I put ""No"", I realized that I was thinking about ""H2o"" incorrectly. So yes, I actually do agree.",Mistake
+79,orbit,It’s early and I’m tired. I misread it.,Mistake
+105,salt,"I think I simply misunderstood the paragraph. I'm actually trying to read it thoroughly and answering truthfully, but I have misread it.",Mistake
+132,salt,"Because it says that table salt is not made of calcium carbonate, so I clicked no.",Mistake
+183,salt,I thought the scientific consensus was right,Mistake
+189,salt,I made an error in my selection.,Mistake
+33,sex,"Because I didn't think the information provided here was accurate, more or less.",Not convinced
+50,speed,When I looked it up I got two different answers.,Not convinced
+133,lasers,I feel like the excerpt that was provided did not definitively state the answer.,Not convinced
+140,lasers,It was confusing to understand the explanation of why lasers don’t focus on sound,Not convinced
+170,lasers,"I may have misread, but I did not see confirmation of this.",Not convinced
+73,electrons,Atoms are known to be the smallest unit of matter.,Personal convictions
+127,orbit,I do not believe in the heliocentric model of an earth spinning around a centralized sun.,Personal convictions
+130,continents,I don't think the continent move rather it is the atmosphere,Personal convictions
+130,sex,I think that the gene both parent release should determine the sex of the baby,Personal convictions
+131,antibiotics,There are some antibiotics that also kill viruses,Personal convictions
+152,continents,I think that they were that way after the ice age. It split apart the whole surface and then water filled in and they have remained the same for ever. They are not moving around or have they for millions of years.,Personal convictions
+152,orbit,"The Earth circles the sun every day. The dark side is when the moon comes out. So everyday, you have daylight and dark (moon). Dark comes from the dark side of the sun.",Personal convictions
+178,electrons,This answer is different because atoms is everywhere and you can't see it but electrons aren't out that as much at all but you could possibly know it's there,Personal convictions
+178,antibiotics,Because antibiotics can kill bacteria in which kills the virus as well in the process so you get healed with this product,Personal convictions
+178,sex,There is no 100% evidence that this is the case and I still fully believe that it is from both genes to make this decision.,Personal convictions
+179,antibiotics,Antibiotics seem that if they are capable of killing tiny things such as bacteria then they are most likely to attach to other things in out bodies and cause it harm although unintentional.,Personal convictions
+186,sex,"The scientific consensus is clear: both parents' genes determine the sex of a baby, specifically the sex chromosomes they contribute.",Personal convictions
+77,continents,"I believe God make it they way it is and if He wanted it changed, He would have done it",Religious Beliefs
+127,continents,"I'm a young earth Christian. I believe the Christian Bible (and outside sources) offers ample evidence that the earth is thousands of years old, not millions.",Religious Beliefs

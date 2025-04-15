@@ -1,0 +1,296 @@
+# Study 1 {#exp1}
+
+## Participants
+
+We recruited 200 participants from the US via prolific. 6 participants failed our attention check, resulting in a final sample of `r exp1_descriptives$n_subj` participants (`r exp1_descriptives$gender$female$n` female, `r exp1_descriptives$gender$male$n` male; $age_\text{mean}$: `r exp1_descriptives$age$mean`, $age_\text{sd}$: `r exp1_descriptives$age$sd`, $age_\text{median}$: `r exp1_descriptives$age$median`). Since we did not have any prior assumptions on effect sizes, we did not do a power analysis.
+
+## Materials
+
+\FloatBarrier
+
+(ref:stimulus-example) Example of a science question, the scientific consensus and the corresponding acceptance question.
+
+```{r stimulus-example, echo=FALSE, out.width= "100%", fig.align="left", fig.show="hold", fig.cap="(ref:stimulus-example)"}
+knitr::include_graphics("./figures/study1_question_example.png")
+```
+
+```{r questions-with-sources}
+# items <- read_csv("exp_1/materials/knowledge_items.csv") %>% 
+#   mutate(id = 1:nrow(.)) %>% 
+#   select(id, Question, `Scientific consensus`, `Reference(s)`)
+# 
+# # Output the table
+# kbl(items, booktabs = T, longtable = TRUE,
+#     caption = "Science knowledge items", 
+#     full_width = T) %>%
+#   column_spec(1, width = "1em") %>%
+#   column_spec(2, width = "10em") %>%
+#   column_spec(3, width = "10em") %>%
+#   column_spec(4, width = "15em") 
+```
+
+## Results
+
+Regarding RQ1 and RQ2, participants answered on average `r exp1_descriptives$means$knowledge_mean` (sd = `r exp1_descriptives$means$knowledge_sd`) of the questions correctly, and accepted the scientific consensus on average for `r exp1_descriptives$means$acceptance_mean` (sd = `r exp1_descriptives$means$acceptance_sd`) of the questions.
+
+In most cases (`r exp1_descriptives$conditional_acceptance$false$Yes$share`), participants readily accepted the scientific consensus after having given the wrong answer to a question. In very few cases (`r exp1_descriptives$conditional_acceptance$true$No$share`), participants who gave the correct response afterwards rejected the scientific consensus, thereby contradicting their own initial response. We believe this might have been due to inattention.
+
+For RQ3, we find a positive but small correlation between both science knowledge and trust in science (r = `r exp1_descriptives$cor_trust_knowledge$estimate`, p `r exp1_descriptives$cor_trust_knowledge$p.value`), and acceptance of scientific consensus and trust in science (r = `r exp1_descriptives$cor_trust_acceptance$estimate`, p `r exp1_descriptives$cor_trust_acceptance$p.value`). The more people are knowledgeable about science and the more they tend to accept the scientific consensus, the more they tend to trust science. These correlations are relatively weak, which might be partly due to ceiling effects: As illustrated in Fig. \@ref(fig:exp1-plot-overview), (i) most people do trust science, and (ii) that is true even among people with low knowledge or acceptance rates.
+
+For RQ4, we find a negative correlation of similar magnitude between conspiracy thinking and science knowledge (r = `r exp1_descriptives$cor_conspiracy_knowledge$estimate`, p `r exp1_descriptives$cor_conspiracy_knowledge$p.value`), and conspiracy thinking and acceptance of scientific consensus (r = `r exp1_descriptives$cor_conspiracy_acceptance$estimate`, p `r exp1_descriptives$cor_conspiracy_acceptance$p.value`).
+
+Below, we show that these associations are robust when using alternative measures of trust and conspiracy thinking. We also provide more descriptive statistics, such as knowledge and acceptance by science questions.
+
+Are trust in science and conspiracy thinking, respectively, associated with being more easily convinced of the scientific consensus? In our main analyses, we looked at correlations of acceptance across all observations. One possibility is that the associations between trust in science/conspiracy thinking and acceptance of scientific consensus are explained by science knowledge: People who give the right answer in the first place are more ready to accept the consensus, and trust in science/conspiracy thinking are mostly associated with this knowledge, but not with willingness to accept the consensus. To addressed this potential confound, in a non-preregistered analysis, we restricted our sample to cases where participants gave the wrong answer to the knowledge question. We then calculated the correlation between trust in science and average acceptance rate by participant. We find no statistically significant correlation of acceptance with neither conspiracy thinking (r = `r exp1_descriptives$false_answers_cor_conspiracy_acceptance$estimate`, p `r exp1_descriptives$false_answers_cor_conspiracy_acceptance$p.value`), nor with trust in science (r = `r exp1_descriptives$false_answers_cor_trust_acceptance$estimate`, p `r exp1_descriptives$false_answers_cor_trust_acceptance$p.value`).
+
+## Discussion
+
+These results suggest that most people accept the scientific consensus most of the time. Even when people do not know the correct answer to a science question, they tend to mostly accept the scientific consensus afterwards. Yet, in `r exp1_descriptives$conditional_acceptance$false$No$share` of the cases, participants rejected the scientific consensus after having given the wrong answer, suggesting that simply stating the consensus is not sufficient to convince participants sometimes. In general, people with lower trust in science and who believe more in conspiracy theories tend to both know less about science and accept the scientific consensus less.
+
+## Comparing items
+
+### Conspiracy theories
+
+Table \@ref(tab:correlation-conspiracy) shows the correlations of the three different scales assessing conspiracy thinking.
+
+```{r correlation-conspiracy}
+correlation_matrix <- exp1_wide %>%
+  select(BCTI_avg, CMQ_avg, SICBS) %>% 
+  rename(BCTI = BCTI_avg, 
+         CMQ = CMQ_avg) %>% 
+  cor()
+
+apa_table(correlation_matrix, 
+          caption = "Correlations of the three different scales assessing conspiracy thinking",
+          placement = "h")
+```
+
+### Trust in science
+
+Table \@ref(tab:correlation-trust) shows the correlations of the three different items measuring trust in science.
+
+```{r correlation-trust}
+correlation_matrix <- exp1_wide %>%
+  select(wgm_sciencegeneral, wgm_scientists, pew) %>% 
+  cor()
+
+apa_table(correlation_matrix, 
+          caption = "Correlations of the three different items measuring trust in science",
+          placement = "h")
+```
+
+## Correlations with alternative measures
+
+Table \@ref(tab:correlations-outcomes) shows the correlations between knowledge and acceptance, respectively, and outcome variables.
+
+```{r}
+# Standardize all variables. Linear regression on standardized variables is equivalent to correlation
+standardized_variables <- exp1_wide %>% 
+  select(avg_acceptance, avg_knowledge, BCTI_avg, CMQ_avg, SICBS, wgm_scientists, wgm_sciencegeneral, pew) %>% 
+  mutate(across(everything(), ~scale(.x)))
+```
+
+```{r}
+# List of variables
+variables <- c("BCTI_avg", "CMQ_avg", "SICBS", "wgm_scientists", "wgm_sciencegeneral", "pew")
+
+# Run regression for each variable and store results in a list
+results_list_knowledge <- map(variables, ~ run_regression(standardized_variables, .x, "avg_knowledge"))
+results_list_acceptance <- map(variables, ~ run_regression(standardized_variables, .x, "avg_acceptance"))
+```
+
+```{r correlations-outcomes}
+# as data frame/output table
+results <- bind_rows(list(results_list_knowledge, results_list_acceptance))
+results %>% 
+  filter(term != "intercept") %>%
+    mutate_if(is.numeric, round, digits = 2) %>% 
+  # make a combined variable of estimate and p.value
+  mutate(estimate = paste0(estimate, " (p", p.value, ")")) %>% 
+  select(outcome, term, estimate) %>% 
+  pivot_wider(names_from = term, 
+              values_from = estimate) %>% 
+  rename(`Correlation with knowledge` = avg_knowledge, 
+         `Correlation with acceptance` = avg_acceptance, 
+         ) %>% 
+  mutate(outcome = case_when(outcome == "BCTI_avg" ~ "BCTI (main conspiracy measure)", 
+                             outcome == "CMQ_avg" ~ "CMQ", 
+                             outcome == "SICBS" ~ "SICBS", 
+                             outcome == "wgm_scientists" ~ "WGM trust scientists",
+                             outcome == "wgm_sciencegeneral" ~ "WGM trust general (main trust measure)",
+                             outcome == "pew" ~ "PEW trust scientists",
+                             )) %>% 
+  apa_table(caption = "Correlations between knowledge and acceptance, respectively, and outcome variables")
+```
+
+## Results conditional on false responses
+
+Table \@ref(tab:false-response-regression) shows the correlations between acceptance and outcome variables based on linear regression models on standardized values.
+
+```{r}
+# Standardize all variables. Linear regression on standardized variables is equivalent to correlation
+standardized_variables <- exp1_false_knowledge %>% 
+  select(avg_acceptance, BCTI_avg, CMQ_avg, SICBS, wgm_scientists, wgm_sciencegeneral, pew) %>% 
+  mutate(across(everything(), ~scale(.x)))
+```
+
+```{r}
+# Run regression for each variable and store results in a list
+results_list <- setNames(map(variables, ~ run_regression(standardized_variables, .x, "avg_acceptance", return = "model")), variables)
+```
+
+```{r false-response-regression}
+# modelsummary(results_list,
+#              stars = TRUE,
+#              caption = "Based on false response data only, correlations between acceptance and outcome variables based on linear regression models on standardized values")
+# 
+
+
+
+# Generate the table with the correct format
+if (knitr::is_latex_output() || knitr::is_html_output()) {
+  modelsummary(results_list,
+               stars = TRUE,
+               caption = "Based on false response data only, correlations between acceptance and outcome variables based on linear regression models on standardized values",
+               output = "kableExtra")
+
+} else {
+  modelsummary(results_list,
+               stars = TRUE,
+               caption = "Based on false response data only, correlations between acceptance and outcome variables based on linear regression models on standardized values",
+               output = "flextable") %>%
+    flextable::set_caption("Based on false response data only, correlations between acceptance and outcome variables based on linear regression models on standardized values") %>%
+    flextable::autofit() %>%  # Ensure proper column width
+    flextable::theme_booktabs()  # Use a professional-looking theme
+  
+}
+
+
+```
+
+(ref:exp1-plot-overview) Summary plot for Study 1. **A** Shows the distribution of science knowledge (left) and acceptance of scientific consensus **B** Shows the relationship between trust in science and science knowledge/acceptance of scientific consensus **C** Shows the relationship between conspiracy thinking and science knowledge/acceptance of scientific consensus
+
+```{r exp1-plot-overview, fig.cap="(ref:exp1-plot-overview)", fig.height= 10, fig.width=10}
+# Plot distributions of knowledge and acceptance and their mean
+
+mean_value_knowledge <- mean(exp1_wide$avg_knowledge)
+max_n <- max(table(exp1_wide$avg_acceptance))
+
+knowledge_mean <- ggplot(exp1_wide, aes(x = avg_knowledge)) +
+  geom_bar() + 
+  geom_vline(xintercept = mean_value_knowledge, color = "red", linetype = "dashed") +
+  geom_text(aes(x = mean_value_knowledge, y = 40, label = paste("Mean =", round(mean_value_knowledge, 2))), 
+            vjust = -0.5, hjust = 1.2, check_overlap = TRUE) +
+  scale_x_continuous(breaks = seq(0, 1, 0.1)) +
+  scale_y_continuous(breaks = seq(0, max_n, 10)) +
+  coord_cartesian(xlim = c(0, 1), 
+                  ylim = c(0, max_n)) +
+  labs(x = "Average science knowledge", 
+       y = "N")
+
+mean_value <- mean(exp1_wide$avg_acceptance)
+
+acceptance_mean <- ggplot(exp1_wide, aes(x = avg_acceptance)) +
+  geom_bar() + 
+  geom_vline(xintercept = mean_value, color = "red", linetype = "dashed") +
+  geom_text(aes(x = mean_value, y = 60, label = paste("Mean =", round(mean_value, 2))), 
+            vjust = -0.5, hjust = 1.2, check_overlap = TRUE) +
+  scale_x_continuous(breaks = seq(0, 1, 0.1)) +
+  scale_y_continuous(breaks = seq(0, max_n, 10)) +
+  coord_cartesian(xlim = c(0, 1), 
+                  ylim = c(0, max_n)) +
+  labs(x = "Average consensus acceptance", 
+       y = "N")
+
+# Trust in science plots
+plot_data <- exp1_wide %>% 
+  group_by(wgm_sciencegeneral, avg_knowledge) %>% 
+  summarise(n = n())
+
+trust_knowledge <- ggplot(plot_data, aes(x = avg_knowledge, y = wgm_sciencegeneral, fill = n)) +
+  geom_tile() +  # Add black border around tiles for better visibility
+  geom_jitter(inherit.aes = FALSE, data = exp1_wide, aes(x = avg_knowledge, y = wgm_sciencegeneral),
+              width = 0.03, height = 0.08) +  # Scatter points within each tile
+  scale_fill_viridis_c(option = "plasma") +  # Use Viridis color scale (Plasma)
+  scale_x_continuous(breaks = seq(0, 1, 0.1)) +
+  coord_cartesian(xlim = c(0, 1)) +
+  scale_y_continuous(breaks = 1:5) +
+  labs(x = "Average science knowledge", 
+       y = "Trust in science", 
+       fill = "N")
+
+plot_data <- exp1_wide %>% 
+  group_by(wgm_sciencegeneral, avg_acceptance) %>% 
+  summarise(n = n())
+
+
+trust_acceptance <- ggplot(plot_data, aes(x = avg_acceptance, y = wgm_sciencegeneral, fill = n)) +
+  geom_tile() +  
+  geom_jitter(inherit.aes = FALSE, data = exp1_wide, aes(x = avg_acceptance, y = wgm_sciencegeneral),
+              width = 0.03, height = 0.08) + 
+  scale_fill_viridis_c(option = "plasma") + 
+  scale_x_continuous(breaks = seq(0, 1, 0.1)) +
+  coord_cartesian(xlim = c(0, 1)) +
+  scale_y_continuous(breaks = 1:5) +
+  labs(x = "Average consensus Acceptance", 
+       y = "Trust in science", 
+       fill = "N") 
+
+# Conspiracy Thinking plots
+
+conspiracy_knowledge <- ggplot(exp1_wide, aes(x = avg_knowledge, y = BCTI_avg)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  scale_x_continuous(breaks = seq(0, 1, 0.1)) +
+  scale_y_continuous(breaks = 1:9) +
+  coord_cartesian(xlim = c(0, 1), 
+                  ylim = c(0, 9)) +
+  labs(x = "Average science knowledge", 
+       y = "Average conspiracy thinking")
+
+conspiracy_acceptance <- ggplot(exp1_wide, aes(x = avg_acceptance, y = BCTI_avg)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  scale_x_continuous(breaks = seq(0, 1, 0.1)) +
+  scale_y_continuous(breaks = 1:9) +
+  coord_cartesian(xlim = c(0, 1), 
+                  ylim = c(0, 9)) +
+  labs(x = "Average consensus acceptance", 
+       y = "Average conspiracy thinking") +
+  theme(legend.position = "top")
+
+# Combine plots
+
+# distributions
+distributions <- ggarrange(knowledge_mean + 
+                             rremove("xlab") , 
+                           acceptance_mean + 
+                             rremove("xlab") +
+                             rremove("ylab")) 
+
+# trust
+trust <- ggarrange(trust_knowledge + 
+                             rremove("xlab") +
+                             guides(fill = "none") +
+                             labs(caption = NULL) , 
+                           trust_acceptance + 
+                             rremove("xlab") +
+                             rremove("ylab"), 
+                   common.legend = TRUE) 
+
+# conspiracy
+conspiracy <- ggarrange(conspiracy_knowledge, 
+                           conspiracy_acceptance + 
+                             rremove("ylab"), 
+                   common.legend = TRUE) 
+
+
+# common plot
+patchwork <- (distributions / trust / conspiracy) + 
+  plot_annotation(tag_levels = 'A')  
+
+patchwork
+
+```
+
+

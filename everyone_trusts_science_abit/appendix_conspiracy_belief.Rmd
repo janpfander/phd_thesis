@@ -1,0 +1,48 @@
+# Conspiracy Belief {#conspiracy-belief}
+
+Figure \@ref(fig:conspiracy-belief-overview) shows the average belief in each of the conspiracy theories across the four studies.  
+
+(ref:conspiracy-belief-overview) Average belief in conspiracy theories.
+
+```{r conspiracy-belief-overview, fig.cap="(ref:conspiracy-belief-overview)", fig.width=8, fig.height=7}
+plot_data <- combined_data %>% 
+  mutate(study = paste0("Study ", study)) %>%
+  # bring to long format
+  pivot_longer(cols = BCTI_apollo:BCTI_evolution, 
+               names_to = "BCTI_item", values_to = "score") %>% 
+  # make a belief variable if participant indicates a numeric answer above the
+  # a belief threshold 
+  mutate(belief = ifelse(score == 9, TRUE, 
+                         ifelse(is.na(score), NA, FALSE)
+  ),
+  BCTI_item = sub("^BCTI_", "", BCTI_item),
+  # rename BCTI items
+  BCTI_item = case_when(
+    BCTI_item == "apollo" ~ "Moon landing", 
+    BCTI_item == "cancer" ~ "Cancer cure", 
+    BCTI_item == "viruses" ~ "Viruses",
+    BCTI_item == "climatechange" ~ "Climate change",
+    BCTI_item == "flatearth" ~ "Flat earth",
+    BCTI_item == "autism" ~ "Vaccine autism",
+    BCTI_item == "polio" ~ "Vaccine cancer",
+    BCTI_item == "alien" ~ "Aliens",
+    BCTI_item == "hydorxychlor" ~ "Covid hydroxychloroquine",
+    BCTI_item == "evolution" ~ "Evolution"
+  )
+  ) %>%
+  select(id, study, c(starts_with("BCTI"), score)) %>% 
+  group_by(study, BCTI_item) %>% 
+  summarize(avg_score = mean(score, na.rm=TRUE)) %>% 
+  ungroup()
+
+ggplot(plot_data, aes(x = reorder(BCTI_item, avg_score), y = avg_score)) +
+    geom_pointrange(aes(ymin = 1, ymax = avg_score),
+                  # Make the lines a little thicker and the dots a little bigger
+                  fatten = 2, size = 1) +
+  scale_y_continuous(limits = c(1, 9), breaks = seq(1, 9, 1)) +
+  labs(x = "Conspiracy belief", y = "Average score") +
+  coord_cartesian(ylim = c(1, 9)) +
+  coord_flip() +
+  plot_theme +
+  facet_wrap(~study)
+```

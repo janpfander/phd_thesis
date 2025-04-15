@@ -1,0 +1,174 @@
+---
+title: "Analysis Study 3"
+output:
+  bookdown::pdf_document2: default
+  bookdown::word_document2: default
+  bookdown::html_document2:
+      keep_md: yes
+always_allow_html: true
+bibliography: ../references.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
+```{r packages, message=FALSE, echo=FALSE, include=FALSE}
+library(tidyverse)     # create plots with ggplot, manipulate data, etc.
+library(broom.mixed)   # convert regression models into nice tables
+library(modelsummary)  # combine multiple regression models into a single table
+library(lme4)          # model specification / estimation 
+library(lmerTest)      # provides p-values in the output
+library(ggpubr)        # stile feature of ggplot
+library(gghalves)      # do special plots in ggplot
+library(kableExtra)    # for tables
+library("grid")        # for image plots   
+library("gridExtra")   # for image plots
+library("png")         # for image plots
+library(stargazer)
+```
+
+```{r, include=FALSE, message=FALSE}
+# read the cleaned long version data set
+data_long <- read_csv("data/cleaned_long.csv")
+
+# read wide version data set
+data_wide <- read_csv("data/cleaned_wide.csv") 
+```
+
+
+```{r}
+plot_data <- data_long %>% 
+  group_by(knowledge, acceptance) %>% 
+  count() %>% 
+  group_by(knowledge) %>% 
+  mutate (share = n/sum(n)) %>% 
+  mutate_if(is.numeric, round, digits = 3)
+
+absolute_numbers <- plot_data %>% 
+  group_by(knowledge) %>% 
+  summarise(n = sum(n))
+
+
+ggplot(plot_data, aes(x = knowledge, y = share, fill = acceptance)) +
+  geom_col(position = "dodge") +
+  scale_y_continuous(labels = scales::percent_format(), breaks = seq(0, 1, 0.1)) +
+  geom_text(aes(label = paste0(round(share * 100, 1), "%")),
+            position = position_dodge(width = 0.9),
+            vjust = -0.5, size = 3) +
+  scale_fill_viridis_d(option = "cividis") +
+  labs(x = "Knowledge answer", fill = "Acceptance \nof consensus") +
+  theme_minimal() +
+  geom_bracket(data = absolute_numbers,
+               aes(xmin = as.numeric(factor(knowledge)) - 0.4, 
+                   xmax = as.numeric(factor(knowledge)) + 0.4, 
+                   y.position = 1.05, label =  paste0("n = ", n)),
+               inherit.aes = FALSE,
+               step.increase = 0)
+```
+
+## New plots
+
+```{r}
+plot_data <- data_long %>% 
+  drop_na(wgm_sciencegeneral) %>% 
+  group_by(wgm_sciencegeneral, acceptance) %>% 
+  count() %>% 
+  group_by(wgm_sciencegeneral) %>% 
+  mutate (share = n/sum(n)) %>% 
+  mutate_if(is.numeric, round, digits = 3)
+
+absolute_numbers <- plot_data %>% 
+  group_by(wgm_sciencegeneral) %>% 
+  summarise(n = sum(n))
+
+
+ggplot(plot_data, aes(x = wgm_sciencegeneral, y = share, fill = acceptance)) +
+  geom_col(position = "dodge") +
+  scale_y_continuous(labels = scales::percent_format(), breaks = seq(0, 1, 0.1)) +
+  geom_text(aes(label = paste0(round(share * 100, 1), "%")),
+            position = position_dodge(width = 0.9),
+            vjust = -0.5, size = 3) +
+  scale_fill_viridis_d(option = "cividis") +
+  labs(x = "Trust in science", fill = "Acceptance \nof consensus") +
+  theme_minimal() +
+  geom_bracket(data = absolute_numbers,
+               aes(xmin = as.numeric(factor(wgm_sciencegeneral)) - 0.4, 
+                   xmax = as.numeric(factor(wgm_sciencegeneral)) + 0.4, 
+                   y.position = 1.05, label =  paste0("n = ", n)),
+               inherit.aes = FALSE,
+               step.increase = 0)
+```
+
+
+```{r}
+# Define breaks for each integer from 1 to 9
+breaks <- seq(1, 9, by = 1)
+
+# Define labels for each bin in the desired format
+labels <- paste0(1:8, "-", 2:9)
+
+plot_data <- data_long %>% 
+  drop_na(BCTI_avg) %>% 
+  # # Create the binned version of BCTI_avg
+  mutate(BCTI_avg_binned = cut(BCTI_avg, breaks = breaks, labels = labels, include.lowest = TRUE, right = FALSE)) %>% 
+  group_by(BCTI_avg_binned, acceptance) %>% 
+  summarize(n = n()) %>% 
+  group_by(BCTI_avg_binned) %>% 
+  mutate (share = n/sum(n)) %>% 
+  mutate_if(is.numeric, round, digits = 3)
+
+n_participants <-  data_long %>% 
+  drop_na(BCTI_avg) %>% 
+  # # Create the binned version of BCTI_avg
+  mutate(BCTI_avg_binned = cut(BCTI_avg, breaks = breaks, labels = labels, include.lowest = TRUE, right = FALSE)) %>% 
+  group_by(BCTI_avg_binned) %>% 
+  summarize(n_participants = n_distinct(id))
+
+plot_data <- left_join(plot_data, n_participants)
+
+absolute_numbers <- plot_data %>% 
+  group_by(BCTI_avg_binned) %>% 
+  summarise(n_participants = sum(n_participants), 
+            n = sum(n))
+
+
+ggplot(plot_data, aes(x = BCTI_avg_binned, y = share, fill = acceptance)) +
+  geom_col(position = "dodge") +
+  scale_y_continuous(labels = scales::percent_format(), breaks = seq(0, 1, 0.1)) +
+  geom_text(aes(label = paste0(round(share * 100, 1), "%")),
+            position = position_dodge(width = 0.9),
+            vjust = -0.5, size = 3) +
+  scale_fill_viridis_d(option = "cividis") +
+  labs(x = "Average conspiracy thinking (binned)", fill = "Acceptance \nof consensus") +
+  theme_minimal() +
+  geom_bracket(data = absolute_numbers,
+               aes(xmin = as.numeric(factor(BCTI_avg_binned)) - 0.4, 
+                   xmax = as.numeric(factor(BCTI_avg_binned)) + 0.4, 
+                   y.position = 1.05, label =  paste0("n = ", n)),
+               inherit.aes = FALSE,
+               step.increase = 0)
+```
+
+```{r}
+plot_data
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
