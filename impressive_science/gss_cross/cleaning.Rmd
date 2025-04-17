@@ -1,0 +1,138 @@
+---
+title: "Cleaning US General Social Survey (GSS) cross-section"
+output: html_document
+---
+
+```{r, message=FALSE}
+library(tidyverse)
+library(haven) # read stata data
+```
+
+```{r, message=FALSE}
+# read data
+gss_cross <- read_dta("data/gss7222_r2.dta")
+```
+
+## Trust in Institutions
+
+The GSS includes other institutional trust items that can serve as a baseline to evaluate the evolution of trust in science. 
+
+-   [`CONFINAN`] : "Banks and financial institutions"
+-   [`CONBUS`] : "Major companies"
+-   [`CONCLERG`] : "Organized religion"
+-   [`CONEDUC`] : "Education"
+-   [`CONFED`] : "Executive branch of the federal government"
+-   [`CONLABOR`] : "Organized Labor"
+-   [`CONPRESS`] : "Press"
+-   [`CONMEDIC`] : "Medicine"
+-   [`CONTV`] : "TV"
+-   [`CONJUDGE`] : "U.S. Supreme Court"
+-   [`CONSCI`] : "Scientific community"
+-   [`CONLEGIS`] : "Congress"
+-   [`CONARMY`] : "Military"
+
+All these variables are measured as follows: "I am going to name some institutions in this country. As far as the people running these institutions are concerned, would you say you have a great deal of confidence, only some confidence, or hardly any confidence at all in them?" {each of the 16 names of the above organizations} (1) A great deal confidence, (2) Only some confidence, (3) Hardly any confidence at all"
+
+```{r}
+# vector with all institutional trust variable names
+institutional_trust_variables <- c("conbus", "conclerg", "coneduc", "conlabor", "conpress", "contv", "conmedic", "confed", "conlegis", "conjudge", "consci", "conarmy", "confinan") 
+
+# See in which year which measure was collected
+gss_cross |> 
+  group_by(year) |> 
+  summarize(across(all_of(institutional_trust_variables), ~ mean(.x, na.rm=TRUE)
+  )
+  )
+```
+
+
+We reverse the coding for all institutional trust variables, such that higher values represent higher trust. We also code non-valid responses as NA. 
+
+```{r}
+# Function to label values not in c(1, 2, 3) as NA
+label_na_if_not_in_scale <- function(x) {
+  x[!(x %in% c(1, 2, 3))] <- NA
+  return(x)
+}
+
+# mini function that reverses the scale (such that higher = more confidence)
+reverse_scale <- function(x) {
+  return(4 - x)
+}
+
+# check
+gss_cross %>% 
+    mutate(across(all_of(institutional_trust_variables), 
+                ~ label_na_if_not_in_scale(.x)
+                )
+           ) %>% 
+  mutate(across(all_of(institutional_trust_variables), reverse_scale, .names = "recoded_{col}")) %>%
+  select(recoded_conbus, conbus) %>%
+  # make sure to select valid cases to check (in the first year,
+  # trust in institutions wasn't collected)
+  filter(!is.na(conbus))
+
+# recode
+gss_cross <- gss_cross %>%
+  mutate(across(all_of(institutional_trust_variables), 
+                ~ label_na_if_not_in_scale(.x)
+  )
+  ) %>% 
+  mutate(across(all_of(institutional_trust_variables), reverse_scale))
+
+table(gss_cross$consci, useNA = "always")
+
+```
+
+We make a long format version in which institution is a variable. 
+
+First, we have to select only key variables (otherwise R reaches vector limit when reshaping the data frame with so many variables)
+
+```{r}
+# select variables of interest
+gss_cross <- gss_cross |> 
+  select(year,all_of(institutional_trust_variables))
+```
+
+We then shape the data frame to long format, with an institution variable. We also add a factor version for confidence. 
+
+```{r}
+# Create a named vector to map variable names to descriptions
+institutional_trust_labels <- c(
+  confinan = "Banks and financial institutions",
+  conbus = "Major companies",
+  conclerg = "Organized religion",
+  coneduc = "Education",
+  confed = "Executive branch of the federal government",
+  conlabor = "Organized Labor",
+  conpress = "Press",
+  conmedic = "Medicine",
+  contv = "TV",
+  conjudge = "U.S. Supreme Court",
+  consci = "Scientific community",
+  conlegis = "Congress",
+  conarmy = "Military"
+)
+
+# Convert variable names in dataset to labeled descriptions
+gss_cross_long <- gss_cross |> 
+  pivot_longer(cols = all_of(institutional_trust_variables), 
+               names_to = "institution", 
+               values_to = "confidence") |>
+  mutate(
+    institution_label = institutional_trust_labels[institution],
+    confidence_factor = factor(confidence, 
+                               levels = c(1, 2, 3), 
+                               labels = c("Hardly any confidence at all", 
+                                          "Only some confidence", 
+                                          "A great deal confidence"),
+                               ordered = TRUE)
+  )
+```
+
+
+## Export
+
+```{r}
+write_csv(gss_cross_long, "data/gss_cross_cleaned.csv")
+```

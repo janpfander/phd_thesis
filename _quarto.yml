@@ -13,8 +13,9 @@ book:
     - index.qmd
     - intro.qmd
     - summary.qmd
-    - consensus_trust/consensus_trust.qmd
     - everyone_trusts_science_abit/everyone_trusts_science_abit.qmd
+    - impressive_science/impressive_science.qmd
+    - consensus_trust/consensus_trust.qmd
     - references.qmd
   search: true
   repo-url: https://github.com/jjallaire/hopr/
@@ -25,6 +26,7 @@ bibliography:
   - references.bib # the intro and discussion references
   - consensus_trust/references.bib  
   - everyone_trusts_science_abit/references.bib
+  - impressive_science/references.bib  
 
 format:
   html:

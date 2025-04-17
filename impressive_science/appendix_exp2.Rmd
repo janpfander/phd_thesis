@@ -1,0 +1,171 @@
+# Experiment 1 {#exp1}
+
+This is the experiment reported as Experiment 1 in the main article. Please note that on the OSF, all files related to this experiment are listed under "experiment_2", as this corresponded to the order in which our different experiments were run.
+
+## Materials
+
+\FloatBarrier
+
+## Attention check
+
+Imagine you are playing video games with a friend and at some point your friend says: “I don’t want to play this game anymore! To make sure that you read the instructions, please write the three following words "I pay attention" in the box below. I really dislike this game, it's the most overrated game ever.”
+
+Do you agree with your friend? (Yes/No)
+
+We excluded all participants whose answer did not resemble "I pay attention".
+
+## Descriptives
+
+```{r exp1-descriptives}
+# by discipline
+exp1 %>% 
+  group_by(discipline, impressiveness) %>% 
+  summarise(across(c(impressed, learn, competence, trust, consensus), 
+                   list(mean = ~mean(., na.rm=TRUE)), 
+                   .names = "{col}_{fn}")) %>%
+  mutate_if(is.numeric, ~round(.x, digits = 2)) %>% 
+  kable(format = "latex", booktabs = TRUE, caption = "Descriptives") %>%
+  kable_styling(full_width = FALSE) %>%
+  # make smaller to fit
+  kable_styling(latex_options = "scale_down")
+```
+
+## Results
+
+For the manipulation check, we find that the impressive text was more impressive (mean = `r exp1_descriptives$means$imp$impressed_mean`, sd = `r exp1_descriptives$means$imp$impressed_sd`; $\hat{b}$ = `r exp1_descriptives$manipulation_check$impressivenessimp$estimate` `r exp1_descriptives$manipulation_check$impressivenessimp$ci`, p `r exp1_descriptives$manipulation_check$impressivenessimp$p.value`) than the basic text (mean = `r exp1_descriptives$means$basic$impressed_mean`, sd = `r exp1_descriptives$means$basic$impressed_sd`). This overall difference was observed in both disciplines: entomology ($\hat{b}$ = `r exp1_descriptives$manipulation_check_entom$impressivenessimp$estimate` `r exp1_descriptives$manipulation_check_entom$impressivenessimp$ci`, p `r exp1_descriptives$manipulation_check_entom$impressivenessimp$p.value`; $\text{mean}_{\text{basic}}$ = `r exp1_descriptives$means_by_discipline$basic$entom$impressed_mean`, $\text{sd}_{\text{basic}}$ = `r exp1_descriptives$means_by_discipline$basic$entom$impressed_sd`, $\text{mean}_{\text{impressive}}$ = `r exp1_descriptives$means_by_discipline$imp$entom$impressed_mean`, $\text{sd}_{\text{impressive}}$ = `r exp1_descriptives$means_by_discipline$imp$entom$impressed_sd`) and archaeology ($\hat{b}$ = `r exp1_descriptives$manipulation_check_archeo$impressivenessimp$estimate` `r exp1_descriptives$manipulation_check_archeo$impressivenessimp$ci`, p `r exp1_descriptives$manipulation_check_archeo$impressivenessimp$p.value`; $\text{mean}_{\text{basic}}$ = `r exp1_descriptives$means_by_discipline$basic$archeo$impressed_mean`, $\text{sd}_{\text{basic}}$ = `r exp1_descriptives$means_by_discipline$basic$archeo$impressed_sd`, $\text{mean}_{\text{impressive}}$ = `r exp1_descriptives$means_by_discipline$imp$archeo$impressed_mean`, $\text{sd}_{\text{impressive}}$ = `r exp1_descriptives$means_by_discipline$imp$archeo$impressed_sd`).
+
+In addition to the hypotheses presented in the main article, we had the following research questions: 
+
+**RQ1: Do participants perceive that they learn more from impressive texts than from  the basic texts?**
+
+**RQ2: Do perceptions of consensus interact with the relationships proposed in the hypotheses, such that greater perceived consensus is associated with a more positive relationship between impressiveness and trust/competence?**
+
+Regarding RQ1, participants had the impression of having learned more after having read the impressive text (mean = `r exp1_descriptives$means$imp$learn_mean`, sd = `r exp1_descriptives$means$imp$learn_sd`; $\hat{b}$ = `r exp1_descriptives$RQ1$impressivenessimp$estimate` `r exp1_descriptives$RQ1$impressivenessimp$ci`, p `r exp1_descriptives$RQ1$impressivenessimp$p.value`), than after having read the basic one (mean = `r exp1_descriptives$means$basic$learn_mean`, sd = `r exp1_descriptives$means$basic$learn_sd`).
+
+Regarding RQ2, we do not find evidence that perceived consensus modulates the effect of impressiveness hypothesized in H1a and H2a (see regression Table \@ref(tab:exp1-consensus-table)).
+
+Fig. \@ref(fig:exp1-plot) summarizes descriptive results.
+
+(ref:exp1-plot) Overview of treatment effect on various outcomes
+
+```{r exp1-plot, fig.cap="(ref:exp1-plot)"}
+plot_data <- exp1 %>% 
+  pivot_longer(
+    c(competence, trust, impressed, learn),
+    names_to = "outcome", 
+               values_to = "value")
+
+ggplot(plot_data, aes(x = impressiveness, y = value, fill = impressiveness, 
+                 color = impressiveness)) +
+  geom_half_violin (position = position_nudge(x = -.05), 
+                    adjust=1.5, alpha = .4,
+                    side = "l") +
+  geom_dotplot(position = position_nudge(x = -.05),
+               binaxis = 'y', stackdir = 'down', dotsize = 0.1, binwidth = 0.5) + 
+  # colors 
+  scale_color_viridis_d(option = "turbo", begin = 0.1, end = 0.9) +
+  scale_fill_viridis_d(option = "turbo", begin = 0.1,, end = 0.9) +
+  guides(color = "none", fill = "none") +
+  # labels
+  labs(x = "Impressiveness", y = "Likert-scale rating") +
+  plot_theme +
+  facet_wrap(~outcome)
+
+
+```
+
+The results of the models from the hypotheses can be found in table \@ref(tab:exp1-hypotheses-table).
+
+```{r exp1-hypotheses-table}
+# H1 a
+H1a_model <- lmer(competence ~ impressiveness + (1 | id), exp1)
+
+# H1 b
+H1b_model <- lmer(competence ~ impressed + (1 | id), exp1)
+
+# H2 a
+H2a_model <- lmer(trust ~ impressiveness + (1 | id), exp1)
+
+# H2 b
+H2b_model <- lmer(trust ~ impressed + (1 | id), exp1)
+
+# Generate the table with the correct format
+if (knitr::is_latex_output() || knitr::is_html_output()) {
+  
+  modelsummary(list(
+    "H1a (Competence)" = H1a_model,
+    "H1b (Competence pooled)" = H1b_model,
+    "H2a (Trust)" = H2a_model,
+    "H2b (Trust pooled)" = H2b_model
+  ), 
+  stars = TRUE, 
+  caption = "The results of the models for the hypotheses",
+  output = "kableExtra") %>%
+    # make smaller to fit
+    kable_styling(latex_options = "scale_down")
+  
+} else {
+  
+  modelsummary(list(
+    "H1a (Competence)" = H1a_model,
+    "H1b (Competence pooled)" = H1b_model,
+    "H2a (Trust)" = H2a_model,
+    "H2b (Trust pooled)" = H2b_model
+  ), 
+  stars = TRUE, 
+  caption = "The results of the models for the hypotheses",
+  output = "flextable") %>%
+    flextable::set_caption("The results of the models for the hypotheses") %>%
+    flextable::autofit() %>%  # Ensure proper column width
+    flextable::theme_booktabs()  # Use a professional-looking theme
+  
+}
+```
+
+The results of the model from RQ1 and of the models from RQ2 (interaction between impressiveness and consensus on competence/trust) can be found in table \@ref(tab:exp1-consensus-table).
+
+```{r exp1-consensus-table}
+# RQ1
+RQ1_model <- lmer(learn ~ impressiveness + (1 | id), exp1)
+
+# RQ2
+# for H1
+RQ2_H1a_model <- lmer(trust ~ impressiveness*consensus + (1 | id), exp1)
+RQ2_H1b_model <- lmer(trust ~ impressed*consensus + (1 | id), exp1)
+# for H2
+RQ2_H2a_model <- lmer(competence ~ impressiveness*consensus + (1 | id), exp1)
+RQ2_H2b_model <- lmer(competence~ impressed*consensus + (1 | id), exp1)
+
+# Generate the table with the correct format
+if (knitr::is_latex_output() || knitr::is_html_output()) {
+  
+  modelsummary(list("RQ 1" = RQ1_model,
+                    "H1a x Consensus" = RQ2_H1a_model,
+                    "H1b x Consensus" = RQ2_H1b_model,
+                    "H2a x Consensus" = RQ2_H2a_model,
+                    "H2b x Consensus" = RQ2_H2b_model
+  ), 
+  stars = TRUE, 
+  caption = "The results of the models for the research questions",
+  output = "kableExtra") %>%
+    # make smaller to fit
+    kable_styling(latex_options = "scale_down")
+  
+} else {
+  
+  modelsummary(list("RQ 1" = RQ1_model,
+                    "H1a x Consensus" = RQ2_H1a_model,
+                    "H1b x Consensus" = RQ2_H1b_model,
+                    "H2a x Consensus" = RQ2_H2a_model,
+                    "H2b x Consensus" = RQ2_H2b_model
+  ), 
+  stars = TRUE, 
+  caption = "The results of the models for the research questions",
+  output = "flextable") %>%
+    flextable::set_caption("The results of the models for the research questions") %>%
+    flextable::autofit() %>%  # Ensure proper column width
+    flextable::theme_booktabs()  # Use a professional-looking theme
+  
+}
+
+```

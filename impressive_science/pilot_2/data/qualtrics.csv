@@ -1,0 +1,74 @@
+StartDate,EndDate,Status,IPAddress,Progress,Duration (in seconds),Finished,RecordedDate,ResponseId,RecipientLastName,RecipientFirstName,RecipientEmail,ExternalReference,LocationLatitude,LocationLongitude,DistributionChannel,UserLanguage,consent,attention,archeo_basic_learn,archeo_basic_impress,archeo_basic_comp,archeo_basic_trust,archeo_imp_learn,archeo_imp_impress,archeo_imp_comp,archeo_imp_trust,archeo_basic_learn,archeo_basic_impress,archeo_basic_comp,archeo_basic_trust,archeo_imp_learn,archeo_imp_impress,archeo_imp_comp,archeo_imp_trust,Q1,gender,age,education,PROLIFIC_PID,condition
+Start Date,End Date,Response Type,IP Address,Progress,Duration (in seconds),Finished,Recorded Date,Response ID,Recipient Last Name,Recipient First Name,Recipient Email,External Data Reference,Location Latitude,Location Longitude,Distribution Channel,User Language,"We invite you to participate in a scientific experiment. Participation requires that you give your informed consent. Before proceeding, please consider the following information:
+
+
+
+The study will take about 3 minutes to complete.
+
+
+
+There are no risks involved in this study.
+
+
+
+You will be paid for your participation at the posted rate (provided that you complete the whole study, including demographic questions).
+
+
+
+Your individual privacy will be maintained in all published and written data resulting from the study.
+
+ 
+
+Participation in this research study is voluntary. You may choose not to participate.
+
+ 
+
+By ticking the box below, and proceeding to the study task you certify that you have read this form, and agreed to participate in accordance with the above conditions.","Imagine you are playing video games with a friend and at some point your friend says: 
+ 
+
+“I don’t want to play this game anymore! To make sure that you read the instructions, please write the three following words ""I pay attention"" in the box below. I really dislike this game, it's the most overrated game ever.” 
+
+ 
+
+Do you agree with your friend?",How much do you feel you’ve learnt about human history by reading this text?,How impressive did you find the findings of the archeologists described in the text?,Would you agree/disagree that reading this text has made you think of archeologists  as more competent than you thought before?,Would you agree/disagree that you trust the discipline of archeology more than you did before?,How much do you feel you’ve learnt about human history by reading this text?,How impressive did you find the findings of the archeologists described in the text?,Would you agree/disagree that reading this text has made you think of archeologists  as more competent than you thought before?,Would you agree/disagree that you trust the discipline of archeology more than you did before?,How much do you feel you’ve learnt about human history by reading this text?,How impressive did you find the findings of the archeologists described in the text?,Would you agree/disagree that reading this text has made you think of archeologists  as more competent than you thought before?,Would you agree/disagree that you trust the discipline of archeology more than you did before?,How much do you feel you’ve learnt about human history by reading this text?,How impressive did you find the findings of the archeologists described in the text?,Would you agree/disagree that reading this text has made you think of archeologists  as more competent than you thought before?,Would you agree/disagree that you trust the discipline of archeology more than you did before?,"Before finishing, please provide the following information. Once you are done with these questions, please do not forget to press the arrow to complete the survey and get your completion code.",What is your gender?,What is your age?,What is the highest level of education you have completed?,PROLIFIC_PID,condition
+"{""ImportId"":""startDate"",""timeZone"":""Europe/Berlin""}","{""ImportId"":""endDate"",""timeZone"":""Europe/Berlin""}","{""ImportId"":""status""}","{""ImportId"":""ipAddress""}","{""ImportId"":""progress""}","{""ImportId"":""duration""}","{""ImportId"":""finished""}","{""ImportId"":""recordedDate"",""timeZone"":""Europe/Berlin""}","{""ImportId"":""_recordId""}","{""ImportId"":""recipientLastName""}","{""ImportId"":""recipientFirstName""}","{""ImportId"":""recipientEmail""}","{""ImportId"":""externalDataReference""}","{""ImportId"":""locationLatitude""}","{""ImportId"":""locationLongitude""}","{""ImportId"":""distributionChannel""}","{""ImportId"":""userLanguage""}","{""ImportId"":""QID1211687480""}","{""ImportId"":""QID1211687479_TEXT""}","{""ImportId"":""QID87""}","{""ImportId"":""QID88""}","{""ImportId"":""QID129""}","{""ImportId"":""QID130""}","{""ImportId"":""QID80""}","{""ImportId"":""QID82""}","{""ImportId"":""QID95""}","{""ImportId"":""QID128""}","{""ImportId"":""QID116""}","{""ImportId"":""QID117""}","{""ImportId"":""QID133""}","{""ImportId"":""QID134""}","{""ImportId"":""QID106""}","{""ImportId"":""QID107""}","{""ImportId"":""QID131""}","{""ImportId"":""QID132""}","{""ImportId"":""QID1211775182""}","{""ImportId"":""QID1211775183""}","{""ImportId"":""QID1211775184_TEXT""}","{""ImportId"":""QID1211775185""}","{""ImportId"":""PROLIFIC_PID""}","{""ImportId"":""condition""}"
+2024-02-08 14:37:15,2024-02-08 14:38:04,0,188.30.120.196,100,49,1,2024-02-08 14:38:05,R_2OU1OrO2HcZIAtz,,,,,52.9538,-1.1571,anonymous,EN,1,I pay attention,,,,,,,,,4,3,3,3,,,,,,1,37,4,5d49d17b3dad1f0001e2aba1,nolabels
+2024-02-08 14:37:27,2024-02-08 14:38:09,0,204.111.129.91,100,42,1,2024-02-08 14:38:10,R_6qA7C8YFYN6gyIh,,,,,37.2613,-79.9335,anonymous,EN,1,I pay attention,,,,,2,5,2,2,,,,,,,,,,1,33,3,56cc78e3ccc0e20006b82a7d,labels
+2024-02-08 14:37:25,2024-02-08 14:38:15,0,128.243.2.29,100,50,1,2024-02-08 14:38:16,R_7OZaqmnBSmmvbvH,,,,,52.9538,-1.1571,anonymous,EN,1,I pay attention,,,,,,,,,5,5,5,5,,,,,,2,47,7,5fb8dc3c8e8e964121c6aa4c,nolabels
+2024-02-08 14:37:20,2024-02-08 14:38:18,0,90.192.142.122,100,57,1,2024-02-08 14:38:18,R_7fx2ywb2AYT3Wak,,,,,53.7601,-1.8021,anonymous,EN,1,I pay attention,4,4,3,4,,,,,,,,,,,,,,1,30,5,63288c4c7c9cc5e61437b9b0,labels
+2024-02-08 14:37:16,2024-02-08 14:38:30,0,71.225.178.41,100,74,1,2024-02-08 14:38:31,R_6emWfOKsejheudz,,,,,40.4441,-75.345,anonymous,EN,1,I pay attention,4,4,4,4,,,,,,,,,,,,,,1,50,6,5ba292385301b80001c71ba2,labels
+2024-02-08 14:37:19,2024-02-08 14:38:40,0,24.168.226.165,100,81,1,2024-02-08 14:38:41,R_1OlDJngIStO0GPk,,,,,33.8734,-78.6493,anonymous,EN,1,I pay attention,,,,,3,4,4,4,,,,,,,,,,1,64,4,6228f5506248f4f80a39008a,labels
+2024-02-08 14:37:18,2024-02-08 14:38:44,0,86.169.134.203,100,86,1,2024-02-08 14:38:45,R_1fy7PfE8O65A7MV,,,,,51.4098,-0.0249,anonymous,EN,1,I pay attention.,3,4,3,3,,,,,,,,,,,,,,1,35,5,5dbf5fe16849043f135aa2c0,labels
+2024-02-08 14:37:24,2024-02-08 14:38:45,0,146.198.109.156,100,80,1,2024-02-08 14:38:46,R_3GbnMtIHekHnNCh,,,,,53.8362,-1.7686,anonymous,EN,1,I pay attention,,,,,,,,,,,,,4,4,4,3,,1,42,5,6310a5c786d2abda637997c0,nolabels
+2024-02-08 14:37:24,2024-02-08 14:38:46,0,130.88.208.71,100,82,1,2024-02-08 14:38:47,R_2SOKMEScYf321tT,,,,,53.4788,-2.2585,anonymous,EN,1,I pay attention,3,3,2,2,,,,,,,,,,,,,,2,39,5,60537fdcda0ac05f1c59c57f,labels
+2024-02-08 14:37:17,2024-02-08 14:39:00,0,50.24.248.225,100,103,1,2024-02-08 14:39:01,R_1Pikq0Aa3VyvCuU,,,,,30.6475,-95.5793,anonymous,EN,1,I pay attention,,,,,,,,,1,1,1,1,,,,,,1,33,3,55fc1a7c77f33b0010cb229f,nolabels
+2024-02-08 14:37:21,2024-02-08 14:39:01,0,90.253.136.103,100,99,1,2024-02-08 14:39:01,R_2WT0MUBQVC964Ib,,,,,54.5245,-1.551,anonymous,EN,1,I pay attention,,,,,,,,,,,,,5,5,5,4,,2,59,3,5641c95d17bdbe00102a0b51,nolabels
+2024-02-08 14:37:17,2024-02-08 14:39:08,0,82.6.221.137,100,110,1,2024-02-08 14:39:08,R_7eOjU1anR3LhNcd,,,,,50.7241,-1.7891,anonymous,EN,1,I pay attention,,,,,5,5,5,3,,,,,,,,,,1,30,2,629f6b8c65fcae219e245284,labels
+2024-02-08 14:37:13,2024-02-08 14:39:12,0,92.40.185.175,100,119,1,2024-02-08 14:39:12,R_2SLIPjQJiwcbHa1,,,,,52.2835,-0.8951,anonymous,EN,1,I pay attention,,,,,,,,,2,3,1,2,,,,,,1,39,6,5eaecb0824839e59ed3523eb,nolabels
+2024-02-08 14:37:39,2024-02-08 14:39:13,0,90.241.158.80,100,93,1,2024-02-08 14:39:14,R_3sdbjP5i9Qbu2QE,,,,,53.4507,-2.3186,anonymous,EN,1,"I pay attention ",,,,,,,,,,,,,4,4,4,4,,1,38,6,5ecd4b104b4dc408fcf4eb16,nolabels
+2024-02-08 14:37:29,2024-02-08 14:39:14,0,85.255.233.53,100,104,1,2024-02-08 14:39:14,R_2Mum0Gmjv830GVM,,,,,51.4964,-0.1224,anonymous,EN,1,I pay attention,,,,,3,4,5,4,,,,,,,,,,2,28,5,601fe0de101ae05414812f4d,labels
+2024-02-08 14:37:28,2024-02-08 14:39:25,0,82.8.236.53,100,116,1,2024-02-08 14:39:26,R_1aruHEqLK2c6Uty,,,,,53.4044,-3.0715,anonymous,EN,1,I pay attention,2,4,3,3,,,,,,,,,,,,,,1,23,3,5b71c48d4d08b700018a8953,labels
+2024-02-08 14:37:30,2024-02-08 14:39:33,0,92.40.171.163,100,123,1,2024-02-08 14:39:34,R_1vgcankPzX8e1ax,,,,,51.4731,-0.3438,anonymous,EN,1,I pay attention,,,,,,,,,,,,,4,5,4,4,,2,33,3,59900f959d487e0001ac3a8e,nolabels
+2024-02-08 14:37:28,2024-02-08 14:39:37,0,90.206.148.128,100,128,1,2024-02-08 14:39:37,R_2fWd9T8p2TU4ns7,,,,,51.3724,1.1561,anonymous,EN,1,I pay attention,,,,,,,,,,,,,4,4,3,3,,2,19,3,5f0db498f5e4e102c0f65b67,nolabels
+2024-02-08 14:37:32,2024-02-08 14:39:40,0,87.115.238.72,100,128,1,2024-02-08 14:39:41,R_3fPeXaIfZp6LJcb,,,,,52.6513,-1.0876,anonymous,EN,1,I pay attention,,,,,3,3,3,3,,,,,,,,,,2,45,6,54247957fdf99b691fb38467,labels
+2024-02-08 14:37:47,2024-02-08 14:39:48,0,198.37.252.6,100,121,1,2024-02-08 14:39:49,R_6jTjCALvH2QvyYh,,,,,38.2132,-84.5455,anonymous,EN,1,I pay attention,,,,,,,,,3,4,3,3,,,,,,2,38,4,5e29dc4721a5f20481c70274,nolabels
+2024-02-08 14:37:32,2024-02-08 14:39:51,0,51.148.129.179,100,139,1,2024-02-08 14:39:51,R_3TdeP34Z2YxQmGd,,,,,53.5866,-2.4354,anonymous,EN,1,I pay attention,3,3,3,3,,,,,,,,,,,,,,2,61,5,56b8ad1be1d0a2000c154093,labels
+2024-02-08 14:37:26,2024-02-08 14:39:55,0,46.208.207.202,100,148,1,2024-02-08 14:39:55,R_3m8XuvB0T6FGoEh,,,,,50.9819,-3.2766,anonymous,EN,1,I pay attention,,,,,,,,,2,2,3,3,,,,,,2,54,4,5c48c13bcae0ab0001890ce4,nolabels
+2024-02-08 14:37:27,2024-02-08 14:40:02,0,146.198.17.184,100,154,1,2024-02-08 14:40:02,R_31ty5npV6206KSB,,,,,53.1187,-1.2649,anonymous,EN,1,I pay attention,,,,,,,,,3,3,4,4,,,,,,1,37,2,63468b5809bf04222262bfed,nolabels
+2024-02-08 14:37:27,2024-02-08 14:40:18,0,86.138.239.144,100,170,1,2024-02-08 14:40:18,R_8gelEgnKxbsASxQ,,,,,52.578,1.0889,anonymous,EN,1,I pay attention,,,,,,,,,,,,,4,5,3,4,,2,33,5,5ef660beebde2833d8492e58,nolabels
+2024-02-08 14:37:35,2024-02-08 14:40:18,0,90.192.60.148,100,163,1,2024-02-08 14:40:19,R_8rktWbLjGXUOduU,,,,,55.9135,-4.4084,anonymous,EN,1,I pay attention,4,3,4,4,,,,,,,,,,,,,,2,45,3,5fa07c635b16f50d21483d5e,labels
+2024-02-08 14:37:28,2024-02-08 14:40:24,0,80.192.16.187,100,176,1,2024-02-08 14:40:25,R_214YNTBXRMTIfxc,,,,,56.0118,-4.594,anonymous,EN,1,I pay attention,,,,,,,,,3,3,2,3,,,,,,1,28,4,5c92f797803bff0017fef8dd,nolabels
+2024-02-08 14:37:20,2024-02-08 14:40:24,0,151.225.91.64,100,184,1,2024-02-08 14:40:25,R_272ywNt1ySkYzWo,,,,,50.8032,-0.6533,anonymous,EN,1,I pay attention,3,1,1,3,,,,,,,,,,,,,,1,63,2,5654166804212700054a12aa,labels
+2024-02-08 14:37:28,2024-02-08 14:40:25,0,81.141.79.78,100,177,1,2024-02-08 14:40:25,R_1ovANM5YYtG7We2,,,,,51.6341,0.4163,anonymous,EN,1,I pay attention,,,,,,,,,,,,,4,5,5,4,,2,53,3,613713a660ee306c2817c891,nolabels
+2024-02-08 14:37:26,2024-02-08 14:40:25,0,31.51.120.109,100,178,1,2024-02-08 14:40:25,R_3riT4JLMXiJUe2Z,,,,,50.9661,-1.3348,anonymous,EN,1,I pay attention,,,,,2,4,4,4,,,,,,,,,,2,27,3,5ae9cde00335e200019e9eed,labels
+2024-02-08 14:38:31,2024-02-08 14:40:27,0,195.5.127.237,100,115,1,2024-02-08 14:40:27,R_5jVTs7MpSgVtlQU,,,,,52.6513,-1.0876,anonymous,EN,1,I pay attention,5,5,4,4,,,,,,,,,,,,,,1,42,3,63d6c8b398b284a355e65870,labels
+2024-02-08 14:37:15,2024-02-08 14:40:28,0,86.143.218.172,100,193,1,2024-02-08 14:40:29,R_1G6EUl63Ql0vgyt,,,,,53.7668,-2.7217,anonymous,EN,1,I pay attention,,,,,,,,,,,,,3,4,5,4,,1,44,5,5e5521580ee1b951df544c3c,nolabels
+2024-02-08 14:37:27,2024-02-08 14:40:45,0,80.192.16.187,100,198,1,2024-02-08 14:40:46,R_3zYBm0zzPgcV0S4,,,,,56.0118,-4.594,anonymous,EN,1,I pay attention,4,3,2,3,,,,,,,,,,,,,,1,29,3,5b258c9ba7cee100011d8aad,labels
+2024-02-08 14:37:39,2024-02-08 14:40:57,0,72.10.100.209,100,197,1,2024-02-08 14:40:57,R_3Ia5S0LyRq5qrAM,,,,,42.0016,-72.4597,anonymous,EN,1,I pay attention,,,,,3,4,3,4,,,,,,,,,,2,51,5,65084b156c1877154b9c22b0,labels
+2024-02-08 14:37:23,2024-02-08 14:41:00,0,80.40.8.4,100,216,1,2024-02-08 14:41:00,R_40MRhOrZp67XNPL,,,,,55.8857,-4.151,anonymous,EN,1,I pay attention,,,,,4,4,3,4,,,,,,,,,,2,40,5,5b2c0994f1ca3c000190196a,labels
+2024-02-08 14:37:23,2024-02-08 14:41:19,0,84.71.111.57,100,235,1,2024-02-08 14:41:19,R_6Qqc58Pjjn9XdtL,,,,,51.9916,-0.7357,anonymous,EN,1,I pay attention,,,,,,,,,,,,,4,5,4,4,,1,40,2,5de7900ceb1b0a6fe754b2c6,nolabels
+2024-02-08 14:38:24,2024-02-08 14:41:36,0,81.79.42.178,100,192,1,2024-02-08 14:41:36,R_29EVooEBHiQ8RzP,,,,,51.3693,0.0221,anonymous,EN,1,I pay attention,,,,,,,,,3,4,3,3,,,,,,1,47,6,58f669cefb4d7500014af69b,nolabels
+2024-02-08 14:37:39,2024-02-08 14:41:44,0,82.41.214.128,100,244,1,2024-02-08 14:41:44,R_2OUph4kp12adKLH,,,,,53.8094,-3.0007,anonymous,EN,1,I pay attention,,,,,,,,,3,3,3,3,,,,,,2,42,5,614c8dd508d065d05cc8dd11,nolabels
+2024-02-08 14:37:22,2024-02-08 14:42:03,0,51.9.43.81,100,281,1,2024-02-08 14:42:04,R_2Gwdhbq4L9ExKE1,,,,,52.2991,-0.6942,anonymous,EN,1,I pay attention,,,,,3,3,4,4,,,,,,,,,,1,33,5,572f526c3c27e7000e0b8aaa,labels
+2024-02-08 14:40:15,2024-02-08 14:43:49,0,80.192.16.187,100,214,1,2024-02-08 14:43:49,R_29cXwgQctuD17Tb,,,,,56.0118,-4.594,anonymous,EN,1,I pay attention,,,,,,,,,,,,,3,4,4,3,,2,29,2,5b2a72f7c293b90001732b89,nolabels
+2024-02-08 14:40:12,2024-02-08 14:44:43,0,84.71.59.124,100,271,1,2024-02-08 14:44:43,R_2wRILKELlF4dig3,,,,,51.5555,-0.6212,anonymous,EN,1,I pay attention,,,,,4,5,5,5,,,,,,,,,,2,37,5,58b20a24c352cc0001ed554b,labels

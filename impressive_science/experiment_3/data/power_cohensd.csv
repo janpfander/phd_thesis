@@ -1,0 +1,22 @@
+method,power,n,iterations
+SUR,0.354,30,1000
+mixed-model interaction,0.34,30,1000
+separate models,0.131,30,1000
+SUR,0.567,50,1000
+mixed-model interaction,0.556,50,1000
+separate models,0.262,50,1000
+SUR,0.845,100,1000
+mixed-model interaction,0.845,100,1000
+separate models,0.587,100,1000
+SUR,0.959,150,1000
+mixed-model interaction,0.958,150,1000
+separate models,0.813,150,1000
+SUR,0.983,200,1000
+mixed-model interaction,0.983,200,1000
+separate models,0.916,200,1000
+SUR,0.999,250,1000
+mixed-model interaction,0.999,250,1000
+separate models,0.975,250,1000
+SUR,0.999,300,1000
+mixed-model interaction,0.999,300,1000
+separate models,0.995,300,1000

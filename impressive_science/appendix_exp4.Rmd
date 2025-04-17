@@ -1,0 +1,11 @@
+# Experiment 2 {#exp2}
+
+\FloatBarrier
+
+This is the experiment reported as Experiment 2 in the main article. Please note that on the OSF, all files related to this experiment are listed under "experiment_4", as this corresponded to the order in which our different experiments were run.
+
+This appendix only contains the attention check, as all analyses that were run are reported in the main article. 
+
+## Attention check 
+
+Participants answered the following attention check: “Please answer 'Strongly agree' to this question to show you are paying attention. [1. Strongly disagree; 2. Somewhat disagree; 3. Neither agree nor disagree; 4. Somewhat agree; 5. Strongly agree]". We excluded all participants who did not select "5. Strongly agree".

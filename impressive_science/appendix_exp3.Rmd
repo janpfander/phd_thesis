@@ -1,0 +1,395 @@
+# Experiment 2b {#exp2b}
+
+This experiment is not reported in the main article. Please note that on the OSF, all files related to this experiment are listed under "experiment_3", as this corresponded to the order in which our different experiments were run.
+
+## Difference with Experiment 2
+
+\FloatBarrier
+
+In contrast to Experiment 3, we used a more direct recall measure—an open-ended text answer—and an even shorter time lag.
+
+In Experiment 3, we quizzed participants about impressive scientific findings, either immediately after learning about them or after having gone through a distraction task. However, people's quiz performance did not vary between conditions--possibly because the quiz was generally too easy, and those questions which weren't easy were already hard to answer immediately after having read the text. In Experiment 4, we used a different design to overcome some of these issues.
+
+```{r exp2b}
+# Experiment 2 b
+
+# read the cleaned version data set
+exp2b_wide <- read_csv("experiment_3/data/cleaned_wide.csv")
+
+exp2b_long <- read_csv("experiment_3/data/cleaned_long.csv")
+
+# Hypotheses
+
+# H1 a
+model_trust <- run_mixed_model(exp2b_long, outcome = "trust")
+
+# H1 b
+model_impressed <- run_mixed_model(exp2b_long, outcome = "impressiveness")
+
+# H1 c
+model_competence <- run_mixed_model(exp2b_long, outcome = "competence")
+
+# Isolated Treatment effects
+
+treatment_effect_knowledge <- lm(n_correct_std ~ treatment, exp2b_wide) 
+
+treatment_effect_trust <- lm(trust_std ~ treatment, exp2b_wide)
+
+treatment_effect_impressed <- lm(impressed_std ~ treatment, exp2b_wide) 
+
+treatment_effect_competence <- lm(competence_std ~ treatment, exp2b_wide) 
+
+
+
+# extract descriptives for inline reporting
+exp2b_descriptives <- list(
+  # Demographics
+  n_subj = n_distinct(exp2b_wide$id),
+  gender = exp2b_wide %>% group_by(gender) %>% summarize(n = n_distinct(id)) %>% split(.$gender),
+  age = exp2b_wide %>%
+  summarize(
+    across(
+      age,
+      list(
+        mean = ~mean(.x, na.rm = TRUE),
+        median = ~median(.x, na.rm = TRUE),
+        sd = ~sd(.x, na.rm = TRUE)
+      ),
+      .names = "{.fn}"
+    )
+  ) %>%
+  rounded_numbers(),
+  # Means (raw scales)
+  means = exp2b_wide %>% 
+    summarize(across(c("impressed", "competence", "trust", "n_correct"), 
+                     list(mean = mean, sd = sd), 
+                     .names = "{.col}_{.fn}")) %>%
+    mutate_if(is.numeric, round, digits = 2),
+  # H1a
+  model_trust  = text_ready(model_trust),
+  # H1b
+  model_impressed  = text_ready(model_impressed),
+  # H1c
+  model_competence  = text_ready(model_competence), 
+  # Treatment effects
+  treatment_effect_knowledge = text_ready(treatment_effect_knowledge),
+  treatment_effect_trust = text_ready(treatment_effect_trust),
+  treatment_effect_impressed = text_ready(treatment_effect_impressed),
+  treatment_effect_competence = text_ready(treatment_effect_competence)
+)
+
+```
+
+Experiments 1 and 2 have shown that exposure to impressive scientific content can increase trust in science and perceived competence of scientists. In Experiment 3, we test if these impressions persist, and if they persists more than specific knowledge about the content.
+
+The deficit model suggests that people do not trust science (enough), because they do not know enough about it. Accordingly, more knowledge about science generates trust. Here, we want to contrast this model with an alternative one: the trust-by-impression account. According to this model, people trust science at time T+1 not so much because they know about it at time T+1, but because they have been impressed by it at time T. We expected people to forget quickly about precise content, but that the impressions they gain about scientists’ trustworthiness persist. We therefore predicted that our treatment - a short distraction task - will result in a stronger decrease of knowledge than a decreas in trust/impressiveness/competence.
+
+H1: The difference in knowledge performance between treatment and control group is larger (more negative) than the difference in ...
+
+-   H1a: ...trust.
+
+-   H1b: ...impressiveness.
+
+-   H1c: ...competence.
+
+## Methods
+
+### Participants
+
+We ran a power simulation to inform our choice of sample size. The power simulation suggested that with 150 participants, we would cross the power threshold of 90% for the interaction effect (power = 0.958). Due to uncertainty about our parameters for the simulations, and because our budget allowed for it, we aimed to recruit a sample of 200 participants. We ended up with a sample of `r exp2b_descriptives$n_subj` participants (`r exp2b_descriptives$gender$female$n` female, `r exp2b_descriptives$gender$male$n` male; $age_\text{mean}$: `r exp2b_descriptives$age$mean`, $age_\text{sd}$: `r exp2b_descriptives$age$sd`, $age_\text{median}$: `r exp2b_descriptives$age$median`), none of which failed our attention check.
+
+### Attention check
+
+Imagine you are playing video games with a friend and at some point your friend says: “I don’t want to play this game anymore! To make sure that you read the instructions, please write the three following words "I pay attention" in the box below. I really dislike this game, it's the most overrated game ever.”
+
+Do you agree with your friend? (Yes/No)
+
+We excluded all participants whose answer did not resemble "I pay attention".
+
+### Procedure
+
+All participants read one vignette, established as impressive and trust enhancing in previous experiments. We randomized whether this vignette was about archaeology or entomology. Right after reading the vignette, all participants answered four seemingly relevant questions about the vignette, but which are of no interest to our hypotheses. The aim of these questions was to make the following distraction task for the treatment group less obvious.
+
+For these decoy questions, we asked participants how clear the text was [1 - Not clear at all, 2 - Not very clear, 3 - Neither clear nor not clear, 4 - Quite clear, 5 - Very clear], if the text presented any new or surprising information to them [1 - None at all, 2 - Very little, 3 - Moderately, 4 - Quite a bit, 5 - A significant amount], if it made them think of archaeologists/entomologists as more knowledgeable than they thought before [1 - Strongly disagree, 2 - Disagree, 3 - Neither agree nor disagree, 4 - Agree, 5 - Strongly agree] and how much they felt they have learned about human history/insects by reading the text [1 - Nothing, 2 - A bit, 3 - Some, 4 - Quite a bit, 5 - A lot].
+
+Participants were randomly assigned to one of two groups: In the control group, participants proceeded immediately to answer all outcome questions. In the treatment group, participants engaged in a 5min distraction task before proceeding to the same outcome questions (Check how much longer these participants actually took on average). The distraction task consisted of reading two vignettes that were completely unrelated and answering a couple of questions about them.
+
+For our outcomes, similar to previous experiments, we asked participants how impressed they were by the content (“How impressive do you think the findings of the archaeologists/entomologists described in the text are?” [1 - Not impressive at all, 2 - Not very impressive, 3 - Neither impressive nor not impressive, 4 - Quite impressive, 5 - Very impressive]), how competent they believed the scientists of the discipline to be ("How competent do you think archaeologists/entomologists are?" [1 - Not competent at all, 2 - Not very competent, 3 - Neither competent nor not competent, 4 - Quite competent, 5 - Very competent]), and how much they trusted the discipline ("How much would you trust the discipline of archaeologists/entomologists ?" [1 - Not trust them at all, 2 - Not trust them much, 3 - Neither trust them or not trust them, 4 - Trust them quite a bit, 5 - Trust them a lot]).
+
+To measure the retained knowledge about the content of the vignettes, we asked participants to answer 5 multiple choice questions (Table \@ref(tab:exp2b-knowledge)). For each question, participants got 1 point for the correct answer, and 0 points for any other answer. We calculated an overall knowledge score as the sum of points for all five questions, such that the maximum score is 5 and the minimum score is 0. Whether participants first answered the quiz or the other outcome questions was randomized, in both the control and the treatment group
+
+### Materials
+
+As in Experiment 2, Experiment 3 relied on the impressive version of the stimuli of Experiment 1 (see Table \@ref(tab:exp1-stimuli)).
+
+```{r exp2b-knowledge, echo=FALSE}
+table <- data.frame(
+  Archaeology = c("According to the text, what can archaeologists determine from examining bones? 
+a) Gender, age, and past diseases 
+b) Gender, age, and handedness
+c) Gender and age
+d) Gender, age, past diseases, and handedness
+(correct answer: a)
+",
+"",
+"According to the text, how do archaeologists determine at what age someone stopped drinking their mother’s milk?
+a) By analyzing their bones 
+b) By examining their hair 
+c) By studying their teeth 
+d) By observing their burial rituals
+(correct answer: c)
+",
+"",
+"The text mentions nerves that are particularly enlarged in humans compared to apes, which are they? 
+a) The nerves that control fine hand movements
+b) The nerves that control breathing
+c) The nerves that balance for bipedal motion
+d) The nerves that control the digestive system
+(correct answer: b)
+",
+"",
+"Why is the canal containing a nerve going from the brain to the thorax enlarged in Neanderthals? 
+a) Because Neanderthals had a different diet
+b) Because Neanderthals engaged in increased physical activity 
+c) Because Neanderthals were left-handed 
+d) Because Neanderthals were able to speak
+(correct answer: d)
+",
+"",
+"According to the text, what evidence suggests that most Neanderthals were right-handed? 
+a) Analysis of their bones 
+b) Analysis of their tools 
+c) Examination of their teeth 
+d) Observation of their cave paintings
+(correct answer: b)
+"),
+Entomology = c(
+"Which techniques have entomologists used to study flies' visual perception?
+a) Sonar imaging
+b) Electron microscopy 
+c) X-ray diffraction 
+d) Mass spectrometry
+(correct answer: b)
+",
+"",
+"What is the order or magnitude of the shorter displays flies can perceive?
+a) Picoseconds
+b) Nanoseconds
+c) Microseconds
+d) Milliseconds
+(correct answer: d)
+",
+"",
+"Where are the sensitive hairs found on crickets located?
+a) Legs  
+b) Wings  
+c) Rear  
+d) Head  
+(correct answer: c)
+",
+"",
+"What technique did entomologists use to study the sensitivity of cricket hairs?
+a) Mass spectrometry  
+b) Electron microscopy  
+c) Laser-Doppler velocimetry  
+d) Sonar imaging  
+(correct answer: c)
+",
+"",
+"According to the passage, how sensitive are the cricket hairs to air motion changes?
+a) They react to changes equivalent to the energy of a single photon.  
+b) They react to changes equivalent to the energy of a single atom.  
+c) They react to changes equivalent to the energy of a single grain of sand.
+d) They react to changes equivalent to the energy of a single breath.  
+(correct answer: a)
+")
+)
+
+# Output the table
+if (knitr::is_latex_output() || knitr::is_html_output()) {
+  # For LaTeX or HTML: Use kable, column_spec, and kable_styling
+  table_output <- kableExtra::kable(table, 
+                  col.names = c("Archaeology", "Entomology"),
+                  caption = "Knowledge questions used in Experiment 3",
+                  align = "l", 
+                  booktabs = TRUE,
+                  longtable = TRUE,
+                  #full_width = TRUE,
+                  #format = "pandoc"
+                  ) %>%
+  kable_styling(latex_options = "repeat_header",
+                font_size = 8)  %>%
+  column_spec(1, width = "25em", extra_css = "padding: 20px;", border_right = TRUE) %>%
+    column_spec(2, width = "25em", extra_css = "padding: 20px;")
+} else {
+  # For Word: Use flextable and rename columns
+  table_output <- flextable::flextable(table |> 
+                                         rename(`Archaeology` = Archaeology, 
+                                                `Entomology` = Entomology)) %>%
+    flextable::set_caption(caption = "Knowledge questions used in Experiment 3") %>%
+    flextable::autofit() %>%
+    flextable::width(j = 1, width = 6) %>%
+    flextable::width(j = 2, width = 6) 
+}
+
+table_output
+```
+
+## Results and discussion
+
+We tested these hypotheses with the following model:
+
+$$
+value = (\beta_{0} + b_\text{0, participant}) + \beta_{1} Treatment + \beta_{2} Outcome + \beta_{3} (Treatment \times Outcome) + \epsilon
+$$
+
+$$
+b_\text{0, participant} \sim \mathcal{N}(0, \sigma^2_{participant})
+$$
+
+In this model, the dependent variable "value" represents a standardized version of the outcome variables. The variable "Treatment" is a binary indicator, where a value of 1 signifies that participants were exposed to the decoy (treatment group) and a value of 0 indicates that they were not (control group). The "Outcome" variable is also binary, distinguishing outcome measures: a value of 1 represents knowledge, while a value of 0 represents (in different models) one of the other outcomes, i.e. trust, impressiveness, or competence. The interaction term ("Treatment x Outcome") captures the difference in the treatment effect between these outcome measures. For example, a statistically significant, negative interaction coefficient would indicate that the difference between control and decoy group was larger for the knowledge measure than for trust/competence/impressiveness. Random intercepts for participants ($b_\text{0, participant}$) are included in the model to account for individual variability. These random intercepts are assumed to follow a normal distribution with a variance of $\sigma^2_{participant}$.
+
+Analyzing the effects of our treatment on all outcome variables of interest separately, we do not find evidence that our treatment affected any of them at all ($\hat{b}_{\text{knowledge}}$ = `r exp2b_descriptives$treatment_effect_knowledge$treatmentdistraction$estimate` `r exp2b_descriptives$treatment_effect_knowledge$treatmentdistraction$ci`, p `r exp2b_descriptives$treatment_effect_knowledge$treatmentdistraction$p.value`; $\hat{b}_{\text{trust}}$ = `r exp2b_descriptives$treatment_effect_trust$treatmentdistraction$estimate` `r exp2b_descriptives$treatment_effect_trust$treatmentdistraction$ci`, p `r exp2b_descriptives$treatment_effect_trust$treatmentdistraction$p.value`; $\hat{b}_{\text{impressiveness}}$ = `r exp2b_descriptives$treatment_effect_impressed$treatmentdistraction$estimate` `r exp2b_descriptives$treatment_effect_impressed$treatmentdistraction$ci`, p `r exp2b_descriptives$treatment_effect_impressed$treatmentdistraction$p.value`; $\hat{b}_{\text{competence}}$ = `r exp2b_descriptives$treatment_effect_competence$treatmentdistraction$estimate` `r exp2b_descriptives$treatment_effect_competence$treatmentdistraction$ci`, p `r exp2b_descriptives$treatment_effect_competence$treatmentdistraction$p.value`). In other words, over a 5min distraction task, knowledge persisted, and so did perceptions of the scientific disciplines and the scientists.
+
+Unsurprisingly, we do therefore not find evidence for our hypotheses, namely that our treatment--the distraction task--affected knowledge more than it did any of the other outcome variables ($\hat{b}_{\text{trust}}$ = `r exp2b_descriptives$model_trust$interaction$estimate` `r exp2b_descriptives$model_trust$interaction$ci`, p `r exp2b_descriptives$model_trust$interaction$p.value`; $\hat{b}_{\text{impressiveness}}$ = `r exp2b_descriptives$model_impressed$interaction$estimate` `r exp2b_descriptives$model_impressed$interaction$ci`, p `r exp2b_descriptives$model_impressed$interaction$p.value`; $\hat{b}_{\text{competence}}$ = `r exp2b_descriptives$model_competence$interaction$estimate` `r exp2b_descriptives$model_competence$interaction$ci`, p `r exp2b_descriptives$model_competence$interaction$p.value`).
+
+Table \@ref(tab:exp2b-descriptives) provides a descriptive table of the results, and Figure \@ref(fig:exp2b-plot) illustrates them. The results of the models from the hypotheses can be found in table \@ref(tab:exp2b-hypotheses-table). The treatment effects by outcome can be found in table \@ref(tab:exp2b-treatment-effects).
+
+```{r exp2b-descriptives}
+# by discipline
+table <- exp2b_wide %>% 
+  group_by(discipline, treatment) %>% 
+  summarise(across(c(n_correct, impressed, competence, trust), 
+                   list(mean = ~mean(., na.rm=TRUE)), 
+                   .names = "{col}_{fn}")) %>%
+  mutate_if(is.numeric, ~round(.x, digits = 2)) 
+
+# Generate the table with the correct format
+if (knitr::is_latex_output() || knitr::is_html_output()) {
+  
+output_table <- table %>% 
+  kable(format = "latex", booktabs = TRUE, caption = "Descriptives") %>%
+  kable_styling(full_width = FALSE) %>%
+  # make smaller to fit
+  kable_styling(latex_options = "scale_down")
+  
+} else {
+  
+output_table <- table %>%
+  apa_table(
+    caption = "Descriptives"
+  )
+  
+}
+
+output_table
+```
+
+(ref:exp2b-plot) Overview of treatment effect on various outcomes
+
+```{r exp2b-plot, fig.cap="(ref:exp2b-plot)"}
+# ordre
+plot_data <- exp2b_long
+
+plot_data$outcome <- factor(plot_data$outcome, levels = c("knowledge", "trust", "competence", "impressiveness"))
+# by discipline
+ggplot(plot_data, aes(x=outcome, y=value, fill = treatment)) +
+  geom_half_violin(position = position_nudge(x = -.2),
+                   adjust=2, alpha = .4,
+                   side = "l") +
+  stat_summary(fun = "mean", geom = "point", size = 2, shape = 21) +
+  stat_summary(fun = "mean", geom = "line", size = 1, linetype = "dashed") +
+  stat_summary(fun.data = "mean_se", geom = "errorbar", width = .2) +
+  # Add nice labels
+  labs(x = NULL, y = "Standardized likert scale rating", fill = NULL) +
+  scale_fill_manual(values = c("#E69F00", "#56B4E9")) +
+  plot_theme + 
+  theme(axis.text.x = element_text(angle = 20, hjust = 1)) 
+
+
+```
+
+```{r exp2b-hypotheses-table}
+# H1 a
+model_trust <- run_mixed_model(exp2b_long, outcome = "trust")
+
+# H1 b
+model_impressed <- run_mixed_model(exp2b_long, outcome = "impressiveness")
+
+# H1 c
+model_competence <- run_mixed_model(exp2b_long, outcome = "competence")
+
+# Generate the table with the correct format
+if (knitr::is_latex_output() || knitr::is_html_output()) {
+  
+  modelsummary(list(
+    "Competence" = model_competence,
+    "Trust" = model_trust,
+    "Impressiveness" = model_impressed
+  ),
+  stars = TRUE, 
+  output = "kableExtra", 
+  caption = "Models for interaction hypotheses") %>%
+    # make smaller to fit
+    kable_styling(latex_options = "scale_down")
+  
+  
+} else {
+  
+  modelsummary(list(
+    "Competence" = model_competence,
+    "Trust" = model_trust,
+    "Impressiveness" = model_impressed
+  ),
+  stars = TRUE, 
+  caption = "Models for interaction hypotheses",
+  output = "flextable") %>%
+    flextable::set_caption("Models for interaction hypotheses") %>%
+    flextable::autofit() %>%  # Ensure proper column width
+    flextable::theme_booktabs()  # Use a professional-looking theme
+  
+}
+
+```
+
+```{r exp2b-treatment-effects}
+# Isolated Treatment effects
+treatment_effect_knowledge <- lm(n_correct_std ~ treatment, exp2b_wide) 
+
+treatment_effect_trust <- lm(trust_std ~ treatment, exp2b_wide)
+
+treatment_effect_impressed <- lm(impressed_std ~ treatment, exp2b_wide) 
+
+treatment_effect_competence <- lm(competence_std ~ treatment, exp2b_wide) 
+
+# Generate the table with the correct format
+if (knitr::is_latex_output() || knitr::is_html_output()) {
+  
+  modelsummary(list("Knowledge" = treatment_effect_knowledge,
+                    "Trust" = treatment_effect_trust,
+                    "Impressiveness" = treatment_effect_impressed,
+                    "Competence" = treatment_effect_competence
+  ), 
+  stars = TRUE, 
+  output = "kableExtra", 
+  caption = "Treatment effects by outcome") %>%
+    # make smaller to fit
+    kable_styling(latex_options = "scale_down")
+  
+  
+} else {
+  
+  modelsummary(list("Knowledge" = treatment_effect_knowledge,
+                    "Trust" = treatment_effect_trust,
+                    "Impressiveness" = treatment_effect_impressed,
+                    "Competence" = treatment_effect_competence
+  ), 
+  stars = TRUE, 
+  caption = "Treatment effects by outcome",
+  output = "flextable") %>%
+    flextable::set_caption("Treatment effects by outcome") %>%
+    flextable::autofit() %>%  # Ensure proper column width
+    flextable::theme_booktabs()  # Use a professional-looking theme
+  
+}
+```

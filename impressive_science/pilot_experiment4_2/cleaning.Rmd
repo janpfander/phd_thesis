@@ -1,0 +1,152 @@
+---
+title: "Data cleaning Pilot 2 for Experiment 4 - Phase 1"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+```{r packages, message=FALSE}
+library(tidyverse)     # create plots with ggplot, manipulate data, etc.
+library(broom.mixed)   # convert regression models into nice tables
+library(modelsummary)  # combine multiple regression models into a single table
+library(lme4)          # model specification / estimation 
+library(lmerTest)      # provides p-values in the output
+library(ggpubr)        # stile feature of ggplot
+library(gghalves)      # do special plots in ggplot
+library(kableExtra)    # for tables
+library(writexl)
+```
+
+## Import data
+
+```{r import, message=FALSE}
+# export values, not labels from qualtrics
+d <- read_csv("data/data_phase1.csv")
+names(d)
+
+#retest
+d2 <- read_csv("data/data_phase2.csv")
+```
+
+```{r}
+# inspect
+head(d) # you can also use View(d)
+# delete first two rows and fliter out unfinished questionnaires
+d <- d %>% 
+  slice(3: nrow(.)) %>%
+  filter(Finished == 1)
+  
+
+d2 <- d2 %>% 
+  slice(3: nrow(.)) %>%
+  filter(Finished == 1)
+
+```
+
+## Attention check
+
+```{r attention}
+# attention check
+table(d$attention, useNA = "always")
+```
+
+```{r}
+# filter to only valid attention check responses
+d <- d %>% filter(attention == 5)
+
+d2 <-d2 %>% filter(attention == 2)
+```
+
+## Re-shape data
+
+```{r}
+# check all names and their order. 
+names(d)
+```
+
+```{r}
+# clean and re-shape
+d <- full_join(d, d2, by = "PROLIFIC_PID")
+
+longd <- d %>% 
+  # add an easy to read participant identifier
+  mutate(id = 1:nrow(.)) %>% 
+  mutate(recall_condition = ifelse(is.na(archeo_recall_t1) & is.na(entom_recall_t1), "delayed", "immediate"), 
+         main_discipline = ifelse(is.na(archeo_trust_t0), "entom", "archeo")) %>%
+  # bring to long format
+  pivot_longer(cols = c(starts_with("archeo"), starts_with("entom"), recall_t2), 
+               names_to = "condition", values_to = "score")
+longd <- longd %>% 
+  mutate(condition = ifelse(condition == "recall_t2", 
+                            case_when(main_discipline == "entom" ~ "entom_recall_t2",
+                                      main_discipline == "archeo" ~ "archeo_recall_t2"),
+                            condition))
+
+longd <- longd %>%
+  # separate conditions into CONVERGENCE_OUTCOME_STIMULUS
+  separate_wider_delim(condition, "_", names = c("discipline", "outcome", "time"),
+                       # make sure that it works also for archeo_comp_before
+                       too_many = "merge"
+                       ) %>% 
+  # update discipline
+  mutate(
+    discipline = if_else(
+      str_detect(outcome, "phys|immu"),       # Check if "phys" or "immu" is in 'outcome'
+      str_extract(outcome, "phys|immu"),     # Extract the "phys" or "immu" value
+      discipline                             # Keep existing 'discipline' value
+    ),
+    outcome = str_remove(outcome, "phys|immu")  # Remove "phys" or "immu" from 'outcome'
+  ) %>% 
+  # necessary because of the way we labeled
+  drop_na(score) %>% 
+  pivot_wider(names_from = outcome, values_from = score) %>% 
+  # create better variable names
+  rename(competence = comp, 
+         impressed = impress, 
+         ) %>% 
+  # all variables are coded as `character` - make key variables numeric
+  mutate(across(c(contains("comp"), impressed, contains("trust")), as.numeric)
+         )
+
+
+wided <- longd %>%
+  filter(discipline %in% c("archeo", "entom")) %>% 
+  pivot_wider(names_from = "time", values_from = c("competence", "trust", "impressed", "recall")) %>%
+  select(-impressed_t0, -recall_t0, -discipline)
+```
+
+## Add demographics
+
+## Recode demographics
+
+```{r, message=FALSE}
+prolific_demographics <- read_csv("/Users/Sophie/Documents/Travail/Assistante de recherche - 2024/Confiance dans la science/Pilot 2/prolific_export_6745b74ba0ea95038510febb.csv")
+# 
+wided <- inner_join(wided, prolific_demographics, by = c("PROLIFIC_PID" = "Participant id")) 
+```
+
+```{r}
+wided <- wided %>% 
+   mutate(gender = case_when(Sex == "Male" ~ "male", 
+                             Sex == "Female" ~  "female", 
+                             .default = NA), 
+          age = as.numeric(Age)
+          ) 
+```
+
+# Extract prolific IDs
+
+```{r}
+ID = paste(d$PROLIFIC_PID, collapse = ", ")
+ID
+```
+
+## Export data
+
+```{r}
+# wide format
+write_csv(longd, "/Users/Sophie/Documents/Travail/Assistante de recherche - 2024/Confiance dans la science/Pilot 2/cleaned.csv")
+write_csv(wided, "/Users/Sophie/Documents/Travail/Assistante de recherche - 2024/Confiance dans la science/Pilot 2/wide_cleaned.csv")
+write_xlsx(wided, "/Users/Sophie/Documents/Travail/Assistante de recherche - 2024/Confiance dans la science/Pilot 2/wide_cleaned.xlsx")
+
+```

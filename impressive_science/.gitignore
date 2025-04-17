@@ -1,0 +1,37 @@
+# R stuff
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# Ignore all elements in the *no_git folder
+no_git/
+
+# Ignore gss data
+gss_cross/data/*
+
+# Ignore Word files
+*.doc
+*.docx
+# Do not ignore Word files in 'qualtrics' subfolders
+!*/qualtrics/*.doc
+!*/qualtrics/*.docx
+
+# Ignore HTML files
+*.html
+
+# Ingore other files
+*.aux
+*.toc
+
+# Ignore text files
+*.rtf
+
+# Ignore figures
+*output/
+
+# Ignore preprint files for annonymized peer review
+preprint*
+
+# ignore title page with author details
+title_page*

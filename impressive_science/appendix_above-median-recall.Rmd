@@ -1,0 +1,27 @@
+# Selection of above-median recall scores in Experiment 2  {#above-median}
+
+\FloatBarrier
+
+Checking recall scores after the main study and before launching the validation study, we found them to be very low on average (see Figure \@ref(fig:distribution-knowledge)). For our hypothesis test, we therefore only kept above median responses, to have a more conservative test for our hypotheses. 
+
+(ref:distribution-knowledge) *Distribution of knowledge score in Experiment 2*.
+
+```{r distribution-knowledge, fig.cap="(ref:distribution-knowledge)"}
+median_value <- median(exp2$knowledge_score, na.rm = TRUE)  # Compute median
+
+exp2 |> 
+  ggplot(aes(x = knowledge_score)) + 
+  geom_histogram() +
+  labs(x = "Recall score \n (ranging from 0% to 100% retained information)", y = "N Participants") +
+  scale_x_continuous(labels = scales::percent, limits = c(0, 1)) +  
+  geom_vline(aes(xintercept = median_value), 
+             linetype = "dashed", color = "red", linewidth = 1) +  # Median line
+  geom_text(aes(x = median_value + 0.1, y = 20, 
+                label = paste0("Median: ", scales::percent(median_value, accuracy = 0.1)
+                )
+  ),
+  inherit.aes = FALSE,
+  vjust = -0.5, color = "red") +  # Label for median
+  plot_theme
+```
+

@@ -1,0 +1,416 @@
+---
+title: "Analysis Experiment 4"
+output:
+  bookdown::pdf_document2: default
+  bookdown::word_document2: default
+  bookdown::html_document2:
+      keep_md: yes
+always_allow_html: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+```
+
+```{r packages, message=FALSE, echo=FALSE, include=FALSE}
+library(tidyverse)     # create plots with ggplot, manipulate data, etc.
+library(broom.mixed)   # convert regression models into nice tables
+library(modelsummary)  # combine multiple regression models into a single table
+library(lme4)          # model specification / estimation 
+library(lmerTest)      # provides p-values in the output
+library(ggpubr)        # stile feature of ggplot
+library(gghalves)      # do special plots in ggplot
+library(kableExtra)    # for tables
+library("grid")        # for image plots   
+library("gridExtra")   # for image plots
+library("png")         # for image plots
+library(stargazer)
+library(lsr)
+library(effectsize)
+library(readxl)
+```
+
+```{r, include=FALSE, message=FALSE}
+experiment_data <- read_xlsx("data/experiment_cleaned.xlsx")
+exp_data_above_median <- read_xlsx("data/experiment_cleaned_above_median.xlsx")
+
+validation_data <- read_xlsx("data/validation_cleaned.xlsx")
+```
+
+# Visualisations
+
+## Knowledge scores
+
+```{r, echo=FALSE, message=FALSE, fig.show='hold'}
+## table with means and confidence intervals of knowledge scores by condition
+data_agg_knowledge <- experiment_data %>% 
+    group_by(condition) %>% 
+    summarize(mean = mean(knowledge_score, na.rm = TRUE),
+              CI_down = ciMean(knowledge_score, 0.95, na.rm = TRUE)[1], #lower bound of 95% Confidence interval around the mean
+              CI_up = ciMean(knowledge_score, 0.95, na.rm = TRUE)[2]) #upper bound 
+
+##figure
+experiment_data %>% 
+  ggplot(aes(x = knowledge_score, fill = condition)) + 
+  geom_histogram(binwidth = 0.1, alpha = 0.8) +
+  scale_x_continuous(breaks = seq(0, 1, by = 0.2)) +
+  scale_fill_viridis_d(option = "magma", begin = 0.5, end = 0.8) +
+  facet_wrap(~condition)
+```
+
+## Competence, trust and impressiveness (above-median data)
+
+```{r}
+## table with means and confidence intervals
+data_am_agg_abstrustcomp <- exp_data_above_median %>% 
+    pivot_longer(
+      cols = c("competence", "trust", "global_impressiveness"),  # Columns to pivot
+      names_to = c("outcome"),
+      values_to = "score"                 # New column for values
+    ) %>% 
+    group_by(condition, outcome) %>% 
+    summarize(mean = mean(score, na.rm = TRUE),
+              CI_down = ciMean(score, 0.95, na.rm = TRUE)[1], #lower bound of 95% Confidence interval around the mean
+              CI_up = ciMean(score, 0.95, na.rm = TRUE)[2]) %>% #upper bound 
+  filter(!is.na(CI_up))
+
+##figure
+exp_data_above_median %>% 
+    pivot_longer(
+      cols = c("competence", "trust", "global_impressiveness"),  # Columns to pivot
+      names_to = c("outcome"),
+      values_to = "score"                 # New column for values
+    ) %>% 
+  ggplot(aes(x = outcome, y = score, fill = outcome)) + 
+  geom_violin(alpha = 0.3, colour = "white") +
+  geom_point(aes(x = outcome, y = mean, colour = outcome), data = data_am_agg_abstrustcomp, position = position_dodge(width = 0.9)) +
+  geom_errorbar(aes(y = mean, ymin = CI_down, ymax = CI_up, colour = outcome), 
+                width = 0.2, 
+                alpha = 1,
+                data = data_am_agg_abstrustcomp,
+                position = position_dodge(width = 0.9)) +
+  scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.7) +
+  scale_colour_viridis_d(option = "magma", begin = 0.2, end = 0.7) +
+  facet_wrap(~condition)
+```
+
+## Change in competence and trust (above-median data)
+
+```{r}
+## table with means and confidence intervals
+data_am_agg_trustcomp <- exp_data_above_median %>% 
+  pivot_longer(c("change_competence", "change_trust"), names_to = "outcome", values_to = "score") %>%
+  group_by(condition, outcome) %>% 
+  summarize(mean = mean(score, na.rm = TRUE),
+            CI_down = ciMean(score, 0.95, na.rm = TRUE)[1], #lower bound of 95% Confidence interval around the mean
+            CI_up = ciMean(score, 0.95, na.rm = TRUE)[2]) #upper bound 
+
+## figure
+exp_data_above_median %>% 
+  pivot_longer(c("change_competence", "change_trust"), names_to = "outcome", values_to = "score") %>%
+  ggplot(aes(x = score, colour = outcome, fill = outcome)) +
+  geom_bar(alpha = 0.8, colour = "white", position = "dodge")  +
+  scale_y_continuous(name = "count") + 
+  scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.5) +
+  scale_colour_viridis_d(option = "magma", begin = 0.2, end = 0.5) +
+  facet_wrap(~condition) 
+
+```
+
+## Impressive knowledge
+
+```{r}
+
+## table with means and confidence intervals
+data_agg_impknow <- experiment_data %>% 
+  group_by(condition) %>% 
+  summarize(mean = mean(n_impressive, na.rm = TRUE),
+            CI_down = ciMean(n_impressive, 0.95, na.rm = TRUE)[1], #lower bound of 95% Confidence interval around the mean
+            CI_up = ciMean(n_impressive, 0.95, na.rm = TRUE)[2]) #upper bound 
+
+## figure
+experiment_data %>% 
+  ggplot(aes(x = n_impressive, fill = condition)) +
+  geom_bar(alpha = 0.8, colour = "white", position = "dodge")  +
+  scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.5) +
+  facet_wrap(~condition) 
+
+```
+
+## Impressive knowledge (above-median data)
+
+```{r}
+## table with means and confidence intervals
+data_agg_impknow <- exp_data_above_median %>% 
+  group_by(condition) %>% 
+  summarize(mean = mean(n_impressive, na.rm = TRUE),
+            CI_down = ciMean(n_impressive, 0.95, na.rm = TRUE)[1], #lower bound of 95% Confidence interval around the mean
+            CI_up = ciMean(n_impressive, 0.95, na.rm = TRUE)[2]) #upper bound 
+
+## figure
+exp_data_above_median %>% 
+  ggplot(aes(x = n_impressive, fill = condition)) +
+  geom_bar(alpha = 0.8, colour = "white", position = "dodge")  +
+  scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.5) +
+  facet_wrap(~condition) 
+```
+
+## Forgetting scores (above-median data)
+
+```{r}
+## table with means and confidence intervals
+data_am_agg_forget <- exp_data_above_median %>% 
+  pivot_longer(c("forgetting_score", "impressive_forgetting_score"), names_to = "outcome", values_to = "score") %>%
+  group_by(condition, outcome) %>% 
+  summarize(mean = mean(score, na.rm = TRUE),
+            CI_down = ciMean(score, 0.95, na.rm = TRUE)[1], #lower bound of 95% Confidence interval around the mean
+            CI_up = ciMean(score, 0.95, na.rm = TRUE)[2]) #upper bound 
+
+## figure
+exp_data_above_median %>% 
+  pivot_longer(c("forgetting_score", "impressive_forgetting_score"), names_to = "outcome", values_to = "score") %>%
+  ggplot(aes(x = outcome, y = score, colour = outcome, fill = outcome)) +
+  geom_violin(alpha = 0.3, colour = "white", position = "dodge")  +
+  geom_point(aes(x = outcome, y = mean, colour = outcome), data = data_am_agg_forget, position = position_dodge(width = 0.9)) +
+  geom_errorbar(aes(y = mean, ymin = CI_down, ymax = CI_up, colour = outcome), 
+                width = 0.2, 
+                alpha = 1,
+                data = data_am_agg_forget,
+                position = position_dodge(width = 0.9)) +
+  scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.5) +
+  scale_colour_viridis_d(option = "magma", begin = 0.2, end = 0.5) +
+  facet_wrap(~condition)
+```
+
+## Validation study
+
+```{r}
+## table
+data_val_agg <- validation_data %>% 
+    pivot_longer(
+      cols = c("competence", "trust", "impressiveness"),  # Columns to pivot
+      names_to = c("outcome"),
+      values_to = "score"                 # New column for values
+    ) %>% 
+    group_by(condition, outcome) %>% 
+    summarize(mean = mean(score, na.rm = TRUE),
+              CI_down = ciMean(score, 0.95, na.rm = TRUE)[1], #lower bound of 95% Confidence interval around the mean
+              CI_up = ciMean(score, 0.95, na.rm = TRUE)[2]) %>% #upper bound 
+  filter(!is.na(CI_up))
+
+##figure
+validation_data %>% 
+    pivot_longer(
+      cols = c("competence", "trust", "impressiveness"),  # Columns to pivot
+      names_to = c("outcome"),
+      values_to = "score"                 # New column for values
+    ) %>% 
+  ggplot(aes(x = outcome, y = score, fill = condition)) + 
+  geom_violin(alpha = 0.3, colour = "white") +
+  geom_point(aes(x = outcome, y = mean, colour = condition), data = data_val_agg, position = position_dodge(width = 0.9)) +
+  geom_errorbar(aes(y = mean, ymin = CI_down, ymax = CI_up, colour = condition), 
+                width = 0.2, 
+                alpha = 1,
+                data = data_val_agg,
+                position = position_dodge(width = 0.9)) +
+  scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.5) +
+  scale_colour_viridis_d(option = "magma", begin = 0.2, end = 0.5)
+```
+
+# Analysis
+
+```{r}
+# initialize an empty results data frame
+results <- data.frame(hypothesis = character(), test_type = character(), statistic = numeric(), p_value = numeric(), mean_difference = numeric(), stringsAsFactors = FALSE
+)
+```
+
+## H1a and H1b (above-median data)
+
+```{r}
+# H1a: One-sample t-test for change in competence
+if (shapiro.test(exp_data_above_median$change_competence)$p.value > 0.05) {
+  h1a <- t.test(exp_data_above_median$change_competence, mu = 0)
+  results <- rbind(results, data.frame(
+    hypothesis = "H1a",
+    test_type = "one sample t-test",
+    statistic = h1a$statistic,
+    p_value = h1a$p.value,
+    mean_difference = h1a$estimate
+  ), row.names = NULL)
+} else {
+  h1a <- wilcox.test(exp_data_above_median$change_competence, mu = 0, exact = FALSE)
+  results <- rbind(results, data.frame(
+    hypothesis = "H1a",
+    test_type = "Wilcoxon",
+    statistic = h1a$statistic,
+    p_value = h1a$p.value,
+    mean_difference = NA
+  ), row.names = NULL)
+}
+
+# H1b: One-sample t-test for change in trust
+if (shapiro.test(exp_data_above_median$change_trust)$p.value > 0.05) {
+  h1b <- t.test(exp_data_above_median$change_trust, mu = 0)
+  results <- rbind(results, data.frame(
+    hypothesis = "H1b",
+    test_type = "one sample t-test",
+    statistic = h1b$statistic,
+    p_value = h1b$p.value,
+    mean_difference = h1b$estimate
+  ), row.names = NULL)
+} else {
+  h1b <- wilcox.test(exp_data_above_median$change_trust, mu = 0, exact = FALSE)
+  results <- rbind(results, data.frame(
+    hypothesis = "H1b",
+    test_type = "Wilcoxon",
+    statistic = h1b$statistic,
+    p_value = h1b$p.value,
+    mean_difference = NA
+  ), row.names = NULL)
+}
+
+```
+
+## H2 (above-median data)
+
+```{r}
+# H2: Test forgetting score against zero
+if (shapiro.test(exp_data_above_median$forgetting_score)$p.value > 0.05) {
+  h2 <- t.test(exp_data_above_median$forgetting_score, mu = 0)
+  results <- rbind(results, data.frame(
+    hypothesis = "H2",
+    test_type = "one sample t-test",
+    statistic = h2$statistic,
+    p_value = h2$p.value,
+    mean_difference = h2$estimate
+  ), row.names = NULL)
+} else {
+  h2 <- wilcox.test(exp_data_above_median$forgetting_score, mu = 0, exact = FALSE)
+  results <- rbind(results, data.frame(
+    hypothesis = "H2",
+    test_type = "Wilcoxon",
+    statistic = h2$statistic,
+    p_value = h2$p.value,
+    mean_difference = NA
+  ), row.names = NULL)
+}
+
+```
+
+## H3 (above-median data)
+
+```{r}
+# H3: One-sample test for impressive forgetting score against zero
+if (shapiro.test(exp_data_above_median$impressive_forgetting_score)$p.value > 0.05) {
+  h3 <- t.test(exp_data_above_median$impressive_forgetting_score, mu = 0)
+  results <- rbind(results, data.frame(
+    hypothesis = "H3",
+    test_type = "one sample t-test",
+    statistic = h3$statistic,
+    p_value = h3$p.value,
+    mean_difference = h3$estimate
+  ), row.names = NULL)
+} else {
+  h3 <- wilcox.test(exp_data_above_median$impressive_forgetting_score, mu = 0, exact = FALSE)
+  results <- rbind(results, data.frame(
+    hypothesis = "H3",
+    test_type = "Wilcoxon",
+    statistic = h3$statistic,
+    p_value = h3$p.value,
+    mean_difference = NA
+  ), row.names = NULL)
+}
+
+```
+
+## H4a to H4c
+
+```{r}
+# H4a: Independent t-test for text impressiveness
+h4a <- t.test(
+  impressiveness ~ condition,
+  data = validation_data
+)
+results <- rbind(results, data.frame(
+  hypothesis = "H4a",
+  test_type = "independent t-test",
+  statistic = h4a$statistic,
+  p_value = h4a$p.value,
+  mean_difference = h4a$estimate[[1]] - h4a$estimate[[2]]
+))
+
+# H4b: Independent t-test for competence change
+h4b <- t.test(
+  competence ~ condition,
+  data = validation_data
+)
+results <- rbind(results, data.frame(
+  hypothesis = "H4b",
+  test_type = "independent t-test",
+  statistic = h4b$statistic,
+  p_value = h4b$p.value,
+  mean_difference = h4b$estimate[[1]] - h4b$estimate[[2]]
+))
+
+# H4c: Independent t-test for trust change
+h4c <- t.test(
+  trust ~ condition,
+  data = validation_data
+)
+results <- rbind(results, data.frame(
+  hypothesis = "H4c",
+  test_type = "independent t-test",
+  statistic = h4c$statistic,
+  p_value = h4c$p.value,
+  mean_difference = h4c$estimate[[1]] - h4c$estimate[[2]]
+))
+```
+
+## Exploratory : trust and competence for below-median vs above-median participants
+
+```{r}
+# Calculate cut off values 
+cutoff_archeo50 = quantile(experiment_data$knowledge_score[experiment_data$condition == "archeo"], 0.50)
+cutoff_entom50 = quantile(experiment_data$knowledge_score[experiment_data$condition == "entom"], 0.50)
+
+# Create column indicating whether above the cut-off
+experiment_data <- experiment_data %>%
+  mutate(above_median = case_when(condition == "archeo" ~ knowledge_score >= cutoff_archeo50,
+                                  condition == "entom" ~ knowledge_score >= cutoff_entom50)) 
+
+## table with means and confidence intervals
+data_median_agg_abstrustcomp <- experiment_data %>% 
+    pivot_longer(
+      cols = c("competence", "trust", "global_impressiveness"),  # Columns to pivot
+      names_to = c("outcome"),
+      values_to = "score"                 # New column for values
+    ) %>% 
+    group_by(above_median, condition, outcome) %>% 
+    summarize(mean = mean(score, na.rm = TRUE),
+              CI_down = ciMean(score, 0.95, na.rm = TRUE)[1], #lower bound of 95% Confidence interval around the mean
+              CI_up = ciMean(score, 0.95, na.rm = TRUE)[2]) %>% #upper bound 
+  filter(!is.na(CI_up))
+
+##figure
+experiment_data %>% 
+    pivot_longer(
+      cols = c("competence", "trust", "global_impressiveness"),  # Columns to pivot
+      names_to = c("outcome"),
+      values_to = "score"                 # New column for values
+    ) %>% 
+  ggplot(aes(x = outcome, y = score, fill = above_median)) + 
+  geom_violin(alpha = 0.3, colour = "white") +
+  geom_point(aes(x = outcome, y = mean, colour = above_median), data = data_median_agg_abstrustcomp, position = position_dodge(width = 0.9)) +
+  geom_errorbar(aes(y = mean, ymin = CI_down, ymax = CI_up, colour = above_median), 
+                width = 0.2, 
+                alpha = 1,
+                data = data_median_agg_abstrustcomp,
+                position = position_dodge(width = 0.9)) +
+  scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.7) +
+  scale_colour_viridis_d(option = "magma", begin = 0.2, end = 0.7) +
+  facet_wrap(~condition) + 
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels
+  )
+```

@@ -1,0 +1,184 @@
+---
+title: "Analysis Experiment 3"
+output:
+  bookdown::pdf_document2: default
+  bookdown::word_document2: default
+  bookdown::html_document2:
+      keep_md: yes
+always_allow_html: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+```
+
+```{r packages, message=FALSE, echo=FALSE, include=FALSE}
+library(tidyverse)     # create plots with ggplot, manipulate data, etc.
+library(broom.mixed)   # convert regression models into nice tables
+library(modelsummary)  # combine multiple regression models into a single table
+library(lme4)          # model specification / estimation 
+library(lmerTest)      # provides p-values in the output
+library(ggpubr)        # stile feature of ggplot
+library(gghalves)      # do special plots in ggplot
+library(kableExtra)    # for tables
+library("grid")        # for image plots   
+library("gridExtra")   # for image plots
+library("png")         # for image plots
+library(stargazer)
+library(lsr)
+library(effectsize)
+```
+
+```{r, include=FALSE, message=FALSE}
+data_wide <- read_csv("/Users/Sophie/Documents/Travail/Assistante de recherche - 2024/Confiance dans la science/Pilot 1/cleaned_wide.csv")
+
+# remove participants who did not complete phase 2 
+data_wide <- data_wide %>%
+  filter(!is.na(t2_knowledge1))
+
+
+```
+
+# Descriptives
+
+## Knowledge
+
+```{r, echo=FALSE, message=FALSE, fig.show='hold'}
+
+# distribution of number of correct responses by discipline 
+data_wide %>%
+  pivot_longer(
+    cols = c(n_correct, t2_n_correct),  # Columns to pivot
+    names_to = "time_point",            # New column for time points
+    values_to = "score"                 # New column for values
+  ) %>%
+  ggplot(aes(x = score, fill = time_point)) + 
+  geom_bar(position = position_dodge(preserve = "single"), alpha = 0.8) +
+  scale_fill_viridis_d(option = "magma", begin = 0.5, end = 0.8) +
+  facet_wrap(~discipline)
+
+# averages and confidence intervals
+
+## table
+data_agg <- data_wide %>% 
+    pivot_longer(
+      cols = c(n_correct, t2_n_correct),  # Columns to pivot
+      names_to = "time_point",            # New column for time points
+      values_to = "score"                 # New column for values
+    ) %>%
+    group_by(discipline,time_point) %>% 
+    summarize(mean_know = mean(score, na.rm = TRUE),
+              CI_down = ciMean(score, 0.95, na.rm = TRUE)[1], #lower bound of 95% Confidence interval around the mean
+              CI_up = ciMean(score, 0.95, na.rm = TRUE)[2]) %>% #upper bound 
+    mutate(time_point = ifelse(time_point == "n_correct", "t1", "t2"))
+
+## figure
+data_wide %>%
+  pivot_longer(
+    cols = c(n_correct, t2_n_correct),  # Columns to pivot
+    names_to = "time_point",            # New column for time points
+    values_to = "score"                 # New column for values
+  ) %>% 
+  mutate(time_point = ifelse(time_point == "n_correct", "t1", "t2")) %>%
+  ggplot(aes(x = time_point, y = score, fill = time_point)) + 
+  geom_point(aes(colour = time_point), alpha = 0.3, size = 3, position = position_jitter(width = 0.3, height = 0.1)) +
+  geom_point(aes(x = time_point, y = mean_know, colour = time_point), size = 3, data = data_agg) +
+  geom_errorbar(aes(y = mean_know, ymin = CI_down, ymax = CI_up, colour = time_point), 
+                width = 0.3, 
+                alpha = 0.7,
+                data = data_agg) +
+  scale_fill_viridis_d(option = "magma", begin = 0.5, end = 0.8) +
+  scale_colour_viridis_d(option = "magma", begin = 0.5, end = 0.8) +
+  facet_wrap(~discipline)
+
+```
+
+## Trust
+
+```{r, echo=FALSE, message=FALSE, fig.show='hold'}
+# means and confidence intervals of trust and competence by discipline at t0 and t1
+
+## table
+data_agg2 <- data_wide %>% 
+    rename(competence_t0 = competence_before,
+           trust_t0 = trust_before, 
+           competence_t1 = competence, 
+           trust_t1 = trust) %>%
+    pivot_longer(
+      cols = c(starts_with("competence_t"), starts_with("trust_t")),  # Columns to pivot
+      names_to = c("outcome","time_point"),
+      names_sep = "_",
+      values_to = "score"                 # New column for values
+    ) %>% 
+    group_by(discipline,outcome, time_point) %>% 
+    summarize(mean = mean(score, na.rm = TRUE),
+              CI_down = ciMean(score, 0.95, na.rm = TRUE)[1], #lower bound of 95% Confidence interval around the mean
+              CI_up = ciMean(score, 0.95, na.rm = TRUE)[2])
+#upper bound 
+
+##figure
+data_wide %>% 
+    rename(competence_t0 = competence_before,
+           trust_t0 = trust_before, 
+           competence_t1 = competence, 
+           trust_t1 = trust) %>%
+    pivot_longer(
+      cols = c(starts_with("competence_t"), starts_with("trust_t")),  # Columns to pivot
+      names_to = c("outcome","time_point"),
+      names_sep = "_",
+      values_to = "score"                 # New column for values
+    ) %>% 
+  ggplot(aes(x = outcome, y = score, fill = time_point)) + 
+  geom_violin(alpha = 0.3, colour = "white") +
+  geom_point(aes(x = outcome, y = mean, colour = time_point), data = data_agg2, position = position_dodge(width = 0.9)) +
+  geom_errorbar(aes(y = mean, ymin = CI_down, ymax = CI_up, colour = time_point), 
+                width = 0.2, 
+                alpha = 1,
+                data = data_agg2,
+                position = position_dodge(width = 0.9)) +
+  scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.5) +
+  scale_colour_viridis_d(option = "magma", begin = 0.2, end = 0.5) +
+  facet_wrap(~discipline)
+```
+
+## Impressiveness
+
+```{r}
+# distribution of impressiveness ratings at t1
+data_wide %>%
+  ggplot(aes(x = impressed, fill = discipline)) + 
+  geom_bar(position = position_dodge(preserve = "single"), alpha = 0.8) +
+  scale_fill_viridis_d(option = "magma", begin = 0.9, end = 0.95) +
+  facet_wrap(~discipline)
+
+```
+
+# Analysis
+
+## Knowledge
+
+```{r}
+data_arch = data_wide[data_wide$discipline == "archeo",]
+data_ent = data_wide[data_wide$discipline == "entom",]
+
+testarch = t.test(data_arch$n_correct, data_arch$t2_n_correct, paired = TRUE) 
+cdarch = cohens_d(data_arch$n_correct, data_arch$t2_n_correct, paired = TRUE)
+paste("knowledge t1-t2 - archeo: ", "t(", round(testarch$parameter, 3), ") = ",  round(testarch$statistic,3), ", p = ", round(testarch$p.value,3), ", Cohen's d = ", round(cdarch$Cohens_d,2), " [", round(cdarch$CI_low, 2), ",", round(cdarch$CI_high, 2), "]",  sep = "")
+
+testent = t.test(data_ent$n_correct, data_ent$t2_n_correct, paired = TRUE) 
+cdent = cohens_d(data_ent$n_correct, data_ent$t2_n_correct, paired = TRUE)
+paste("knowledge t1-t2 - entom: ", "t(", round(testent$parameter, 3), ") = ",  round(testent$statistic,3), ", p = ", round(testent$p.value,3), ", Cohen's d = ", round(cdent$Cohens_d,2), " [", round(cdent$CI_low, 2), ",", round(cdent$CI_high, 2), "]",  sep = "")
+```
+
+## Trust
+
+```{r}
+testtrust = t.test(data_wide$trust, data_wide$trust_before, paired = TRUE)
+cdtrust = cohens_d(data_wide$trust, data_wide$trust_before, paired = TRUE)
+testcomp = t.test(data_wide$competence, data_wide$competence_before, paired = TRUE)
+cdcomp = cohens_d(data_wide$competence, data_wide$competence_before, paired = TRUE)
+
+paste("trust t0-t1: ", "t(", round(testtrust$parameter, 3), ") = ",  round(testtrust$statistic,3), ", p = ", round(testtrust$p.value,3), ", Cohen's d = ", round(cdtrust$Cohens_d,2), " [", round(cdtrust$CI_low, 2), ",", round(cdtrust$CI_high, 2), "]",  sep = "")
+
+paste("competence t0-t1: ", "t(", round(testcomp$parameter, 3), ") = ",  round(testcomp$statistic,3), ", p = ", round(testcomp$p.value,3), ", Cohen's d = ", round(cdcomp$Cohens_d,2), " [", round(cdcomp$CI_low, 2), ",", round(cdcomp$CI_high, 2), "]",  sep = "")
+```

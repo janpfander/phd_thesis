@@ -1,0 +1,108 @@
+# Stability of trust in science in the US {#stability}
+
+\FloatBarrier
+
+Figure \@ref(fig:gss-trend) shows how, since the 1970s, on average `r top_intitutions_great_deal$consci$mean_share` of Americans say they have a great deal of confidence in the scientific community, the second highest score among `r n_institutions` institutions included in the US General Social Survey (GSS), just behind the military.
+
+Figure \@ref(fig:gss-trend-confidence) shows that the trend of stability for the share of Americans having a "great deal of confidence" in the scientific community also holds for those who have "only some" or "hardly any" confidence.
+
+(ref:gss-trend) *Top four trusted institutions in the US*. The plot shows the variation of confidence in the top four trusted institutions in the US over time. The data for this plot is from the cumulative file of the US General Social Survey (GSS).
+
+```{r gss-trend, fig.cap="(ref:gss-trend)"}
+# Reduce data to top 4 trusted institutions
+plot_data <- gss_summary_great_deal |>
+  filter(institution %in% top_trusted_institutions$institution)
+
+plot_data |> 
+  ggplot(aes(x = year, y = share, colour = institution_label)) +
+  # Background: Other institutions with lower alpha
+  geom_line(data = plot_data |> 
+              filter(institution != "consci"),
+            aes(color = institution_label), alpha = 0.2, size = 1) + 
+
+  # Foreground: Highlight "consci" with full opacity
+  geom_line(data = plot_data |> 
+              filter(institution == "consci"),
+            aes(color = institution_label), size = 1.2) +
+
+  geom_point(data = plot_data |> 
+               filter(institution == "consci"),
+             aes(color = institution_label), size = 2) +
+
+  # Apply Wes Anderson colors
+  scale_color_manual(values = wes_palette("AsteroidCity1", n = 4, type = "discrete")) +  
+
+  scale_y_continuous(labels = scales::percent, limits = c(0, 1)) +  
+  scale_x_continuous(breaks = c(seq(min(gss_summary_great_deal$year), max(gss_summary_great_deal$year), by = 5), max(gss_summary_great_deal$year))) +  
+
+  labs(x = "Year", y = "Share of Americans \n with 'A great deal confidence'", 
+       caption = "Data source: GSS by NORC") +
+  theme_minimal() +  
+  theme(legend.position = "none") +
+
+  # Institution name nudged to the right
+  geom_text_repel(
+    data = plot_data |> 
+      group_by(institution_label) |> 
+      slice_max(year, n = 1, with_ties = FALSE),  
+    aes(label = institution_label, 
+        alpha = ifelse(institution == "consci", 1, 0.6)),  
+    hjust = 0,  
+    nudge_x = 5,  
+    size = 3,  
+    direction = "both",
+    fontface = "bold",  
+    segment.color = "grey50"  
+  ) +
+  scale_alpha_identity()
+```
+
+```{r}
+# Check evolution for confidence in scientific community for all response options
+gss_summary_polarization <- gss |>
+  drop_na(confidence) |> 
+  group_by(year, institution, institution_label, confidence_factor) |>
+  filter(institution_label == "Scientific community") |> 
+  summarize(
+    n_responses_in_category = n()
+  ) |>
+  group_by(year, institution, institution_label) |> 
+  # remove years without measure
+    mutate(
+      n_responses_in_year = sum(n_responses_in_category),
+      share = n_responses_in_category/n_responses_in_year,
+      # remove 0s
+      share = ifelse(share == 0, NA, share)) |> 
+  # make confidence_factor a factor with levels
+  mutate(confidence_factor = factor(confidence_factor, 
+                                    levels = c("Hardly any confidence at all", 
+                                               "Only some confidence", 
+                                               "A great deal confidence"),
+                                    ordered = TRUE)) |> 
+drop_na(share)
+```
+
+(ref:gss-trend-confidence) *Confidence in Scientific Community in the US*. The plot shows the variation of confidence in the Scientific Community in the US over time, for all answer options. The data for this plot is from the cumulative file of the US General Social Survey (GSS).
+
+```{r gss-trend-confidence, fig.cap="(ref:gss-trend-confidence)"}
+gss_summary_polarization |> 
+  ggplot(aes(x = year, y = share, colour = confidence_factor)) +
+  # Background: Other institutions with lower alpha
+  geom_line(alpha = 0.2, size = 1) + 
+ geom_point(size = 2) +
+  # Apply Wes Anderson colors
+  scale_color_manual(values = wes_palette("FantasticFox1", n = 4, type = "discrete")) +  
+  scale_y_continuous(labels = scales::percent, limits = c(0, 1)) +  
+  scale_x_continuous(breaks = c(seq(min(gss_summary_polarization$year), max(gss_summary_polarization$year), by = 5), max(gss_summary_polarization$year))) +  
+
+  labs(x = "Year", y = "Americans Confidence in Scientific Community", 
+       caption = "Data source: GSS by NORC", color = "Level of Confidence") +
+  theme_minimal() +  
+  scale_alpha_identity()
+```
+
+
+
+
+
+

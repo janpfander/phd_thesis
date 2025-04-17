@@ -1,0 +1,228 @@
+---
+title: "Cleaning Coder data for Recall Responses"
+output:
+  bookdown::pdf_document2: default
+  bookdown::word_document2: default
+  bookdown::html_document2:
+      keep_md: yes
+always_allow_html: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+```
+
+```{r packages, message=FALSE, echo=FALSE, include=FALSE}
+library(tidyverse)     # create plots with ggplot, manipulate data, etc.
+library(broom.mixed)   # convert regression models into nice tables
+library(modelsummary)  # combine multiple regression models into a single table
+library(lme4)          # model specification / estimation 
+library(lmerTest)      # provides p-values in the output
+library(ggpubr)        # stile feature of ggplot
+library(gghalves)      # do special plots in ggplot
+library(kableExtra)    # for tables
+library("grid")        # for image plots   
+library("gridExtra")   # for image plots
+library("png")         # for image plots
+library(stargazer)
+library(lsr)
+library(effectsize)
+library(readxl)
+#library("irr")
+library(writexl)
+```
+
+```{r functions}
+# load functions for computing ICC
+source("../functions/functions.R")
+```
+
+# Make spreadsheet template for coders
+
+```{r}
+# set a seed for random sampling
+set.seed(9823)
+```
+
+We begin by using the chat gpt coding tables generated in the `cleaning.Rmd` file. 
+
+```{r}
+archeo <- read_xlsx("data/archeo_gptcoding_with_justification.xlsx")
+entom <- read_xlsx("data/entom_gptcoding_with_justification.xlsx")
+```
+
+We first remove all content.
+
+```{r}
+remove_chatgpt_codings <- function(df) {
+  df <- df |> 
+  mutate(across(-c(id, condition, text), ~ NA))
+}
+
+archeo <- remove_chatgpt_codings(archeo)
+entom <- remove_chatgpt_codings(entom)
+```
+
+We then randomly pick 40 texts per condition, i.e. 80 in total
+
+```{r}
+sample <- function(df) {
+  df <- df |> 
+    sample_n(40)
+}
+
+archeo <- sample(archeo)
+entom <- sample(entom)
+```
+
+Then we then export them as a combined data frame. 
+
+```{r}
+coder_data <- bind_rows(archeo, entom) 
+
+write_csv(coder_data, ("data/template_human_coders.csv"))
+```
+
+# Import human coded data
+
+```{r, include=FALSE, message=FALSE}
+coding1 <- read_csv("data/human_coder_1.csv") |> 
+  # Remove the first row
+  slice(-1) |> 
+  # make everything numeric
+  mutate(across(everything(), ~ as.numeric(.x))) |> 
+  # Compute total scores
+  rowwise() |> 
+  mutate(cX_total = sum(c_across(starts_with("cX")), na.rm = TRUE)) |> 
+  ungroup() |>  # Ensure the data is no longer rowwise
+  # Add the coder ID to the column names (ex: for coder number 1, rating columns start with c1_)
+  rename_with(~ gsub("cX", "c1", .x))
+
+
+coding2 <- read_xlsx("data/human_coder_2.xlsx") |> 
+# Remove the first row
+  slice(-1) |> 
+  # make everything numeric
+  mutate(across(everything(), ~ as.numeric(.x))) |> 
+  # Compute total scores
+  rowwise() |> 
+  mutate(cX_total = sum(c_across(starts_with("cX")), na.rm = TRUE)) |> 
+  ungroup() |>  # Ensure the data is no longer rowwise
+  # Add the coder ID to the column names (ex: for coder number 1, rating columns start with c1_)
+  rename_with(~ gsub("cX", "c2", .x))
+
+
+codingGPT <- read_xlsx("data/coding_study4_chatgpt.xlsx") |> 
+  rename_with(~ gsub("cX", "cGPT", .x))
+
+# combine data 
+coding2 <- coding2 |>
+  select(-condition, -text)
+
+coding1 <- coding1 |>
+  select(-condition, -text)
+
+codingGPT <- codingGPT |>
+  select(-c(text, text_corrected))
+
+
+
+data <- full_join(coding1, coding2) |> 
+  # only add those texts that coders saw
+  left_join(codingGPT)
+```
+
+# Cleaning
+
+```{r}
+# compute proportion of knowledge items present in the text by dividing total knowledge scores by maximum possible score 
+
+# the maximum score for archeo is 2*8 = 16, for entom 2*7 = 14
+maxscore_archeo = ncol(coding1 |> select(contains("archeo")))*2
+maxscore_entom = ncol(coding1 |> select(contains("entom")))*2
+                         
+
+data <- data |>
+  mutate(c1_totalp = case_when(condition == "archeo" ~ c1_total/maxscore_archeo,
+                               condition == "entom" ~ c1_total/maxscore_entom), 
+         c2_totalp = case_when(condition == "archeo" ~ c2_total/maxscore_archeo,
+                               condition == "entom" ~ c2_total/maxscore_entom),
+         cGPT_totalp = case_when(condition == "archeo" ~ cGPT_total/maxscore_archeo,
+                               condition == "entom" ~ cGPT_total/maxscore_entom))
+
+data_long <- data |>
+  rename(discipline = condition,
+         # it's important to apply functions later on that 
+         # the subject identifier is not just called "id", so we re-name it here
+         subject_id = id
+         ) |> 
+  pivot_longer(starts_with("c"), 
+               names_to = c("coder", "knowledge_dim"), 
+               names_sep = "_", 
+               values_to = "rating")|>
+  filter(!is.na(rating))
+
+# check
+# data_long |>
+#   group_by(coder) |>
+#   count()
+
+# check distribution
+# data_long |>
+#   filter(knowledge_dim == "totalp") |>
+#   ggplot(aes(x = rating)) + 
+#   geom_histogram()
+
+```
+
+# Coder Agreement
+
+```{r}
+# calculate agreement between chat gpt
+
+# ensures that all unique values from data_long$knowledge_dim are selected except "total", "totalp"
+knowledge_dim <- setdiff(unique(data_long$knowledge_dim), c("total", "totalp"))
+
+# coder 1 vs chatgpt 
+agr_c1_GPT = c()
+for(dim in knowledge_dim){
+  column1 = paste("c1_", dim, sep = "")
+  column2 = paste("cGPT_", dim, sep = "")
+  d = data |> select(column1,column2)
+  agr = (sum(data[column1] == data[column2], na.rm = TRUE)/sum(!is.na(data[column1] == data[column2])))*100
+  agr_c1_GPT = append(agr_c1_GPT, agr)
+}
+
+# coder 2 vs chatgpt 
+agr_c2_GPT = c()
+for(dim in knowledge_dim){
+  column1 = paste("c2_", dim, sep = "")
+  column2 = paste("cGPT_", dim, sep = "")
+  d = data |> select(column1,column2)
+  agr = (sum(data[column1] == data[column2], na.rm = TRUE)/sum(!is.na(data[column1] == data[column2])))*100
+  agr_c2_GPT = append(agr_c2_GPT, agr)
+}
+
+#coder 1 vs coder 2 
+agr_c1_c2 = c()
+for(dim in knowledge_dim){
+  column1 = paste("c1_", dim, sep = "")
+  column2 = paste("c2_", dim, sep = "")
+  d = data |> select(column1,column2)
+  agr = (sum(data[column1] == data[column2], na.rm = TRUE)/sum(!is.na(data[column1] == data[column2])))*100
+  agr_c1_c2 = append(agr_c1_c2, agr)
+}
+  
+#create dataset
+agr = data.frame(knowledge_dim, agr_c1_GPT, agr_c2_GPT, agr_c1_c2) 
+```
+
+# Export data
+
+```{r}
+# write data frame with all raw ratings per coder and item
+write_csv(data_long, "data/coder_comparison.csv")
+
+# wide data with all coder agreements
+write_csv(agr, "data/coder_agreement.csv")
+```

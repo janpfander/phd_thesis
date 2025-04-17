@@ -1,0 +1,475 @@
+---
+title: "Data cleaning and GPT coding - Experiment 4"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+```{r packages, message=FALSE}
+library(tidyverse)     # create plots with ggplot, manipulate data, etc.
+library(broom.mixed)   # convert regression models into nice tables
+library(modelsummary)  # combine multiple regression models into a single table
+library(lme4)          # model specification / estimation 
+library(lmerTest)      # provides p-values in the output
+library(ggpubr)        # stile feature of ggplot
+library(gghalves)      # do special plots in ggplot
+library(kableExtra)    # for tables
+library(writexl)
+library(readxl)
+```
+
+## Import data
+
+```{r import, message=FALSE}
+# main study
+expd <- read_xlsx("data/qualtrics_data_main_experiment.xlsx")
+
+#validation study
+vald <- read_xlsx("data/qualtrics_data_validation_study.xlsx")
+```
+
+```{r}
+# check failed attention checks main experiment
+attention_checks <- expd  %>% 
+  slice(2: nrow(.)) 
+
+nrow(attention_checks)
+table(attention_checks$attention)
+```
+
+```{r}
+# check failed attention checks validation study
+attention_checks <- vald  %>% 
+  slice(2: nrow(.)) 
+
+nrow(attention_checks)
+table(attention_checks$attention)
+```
+
+```{r}
+expd <- expd %>% 
+  # delete first row
+  filter(StartDate != "Start Date") %>%
+  # change data type to numeric when relevant 
+  mutate(across(c(Finished, consent:archeo_impglobal, archeo_impknowledge_1:entom_impglobal, entom_impknowledge_1:education), as.numeric)) %>%
+  # fliter out unfinished questionnaires
+  filter(Finished == 1)
+
+  
+
+vald <- vald %>% 
+  # delete first row
+  filter(StartDate != "Start Date") %>%
+  # change data type to numeric when relevant 
+  mutate(across(c(Finished, consent:education), as.numeric)) %>%
+  # fliter out unfinished questionnaires
+  filter(Finished == 1)
+
+```
+
+## Attention check
+
+```{r}
+# filter to only valid attention check responses
+expd <- expd %>% filter(attention == 5)
+
+vald <-vald %>% filter(attention == 5)
+```
+
+# Main experiment
+
+## Clean data
+
+```{r}
+# clean and re-shape
+longexpd <- expd %>% 
+  # add an easy to read participant identifier
+  mutate(id = 1:nrow(.)) %>% 
+  # rename some columns
+  rename_with(~ gsub("archeo_impknowledge_", "archeo_impknowledge", .)) %>%
+  rename_with(~ gsub("entom_impknowledge_", "entom_impknowledge", .)) %>%
+  # bring to long format
+  pivot_longer(cols = c(starts_with("archeo"), starts_with("entom")), 
+               names_to = c("condition", "outcome"), names_sep = "_", values_to = "score", values_transform = as.character) %>%
+  drop_na(score)
+
+widexpd <- longexpd %>%
+  pivot_wider(names_from = outcome, values_from = score) %>% 
+  # create better variable names
+  rename(competence = comp, 
+         global_impressiveness = impglobal) %>% 
+  # make key variables numeric
+  mutate(across(c(contains("comp"), contains("imp"), contains("trust")), as.numeric))
+
+```
+
+## Add demographics
+
+```{r, message=FALSE}
+prolific_demographics <- read_csv("prolific_data_main_experiment.csv") 
+
+widexpd <- inner_join(widexpd, prolific_demographics, by = c("PROLIFIC_PID" = "Participant id")) 
+```
+
+```{r}
+widexpd <- widexpd %>% 
+   mutate(gender = case_when(Sex == "Male" ~ "male", 
+                             Sex == "Female" ~  "female", 
+                             .default = NA), 
+          age = as.numeric(Age)
+          ) 
+```
+
+## Code knowledge scores with chatgpt
+
+Note that we removed the ChatGPT API key in the code below
+
+### Set up
+
+```{r eval=FALSE}
+
+# import chatgpt prompts 
+prompts <- read_xlsx("chatgpt prompts.xlsx")
+
+# distinguish archeology prompts and entomology prompts
+prompts_archeo = prompts %>%
+  filter(grepl("archeo", prompts$knowledge_dim))
+
+prompts_entom = prompts %>%
+  filter(grepl("entom", prompts$knowledge_dim))
+
+# create empty coding grid
+knowledge_dim = prompts$knowledge_dim
+  
+codingGPT <- widexpd %>%
+  select(id, condition, text = recall) 
+
+for(i in 1:length(knowledge_dim)){
+  codingGPT <- codingGPT %>% 
+    mutate(!!knowledge_dim[i] := NA)
+} 
+
+codingGPT <- codingGPT %>%
+    rename_with(~ gsub("archeo", "cX_archeo", .)) %>%
+    # add cX_ in front of column names to match the format necessary to run the code computing inter-rater reliability 
+    rename_with(~ gsub("entom", "cX_entom", .))
+
+# distinguish archaeology texts and entomology texts 
+archeoGPT = codingGPT %>% 
+  filter(condition == "archeo")
+entomGPT = codingGPT %>%
+  filter(condition == "entom")
+
+# OpenAI GPT-4 API key
+my_API <- "YOUR API key"
+
+# Function to interact with the OpenAI GPT-4
+hey_chatGPT <- function(prompt) {
+   retries <- 0
+   max_retries <- 3 # Set a maximum number of retries
+   while (retries < max_retries) {
+   tryCatch({
+   chat_GPT_answer <- POST(
+    url = "https://api.openai.com/v1/chat/completions",
+    add_headers(Authorization = paste("Bearer", my_API)),
+    content_type_json(),
+    encode = "json",
+    body = list(
+    model = "gpt-4o",
+    temperature = 0,
+    messages = list(
+    list(role = "system", content = "rater"),
+    list(role = "user", content = prompt)
+    )
+    )
+   )
+
+   if (status_code(chat_GPT_answer) != 200) {
+    print(paste("API request failed with status", status_code(chat_GPT_answer)))
+    retries <- retries + 1
+    Sys.sleep(1) # Wait a second before retrying
+   } else {
+    result <- content(chat_GPT_answer)$choices[[1]]$message$content
+    if (nchar(result) > 0) {
+    return(str_trim(result))
+    } else {
+    print("Received empty result, retrying...")
+    retries <- retries + 1
+    Sys.sleep(1) # Wait a second before retrying
+    }
+   }
+   }, error = function(e) {
+   print(paste("Error occurred:", e))
+   retries <- retries + 1
+   Sys.sleep(1) # Wait a second before retrying
+   })
+   }
+   return(NA) # Return NA if all retries failed
+  }
+
+# Function to extract Scores from Annotations
+# extracts the last number, even if followed by a period
+extract_last_number <- function(annotation) {
+  # First, try to extract a number at the end, optionally followed by a period
+  score_match <- str_extract(annotation, "[0-9](\\.)?$")
+  
+  # Remove the trailing period, if it exists, and convert to numeric
+  if (!is.na(score_match)) {
+    score_match <- str_remove(score_match, "\\.")
+    return(as.numeric(score_match))
+  } else {
+    return(NA)
+  }
+}  
+```
+
+### Coding pieces of knowledge
+
+```{r, eval=FALSE}
+#archaeology
+for (p in 1:nrow(prompts_archeo)) {
+  column = paste("cX_", prompts_archeo$knowledge_dim[p], sep = "")
+  for (i in 1:nrow(archeoGPT)) {   
+    # Check if the annotation is NA
+       if (is.na(archeoGPT[i, column])) {
+    # Proceed with annotation only if the field is NA
+      prompt <- prompts_archeo$prompt[p]
+      concat <- paste(prompt, archeoGPT$text[i])
+      result <- hey_chatGPT(concat)
+      archeoGPT[i, column] <- result
+
+      # Save progress after each annotation
+      write_xlsx(archeoGPT, "archeo_gptcoding_with_justification.xlsx")
+  
+      }
+    }
+}
+
+#entomology
+for (p in 1:nrow(prompts_entom)) {
+  column = paste("cX_", prompts_entom$knowledge_dim[p], sep = "")
+  for (i in 1:nrow(entomGPT)) {   
+    # Check if the annotation is NA
+       if (is.na(entomGPT[i, column])) {
+    # Proceed with annotation only if the field is NA
+      prompt <- prompts_entom$prompt[p]
+      concat <- paste(prompt, entomGPT$text[i])
+      result <- hey_chatGPT(concat)
+      entomGPT[i, column] <- result
+    
+      # Save progress after each annotation
+      write_xlsx(entomGPT, "entom_gptcoding_with_justification.xlsx")
+  
+      }
+    }
+}
+
+archeoGPTfull <- read_xlsx("archeo_gptcoding_with_justification.xlsx")
+entomGPTfull <- read_xlsx("entom_gptcoding_with_justification.xlsx")
+
+#extract scores from annotations 
+archeoGPTcleaned = archeoGPTfull %>%
+  group_by(id) %>%
+  mutate(cX_archeo1 = extract_last_number(cX_archeo1), 
+         cX_archeo2 = extract_last_number(cX_archeo2), 
+         cX_archeo3 = extract_last_number(cX_archeo3), 
+         cX_archeo4 = extract_last_number(cX_archeo4),
+         cX_archeo5 = extract_last_number(cX_archeo5),
+         cX_archeo6 = extract_last_number(cX_archeo6),
+         cX_archeo7 = extract_last_number(cX_archeo7), 
+         cX_archeo8 = extract_last_number(cX_archeo8))
+
+entomGPTcleaned = entomGPTfull %>%
+  group_by(id) %>%
+  mutate(cX_entom1 = extract_last_number(cX_entom1),
+         cX_entom2 = extract_last_number(cX_entom2),
+         cX_entom3 = extract_last_number(cX_entom3),
+         cX_entom4 = extract_last_number(cX_entom4),
+         cX_entom5 = extract_last_number(cX_entom5),
+         cX_entom6 = extract_last_number(cX_entom6),
+         cX_entom7 = extract_last_number(cX_entom7))
+
+#append the datasets 
+GPTcleaned = bind_rows(archeoGPTcleaned, entomGPTcleaned) %>%
+  # create column with total score
+  mutate(cX_total = sum(across(cX_archeo1:cX_entom7), na.rm = TRUE))
+
+```
+
+### Correcting orthographic and grammatical mistakes
+
+```{r, eval=FALSE}
+
+prompt_textcorrection = "Please correct any orthographical and grammatical mistakes in the text I will give you. Do not change the phrasing in any way except if it is grammatically wrong. Please provide only the text corrected, with no comment of any kind. The text is:"
+
+#create an empty "text_corrected" column
+GPTcleaned <- GPTcleaned %>%
+  mutate(text_corrected = NA)
+
+#ask GPT to correct texts and put the corrected version in the "text_corrected" column 
+for (i in 1:nrow(GPTcleaned)) {
+  # Check if the annotation is NA
+  if (is.na(GPTcleaned[i, "text_corrected"])) {
+  # Proceed with annotation only if the field is NA
+  concat <- paste(prompt_textcorrection, GPTcleaned$text[i])
+  result <- hey_chatGPT(concat)
+  GPTcleaned[i, "text_corrected"] <- result
+    
+  # Save progress after each annotation
+  write_xlsx(GPTcleaned, "gptcoding_corrected_texts_progress.xlsx")
+    }
+}
+```
+
+### Export GPT coding
+
+```{r eval=FALSE}
+write_xlsx(GPTcleaned, "coding_study4_chatgpt.xlsx")
+```
+
+## Append chatgpt coding to main dataset
+
+```{r eval=FALSE}
+
+GPTcleaned = read_xlsx("coding_study4_chatgpt.xlsx")
+
+GPTcleaned = GPTcleaned %>%
+  # reshape data : create columns "gptknowledge1" to "gptknowledge8" instead of columns "archeo1, archeo2, etc" 
+  pivot_longer(c(starts_with("cX_archeo"), starts_with("cX_entom")), values_to = "score", names_to = "knowledge_dim") %>%
+  mutate(knowledge_dim = sub(x = knowledge_dim, pattern = "cX_archeo", replacement = "gptknowledge"),
+         knowledge_dim = sub(x = knowledge_dim, pattern = "cX_entom", replacement = "gptknowledge")) %>%
+  drop_na(score) %>%
+  pivot_wider(names_from = "knowledge_dim", values_from = "score") %>%
+  # remove unnecessary columns 
+  select(-text, -condition)
+
+widexpd = full_join(widexpd, GPTcleaned, by = "id")
+```
+
+## Compute variables for analyses
+
+```{r}
+#compute maximum possible scores in archeology and entomology
+prompts <- read_xlsx("/Users/Sophie/Documents/Travail/Assistante de recherche - 2024/Confiance dans la science/Study 4/chatgpt prompts.xlsx")
+maxscore_archeo = 2*(prompts %>% filter(grepl("archeo", prompts$knowledge_dim)) %>% nrow())
+maxscore_entom = 2*(prompts %>% filter(grepl("entom", prompts$knowledge_dim)) %>% nrow())
+
+# Rename column with total score obtained in the recall task 
+widexpd <- widexpd %>%
+  rename(knowledge_rawscore = cX_total)
+
+# Compute variables
+widexpd <- widexpd %>%
+  group_by(id) %>%
+  mutate(change_competence = competence - 3,
+         change_trust = trust - 3,
+         #proportion of points obtained relative to maximum number 
+         knowledge_score = case_when(condition == "archeo" ~ knowledge_rawscore/maxscore_archeo,
+                                    condition == "entom" ~ knowledge_rawscore/maxscore_entom),
+         #proportion of points not obtained
+         forgetting_score = 1 - knowledge_score) %>%
+  ungroup()
+
+widexpd <- widexpd %>%
+  #number of pieces of information found impressive
+  mutate(n_impressive = rowSums(select(., impknowledge1:impknowledge8), na.rm = TRUE)) %>%
+  rowwise() %>%
+  #number of points obtained in impressive pieces of information 
+  mutate(impressive_knowledge_rawscore = sum(c_across(starts_with("gptknowledge"))[c_across(starts_with("impknowledge")) == 1], na.rm = TRUE),
+         # proportion of points obtained to total possible points in impressive information
+         impressive_knowledge_score = impressive_knowledge_rawscore / (n_impressive*2),
+         # proportion of points failed in impressive information
+         impressive_forgetting_score = 1-impressive_knowledge_score
+         ) %>%
+  ungroup()
+```
+
+## Export data
+
+```{r}
+# wide format
+write_xlsx(widexpd, "experiment_cleaned.xlsx")
+```
+
+## Knowledge scores of the 50% bests in each discipline
+
+```{r}
+
+# Calculate cut off values for best 50%
+cutoff_archeo50 = quantile(widexpd$knowledge_score[widexpd$condition == "archeo"], 0.50)
+cutoff_entom50 = quantile(widexpd$knowledge_score[widexpd$condition == "entom"], 0.50)
+
+# Create dataframe restricted to participants above the cut off 
+widexpd_best50 <- widexpd %>%
+  mutate(above_cutoff50 = case_when(condition == "archeo" ~ knowledge_score >= cutoff_archeo50,
+                                  condition == "entom" ~ knowledge_score >= cutoff_entom50)) %>%
+  filter(above_cutoff50 == TRUE)
+
+# Summary data frames with mean and confidence interval of knowledge scores by condition
+knowledge_cutoff50 <- widexpd_best50 %>% 
+    group_by(condition) %>% 
+    summarize(mean = mean(knowledge_score, na.rm = TRUE),
+              CI_down = ciMean(knowledge_score, 0.95, na.rm = TRUE)[1], #lower bound of 95% Confidence interval around the mean
+              CI_up = ciMean(knowledge_score, 0.95, na.rm = TRUE)[2]) #upper bound 
+```
+
+### Export data for best 50%
+
+```{r}
+write_xlsx(widexpd_best50, "experiment_cleaned_above_median.xlsx")
+
+#export only condition, corrected texts and id for the qualtrics loop and merge
+widexpd_best50 %>%
+  select(condition, id, text_corrected) %>%
+  write_xlsx("texts_loop&merge.xlsx")
+```
+
+# Validation study
+
+## Clean data
+
+```{r}
+# clean and re-shape
+longvald <- vald %>% 
+  # add an easy to read participant identifier
+  mutate(id = 1:nrow(.)) %>% 
+  # rename ID column (which corresponds to the id of the main experiment's participants who wrote the texts seen in the recall condition)
+  rename(recall_text_id = ID) %>%
+  # bring to long format
+  pivot_longer(cols = c(starts_with("archeo"), starts_with("entom")), 
+               names_to = c("discipline", "condition", "outcome"), names_sep = "_", values_to = "score") %>%
+  mutate(condition = case_when(condition == "ori" ~ "original",
+                               condition == "rec" ~ "recall"),
+         outcome = case_when(outcome == "comp" ~ "competence", 
+                             outcome == "impglobal" ~ "impressiveness",
+                             outcome == "trust" ~ "trust")) %>%
+  drop_na(score)
+
+widevald <- longvald %>%
+  # bring to wide format 
+  pivot_wider(names_from = outcome, values_from = score)
+
+```
+
+## Add demographics
+
+```{r, message=FALSE}
+prolific_demographics_val <- read_csv("prolific_data_validation_study.csv") 
+
+widevald <- inner_join(widevald, prolific_demographics_val, by = c("PROLIFIC_PID" = "Participant id")) 
+```
+
+```{r}
+widevald <- widevald %>% 
+   mutate(gender = case_when(Sex == "Male" ~ "male", 
+                             Sex == "Female" ~  "female", 
+                             .default = NA), 
+          age = as.numeric(Age)
+          ) 
+```
+
+## Export data
+
+```{r}
+write_xlsx(widevald, "validation_cleaned.xlsx")
+```

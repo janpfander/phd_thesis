@@ -1,0 +1,16 @@
+knowledge_dim,agr_c1_GPT,agr_c2_GPT,agr_c1_c2
+archeo1,80,77.5,80
+archeo2,80,75,70
+archeo3,82.5,72.5,77.5
+archeo4,87.5,77.5,75
+archeo5,60,72.5,62.5
+archeo6,60,62.5,50
+archeo7,70,60,80
+archeo8,75,70,72.5
+entom1,60,57.49999999999999,87.5
+entom2,85,87.5,80
+entom3,90,92.5,82.5
+entom4,75,65,62.5
+entom5,62.5,67.5,60
+entom6,95,65,70
+entom7,62.5,60,92.5

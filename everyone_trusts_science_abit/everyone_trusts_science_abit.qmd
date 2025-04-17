@@ -5,7 +5,7 @@ author:
   - name: Hugo Mercier
 abstract: >
   Many people report a low degree of trust in science, or endorse conspiracy theories that violate basic scientific knowledge. This might indicate a wholesale rejection of science in substantial segments of the population. In four studies, we asked 782 US participants questions about trust in science, conspiracy beliefs, and basic science (e.g. the relative size of electrons and atoms). Participants were provided with the scientifically consensual answer to the basic science questions, and asked whether they accept it. Acceptance of the scientific consensus was very high in the sample as a whole (95.1%), but also in every sub-sample (e.g., no trust in science: 87.3%; complete endorsement of flat Earth theory: 87.2%). This quasi-universal acceptance of basic science suggests that people are motivated to reject specific scientific beliefs, and not science as a whole. This could be leveraged in science communication.
-doi: 10.31219/osf.io/qc43v_v2
+doi: 10.31219/osf.io/qc43v_v2 d
 ---
 
 ## Quasi-universal acceptance of basic science in the US
@@ -104,7 +104,7 @@ Why does it matter whether trust in science is or is not related to trust in spe
 
 ### The present studies
 
-In a series of four pre-registered online studies (total n = 782), we asked US participants questions about well-established, consensual scientific facts. For each question, we asked participants what they thought the correct answer was (testing their knowledge of science), we informed them of the scientifically accepted answer, and asked them whether they accepted it (measuring their trust in basic science). We also measured participants’ trust in science using standard measures, as well as their beliefs in various conspiracy theories and their tendency to engage in conspiratorial thinking. The four studies, including materials, hypotheses, and analyses, were pre-registered and all materials and data are accessible via the Open Science Framework (<https://osf.io/8utsj/?view_only=364478f01fc548d0a42b9962918d871d>). The differences between the four studies are summarized presently, and the methods are detailed below.
+In a series of four pre-registered online studies (total n = 782), we asked US participants questions about well-established, consensual scientific facts. For each question, we asked participants what they thought the correct answer was (testing their knowledge of science), we informed them of the scientifically accepted answer, and asked them whether they accepted it (measuring their trust in basic science). We also measured participants’ trust in science using standard measures, as well as their beliefs in various conspiracy theories and their tendency to engage in conspiratorial thinking. The four studies, including materials, hypotheses, and analyses, were pre-registered and all materials and data are accessible via the Open Science Framework (<https://osf.io/8utsj/>). The differences between the four studies are summarized presently, and the methods are detailed below.
 
 #### Materials
 
@@ -888,7 +888,7 @@ After removing failed attention checks, the total sample size was `r exp1_descri
 
 #### Scientific facts
 
-Studies 1 to 3 used 10 facts drawn from widely used questionnaires about science knowledge [@allumScienceKnowledgeAttitudes2008; @durantPublicUnderstandingScience1989; @millerMeasurementCivicScientific1998a] sometimes referred to as the "Oxford scale" [@gauchatCulturalAuthorityScience2011]. A ‘trick’ question was added in Study 1 and removed as its wording proved unclear. Study 4 used 10 more recent scientific discoveries. @tbl-knowledge) shows all questions and their answer options.
+Studies 1 to 3 used 10 facts drawn from widely used questionnaires about science knowledge [@allumScienceKnowledgeAttitudes2008; @durantPublicUnderstandingScience1989; @millerMeasurementCivicScientific1998a] sometimes referred to as the "Oxford scale" [@gauchatCulturalAuthorityScience2011]. A ‘trick’ question was added in Study 1 and removed as its wording proved unclear. Study 4 used 10 more recent scientific discoveries. @tbl-knowledge shows all questions and their answer options.
 
 ```{r knowledge}
 #| label: tbl-knowledge
@@ -950,7 +950,7 @@ table_output
 
 #### Conspiracy beliefs
 
-We selected 10 science/health related conspiracy theories from the Belief in Conspiracy Theory Inventory (BCTI) [@pennycookOverconfidentlyConspiratorialConspiracy2022] (Table @tbl-conspiracy)). Participants were asked: "Below is a list of events for which the official version has been disputed. For each event, we would like you to indicate to what extent you believe the cover-up version of events is true or false. [1-9; labels: 1 - completely false, 5 - unsure, 9 - completely true]".
+We selected 10 science/health related conspiracy theories from the Belief in Conspiracy Theory Inventory (BCTI) [@pennycookOverconfidentlyConspiratorialConspiracy2022] (@tbl-conspiracy). Participants were asked: "Below is a list of events for which the official version has been disputed. For each event, we would like you to indicate to what extent you believe the cover-up version of events is true or false. [1-9; labels: 1 - completely false, 5 - unsure, 9 - completely true]".
 
 #### Conspiracy thinking
 
@@ -958,7 +958,7 @@ For all results presented here, we used the four-item conspiracy mentality quest
 
 ```{r conspiracy, echo=FALSE}
 #| label: tbl-conspiracy
-
+#| tbl-cap: "Conspiracy items."
 
 ## Create the data frame
 items <- c(
@@ -983,18 +983,11 @@ if (knitr::is_latex_output() || knitr::is_html_output()) {
       booktabs = TRUE, 
       longtable = TRUE,
       col.names = NULL,
-      caption = "Conspiracy items",
       full_width = TRUE
     ) %>%
     kableExtra::kable_styling(font_size = 8) %>%
     kableExtra::column_spec(1, width = "3em") %>%
-    kableExtra::column_spec(2, width = "40em") %>%
-    kableExtra::footnote(
-      general = "Participants were asked to rate their belief in the conspiracy on a scale from 1 to 9, with the labels: `1 - completely false, 5 - unsure, 9 - completely true`.",
-      escape = FALSE,
-      footnote_as_chunk = TRUE,
-      threeparttable = TRUE
-    )
+    kableExtra::column_spec(2, width = "40em") 
 } else {
   ## For Word: Use apa_table
   table_output <- papaja::apa_table(
@@ -1019,7 +1012,7 @@ In all analyses reported in the main paper, we measure trust in science via a qu
 
 ```{r summary-plot, fig.cap="(ref:summary-plot)", fig.height= 10, fig.width=10}
 #| label: fig-summary-plot
-#| fig-cap: 'Points represent the average share of acceptance and numbers the absolute count of participants as a function of: **A** the level of trust in science ("In general, would you say that you trust science a lot, some, not much, or not at all? [1 = Not at all, 2 = Not much, 3 = Some, 4 = A lot]"); **B** the average conspiracy thinking (CMQ, five items on a scale from 0 to 100); **C** the belief in specific conspiracy theories (i.e. participants who answered 9, "completely true", for a given theory, see Table @tbl-conspiracy) for the list of the theories).'
+#| fig-cap: 'Points represent the average share of acceptance and numbers the absolute count of participants as a function of: **A** the level of trust in science ("In general, would you say that you trust science a lot, some, not much, or not at all? [1 = Not at all, 2 = Not much, 3 = Some, 4 = A lot]"); **B** the average conspiracy thinking (CMQ, five items on a scale from 0 to 100); **C** the belief in specific conspiracy theories (i.e. participants who answered 9, "completely true", for a given theory, see @tbl-conspiracy for the list of the theories).'
 
 
 ## make plot data for trust
@@ -1218,11 +1211,7 @@ Regarding H1, we find a consistent association between trust in science and acce
 
 Regarding H2, the results are mixed for the relation of conspiracy beliefs (measured as the average acceptance of all the conspiracy beliefs) with both acceptance of the scientific consensus (Studies 1: r = `r exp1_descriptives$cor_conspiracy_acceptance$estimate`, p `r exp1_descriptives$cor_conspiracy_acceptance$p.value`; 2: r = `r exp2_descriptives$cor_conspiracy_acceptance$estimate`, p `r exp2_descriptives$cor_conspiracy_acceptance$p.value`; 3: r = `r exp3_descriptives$cor_conspiracy_acceptance$estimate`, p `r exp3_descriptives$cor_conspiracy_acceptance$p.value`; 4: r = `r exp4_descriptives$cor_conspiracy_acceptance$estimate`, p `r exp4_descriptives$cor_conspiracy_acceptance$p.value`) and science knowledge (Studies 1: r = `r exp1_descriptives$cor_conspiracy_knowledge$estimate`, p `r exp1_descriptives$cor_conspiracy_knowledge$p.value`; 2: r = `r exp2_descriptives$cor_conspiracy_knowledge$estimate`, p `r exp2_descriptives$cor_conspiracy_knowledge$p.value`; 3: r = `r exp3_descriptives$cor_conspiracy_knowledge$estimate`, p `r exp3_descriptives$cor_conspiracy_knowledge$p.value`; 4: r = `r exp4_descriptives$cor_conspiracy_knowledge$estimate`, p `r exp4_descriptives$cor_conspiracy_knowledge$p.value`).
 
-n an exploratory analysis, we find that
-
-While actual acceptance of scientific knowledge is only weakly correlated with trust in science,
-
-Why did participants reject the scientific consensus? We collected a total of `r exp4_descriptives$justifications_n + exp3_descriptives$justifications_n + exp2_descriptives$justifications_n` answers (Studies 2: `r exp2_descriptives$justifications_n`; 3: `r exp3_descriptives$justifications_n`; 4: `r exp4_descriptives$justifications_n`) from `r exp4_descriptives$justifications_n_participants + exp3_descriptives$justifications_n_participants + exp2_descriptives$justifications_n_participants` (Studies 2: `r exp2_descriptives$justifications_n_participants`; 3: `r exp3_descriptives$justifications_n_participants`; 4: `r exp4_descriptives$justifications_n_participants`) participants to the open-ended questions on why they had rejected the scientific consensus on a particular question. Based on the answers, we created five categories (Table @tbl-justifications)). All individual answers can be accessed in cleaned data sheets via the OSF project page.
+Why did participants reject the scientific consensus? We collected a total of `r exp4_descriptives$justifications_n + exp3_descriptives$justifications_n + exp2_descriptives$justifications_n` answers (Studies 2: `r exp2_descriptives$justifications_n`; 3: `r exp3_descriptives$justifications_n`; 4: `r exp4_descriptives$justifications_n`) from `r exp4_descriptives$justifications_n_participants + exp3_descriptives$justifications_n_participants + exp2_descriptives$justifications_n_participants` (Studies 2: `r exp2_descriptives$justifications_n_participants`; 3: `r exp3_descriptives$justifications_n_participants`; 4: `r exp4_descriptives$justifications_n_participants`) participants to the open-ended questions on why they had rejected the scientific consensus on a particular question. Based on the answers, we created five categories (@tbl-justifications). All individual answers can be accessed in cleaned data sheets via the OSF project page.
 
 ```{r justifications}
 ### make a common table of exp 2 and exp 3
@@ -1253,18 +1242,13 @@ table <- justifications %>%
   ## remove decimal places
   mutate_if(is.numeric, ~as.integer(.x)) 
 
-table %>%
-  apa_table(caption = "Justifications for rejecting the scientific consensus by category, Studies 2, 3 and 4 combined.", 
-            note = "*Participants with at least one answer in that category")
-
-## table %>% kbl(
-##   booktabs = T, longtable = T,
-##     caption = "Justifications for rejecting the scientific consensus by category, Studies 2, 3 and 4 combined.", 
-##   full_width = T) %>%
-##   footnote(general = "*Participans with at least one answer in that category",
-##            escape = FALSE,
-##            footnote_as_chunk = TRUE,
-##            threeparttable = TRUE)
+table %>% kbl(
+  booktabs = T, longtable = T,
+    caption = "Justifications for rejecting the scientific consensus by category, Studies 2, 3 and 4 combined.",
+  full_width = T) %>%
+  footnote(general = "*Participans with at least one answer in that category",
+           escape = FALSE,
+           footnote_as_chunk = TRUE)
 ```
 
 Why did participants say they accept the scientific consensus? In Studies 3 and 4--the vaccine hesitant samples--we had asked participants about cases in which they agreed with the scientific consensus. A total of `r exp3_descriptives$acceptance_n + exp4_descriptives$acceptance_n` (Studies 3: `r exp3_descriptives$acceptance_n`; 4: `r exp4_descriptives$acceptance_n`) participants answered this question. There were more participants saying they accepted the scientific consensus because they independently verified the fact (Studies 3: `r exp3_descriptives$acceptance_by_reason[["independent verification"]]$share`; 4: `r exp4_descriptives$acceptance_by_reason[["independent verification"]]$share` ), than participants saying it was because they trust scientists (Studies 3: `r exp3_descriptives$acceptance_by_reason[["trust in scientists"]]$share`; 4: `r exp4_descriptives$acceptance_by_reason[["trust in scientists"]]$share`)[^3]. Answers to a question about how they had done so can be found in the ESM.
@@ -1298,7 +1282,16 @@ In applied terms, the present results have implications for science communicatio
 
 The present studies have a number of limitations, in particular the lack of representative samples, and the focus on a single country. While our results support motivated reasoning accounts of trust in science, they leave important questions unaddressed, in particular: Why do people reject specific scientific findings but not others? Suggestions have already been made for a number of issues such as vaccination [@mitonCognitiveObstaclesProVaccination2015], GMOs [@blanckeFatalAttractionIntuitive2015], or nuclear energy [@hacquinDisgustSensitivityPublic2021]. However, research is still needed to better understand what motivates these rejections [see e.g., @hornseyWhyFactsAre2020]. Moreover, rejection of scientific facts can manifest in various ways, for example calling into question the integrity of scientists [@medeSciencerelatedPopulismConceptualization2023a; @medeWhoSupportsSciencerelated2022], or denying the very possibility of scientifically investigating certain issues [@munroScientificImpotenceExcuse2010]. The classification of justifications we present here does not address these processes in detail. Finally, by design, most of the basic science knowledge presented in this study didn't directly relate to anything controversial for most people. Future studies could look at basic science that does relate to scientific topics which are the object of public and policy-relevant debates (e.g. GM food, climate science, vaccines), or scientific findings for which there is a more obvious potential conflict of interest (e.g. non-publicly funded medical research).
 
+### Data availability
 
+
+### Code availability
+
+The code used to create all results (including tables and figures) of this manuscript is also available on the OSF project page (https://osf.io/8utsj/).
+
+### Competing interest
+
+The authors declare having no competing interests.
 
 
 

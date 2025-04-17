@@ -1,0 +1,203 @@
+---
+title: "Analysis Experiment 3"
+output:
+  bookdown::pdf_document2: default
+  bookdown::word_document2: default
+  bookdown::html_document2:
+      keep_md: yes
+always_allow_html: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+```
+
+```{r packages, message=FALSE, echo=FALSE, include=FALSE}
+library(tidyverse)     # create plots with ggplot, manipulate data, etc.
+library(broom.mixed)   # convert regression models into nice tables
+library(modelsummary)  # combine multiple regression models into a single table
+library(lme4)          # model specification / estimation 
+library(lmerTest)      # provides p-values in the output
+library(ggpubr)        # stile feature of ggplot
+library(gghalves)      # do special plots in ggplot
+library(kableExtra)    # for tables
+library("grid")        # for image plots   
+library("gridExtra")   # for image plots
+library("png")         # for image plots
+library(stargazer)
+library(lsr)
+library(effectsize)
+library(readxl)
+```
+
+```{r, include=FALSE, message=FALSE}
+data <- read_csv("/Users/Sophie/Documents/Travail/Assistante de recherche - 2024/Confiance dans la science/Pilot 2/cleaned.csv")
+
+data_wide <- read_xlsx("/Users/Sophie/Documents/Travail/Assistante de recherche - 2024/Confiance dans la science/Pilot 2/wide_cleaned_with personal coding of recalls.xlsx")
+
+# remove participants who did not complete phase 2 
+#data_wide <- data_wide %>%
+#  filter(!is.na(recall_t2))
+```
+
+**Note:** the coding of the quality of recall has been done with the help of chatgpt (prompt after giving it the two initial texts: "Here are summaries provided by participants in an experiment, who saw one of the two texts and then had to recall the information given in the text. Can you rate each summary depending on the quantity of information it provides, by giving one of three possible grades: 1, 2 and 3, from the least info to the more info.") This was done separately for summaries at t1 and summaries at t2. I changed the grade given by chatgpt one or two times when I considered it was not adapted.
+
+# Descriptives
+
+## Trust
+
+```{r, echo=FALSE, message=FALSE, fig.show='hold'}
+# means and confidence intervals of trust and competence by discipline at t0 and t1
+
+## table
+data_agg <- data %>% 
+    pivot_longer(
+      cols = c("competence", "trust"),  # Columns to pivot
+      names_to = c("outcome"),
+      values_to = "score"                 # New column for values
+    ) %>% 
+    group_by(discipline, time, outcome) %>% 
+    summarize(mean = mean(score, na.rm = TRUE),
+              CI_down = ciMean(score, 0.95, na.rm = TRUE)[1], #lower bound of 95% Confidence interval around the mean
+              CI_up = ciMean(score, 0.95, na.rm = TRUE)[2]) %>% #upper bound 
+  filter(!is.na(CI_up))
+
+##figure
+data %>% 
+    pivot_longer(
+      cols = c("competence", "trust"),  # Columns to pivot
+      names_to = c("outcome"),
+      values_to = "score"                 # New column for values
+    ) %>% 
+  ggplot(aes(x = outcome, y = score, fill = time)) + 
+  geom_violin(alpha = 0.3, colour = "white") +
+  geom_point(aes(x = outcome, y = mean, colour = time), data = data_agg, position = position_dodge(width = 0.9)) +
+  geom_errorbar(aes(y = mean, ymin = CI_down, ymax = CI_up, colour = time), 
+                width = 0.2, 
+                alpha = 1,
+                data = data_agg,
+                position = position_dodge(width = 0.9)) +
+  scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.5) +
+  scale_colour_viridis_d(option = "magma", begin = 0.2, end = 0.5) +
+  facet_wrap(~discipline)
+
+```
+
+## Impressiveness
+
+```{r}
+# distribution of impressiveness ratings at t1
+data %>%
+  filter(!is.na(impressed)) %>%
+  ggplot(aes(x = impressed, fill = discipline)) + 
+  geom_bar(position = position_dodge(preserve = "single"), alpha = 0.8) +
+  scale_fill_viridis_d(option = "magma", begin = 0.9, end = 0.95) +
+  facet_wrap(~discipline)
+
+```
+
+## Recall Quality
+
+```{r}
+data_wide %>%
+  pivot_longer(c("recall_t1_quality", "recall_t2_quality"), names_to = "time", values_to = "recall_quality") %>%
+  mutate(time = case_when(time == "recall_t1_quality" ~ "t1", 
+                          time == "recall_t2_quality" ~ "t2")) %>%
+  ggplot(aes(x = recall_quality, fill = time)) + 
+  geom_bar(position = position_dodge(preserve = "single")) +
+  scale_fill_viridis_d(option = "magma", begin = 0.9, end = 0.95) +
+  facet_wrap(~main_discipline)
+```
+
+## Relation of recall quality to trust and impressiveness
+
+```{r}
+# trust, competence and impressiveness ratings depending on recall_quality at t2 
+
+## summary table 
+data_agg2 <- data_wide %>%
+    pivot_longer(
+      cols = c(starts_with("competence"), starts_with("trust"), starts_with("impressed")),  # Columns to pivot
+      names_to = c("outcome", "time"),
+      names_sep = "_",
+      values_to = "score"                 # New column for values
+    ) %>% 
+    group_by(time, outcome, recall_t2_quality) %>% 
+    summarize(mean = mean(score, na.rm = TRUE),
+              CI_down = ciMean(score, 0.95, na.rm = TRUE)[1], #lower bound of 95% Confidence interval around the mean
+              CI_up = ciMean(score, 0.95, na.rm = TRUE)[2],
+              count = n()) %>% #upper bound 
+  filter(!is.na(recall_t2_quality), !is.na(CI_up))
+
+##figure
+data_wide %>% 
+    pivot_longer(
+      cols = c(starts_with("competence"), starts_with("trust"), starts_with("impressed")),  # Columns to pivot
+      names_to = c("outcome", "time"),
+      names_sep = "_",
+      values_to = "score"                 # New column for values
+    ) %>% 
+  filter(!is.na(score), !is.na(recall_t2_quality)) %>%
+  ggplot(aes(x = recall_t2_quality, y = score, fill = time)) + 
+  geom_point(aes(colour = time), alpha = 0.2, position = position_jitter(width = 0.1, height = 0.1)) +
+  geom_point(aes(x = recall_t2_quality, y = mean, colour = time), data = data_agg2, position = position_dodge(width = 0.9)) +
+  geom_errorbar(aes(y = mean, ymin = CI_down, ymax = CI_up, colour = time), 
+                width = 0.2, 
+                alpha = 1,
+                data = data_agg2,
+                position = position_dodge(width = 0.9)) +
+  scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.5) +
+  scale_colour_viridis_d(option = "magma", begin = 0.2, end = 0.5) +
+  facet_wrap(~outcome)
+
+# difference in trust and competence between t0 and t1 depending on recall quality at t2
+## summary table
+data_agg3 <- data_wide %>%
+    mutate(trust_diff = trust_t1 - trust_t0,
+           competence_diff = competence_t1 - competence_t0)%>%
+    pivot_longer(cols = c("trust_diff","competence_diff"),  # Columns to pivot
+      names_to = c("outcome"),
+      values_to = "score"                 # New column for values
+    ) %>% 
+    group_by(outcome, recall_t2_quality) %>% 
+    summarize(mean = mean(score, na.rm = TRUE),
+              CI_down = ciMean(score, 0.95, na.rm = TRUE)[1], #lower bound of 95% Confidence interval around the mean
+              CI_up = ciMean(score, 0.95, na.rm = TRUE)[2],
+              count = n()) %>% #upper bound 
+  filter(!is.na(recall_t2_quality), !is.na(CI_up))
+
+## figure 
+data_wide %>%
+    mutate(trust_diff = trust_t1 - trust_t0,
+           competence_diff = competence_t1 - competence_t0)%>%
+    pivot_longer(cols = c("trust_diff","competence_diff"),  # Columns to pivot
+      names_to = c("outcome"),
+      values_to = "score"                 # New column for values
+    ) %>% 
+  filter(!is.na(recall_t2_quality)) %>%
+  ggplot(aes(x = recall_t2_quality, y = score)) + 
+  geom_point(alpha = 0.3, position = position_jitter(width = 0.15, height = 0.15)) +
+  geom_point(aes(x = recall_t2_quality, y = mean), colour = "red", data = data_agg3) +
+  geom_errorbar(aes(y = mean, ymin = CI_down, ymax = CI_up), 
+                width = 0.2, 
+                alpha = 1,
+                colour= "red",
+                data = data_agg3) +
+  scale_x_continuous(n.breaks = 3) +
+  facet_wrap(~outcome)
+```
+
+# Analysis
+
+## Trust
+
+```{r}
+testtrust = t.test(data_wide$trust_t1, data_wide$trust_t0, paired = TRUE)
+cdtrust = cohens_d(data_wide$trust_t1, data_wide$trust_t0, paired = TRUE)
+testcomp = t.test(data_wide$competence_t1, data_wide$competence_t0, paired = TRUE)
+cdcomp = cohens_d(data_wide$competence_t1, data_wide$competence_t0, paired = TRUE)
+
+paste("trust t0-t1: ", "t(", round(testtrust$parameter, 3), ") = ",  round(testtrust$statistic,3), ", p = ", round(testtrust$p.value,3), ", Cohen's d = ", round(cdtrust$Cohens_d,2), " [", round(cdtrust$CI_low, 2), ",", round(cdtrust$CI_high, 2), "]",  sep = "")
+
+paste("competence t0-t1: ", "t(", round(testcomp$parameter, 3), ") = ",  round(testcomp$statistic,3), ", p = ", round(testcomp$p.value,3), ", Cohen's d = ", round(cdcomp$Cohens_d,2), " [", round(cdcomp$CI_low, 2), ",", round(cdcomp$CI_high, 2), "]",  sep = "")
+```

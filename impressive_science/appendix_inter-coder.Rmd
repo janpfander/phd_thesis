@@ -1,0 +1,39 @@
+# Inter-Coder Agreement  {#inter-coder}
+
+\FloatBarrier
+
+In the paper, we report the ICC. Here, we additionally show the descriptive agreement rates for different pairs of coders for each knowledge element. 
+
+```{r}
+caption <-  "Average agreement rates between different pairs of raters by knowledge element"
+
+table <- coder_agreement |> 
+  mutate(across(starts_with("agr"), ~paste0(.x, "%")))
+
+# Create the basic table
+if (knitr::is_latex_output() || knitr::is_html_output()) {
+  # For LaTeX or HTML: Use kable, column_spec, and kable_styling
+  table_output <- kableExtra::kable(table,
+                  col.names = c("Element", "Coder 1 - ChatGPT", "Coder 1 - ChatGPT", "Coder 1 - Coder 2"),
+                  caption = caption,
+                  align = "l",
+                  booktabs = TRUE,
+                  longtable = TRUE,
+                  #full_width = TRUE,
+                  #format = "pandoc"
+                  ) %>%
+  kable_styling(latex_options = "repeat_header",
+                font_size = 8) 
+} else {
+  # For Word: Use apa_table
+  table_output <- flextable::flextable(table) %>%
+    flextable::set_caption(caption = caption) %>%
+    flextable::autofit() 
+}
+
+table_output
+```
+
+
+
+

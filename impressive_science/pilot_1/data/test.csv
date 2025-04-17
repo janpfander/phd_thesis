@@ -1,0 +1,46 @@
+StartDate,EndDate,Status,IPAddress,Progress,Duration (in seconds),Finished,RecordedDate,ResponseId,RecipientLastName,RecipientFirstName,RecipientEmail,ExternalReference,LocationLatitude,LocationLongitude,DistributionChannel,UserLanguage,consent,attention,ants_basic_learn,ants_basic_impress,ants_basic_comp,ants_basic_trust,archeo_imp_learn,archeo_imp_impress,archeo_imp_comp,archeo_imp_trust,archeo_basic_learn,archeo_basic_impress,archeo_basic_comp,archeo_basic_trust,ants_imp_learn,ants_imp_impress,ants_imp_comp,ants_imp_trust,ants_basic_learn,ants_basic_impress,ants_basic_comp,ants_basic_trust,archeo_imp_learn,archeo_imp_impress,archeo_imp_comp,archeo_imp_trust,archeo_basic_learn,archeo_basic_impress,archeo_basic_comp,archeo_basic_trust,ants_imp_learn,ants_imp_impress,ants_imp_comp,ants_imp_trust,Q1,gender,age,education,PROLIFIC_PID,condition
+Start Date,End Date,Response Type,IP Address,Progress,Duration (in seconds),Finished,Recorded Date,Response ID,Recipient Last Name,Recipient First Name,Recipient Email,External Data Reference,Location Latitude,Location Longitude,Distribution Channel,User Language,"We invite you to participate in a scientific experiment. Participation requires that you give your informed consent. Before proceeding, please consider the following information:
+
+
+
+The study will take about 5 minutes to complete.
+
+
+
+There are no risks involved in this study.
+
+
+
+You will be paid for your participation at the posted rate (provided that you complete the whole study, including demographic questions).
+
+
+
+Your individual privacy will be maintained in all published and written data resulting from the study.
+
+ 
+
+Participation in this research study is voluntary. You may choose not to participate.
+
+ 
+
+By ticking the box below, and proceeding to the study task you certify that you have read this form, and agreed to participate in accordance with the above conditions.","Imagine you are playing video games with a friend and at some point your friend says: 
+ 
+
+“I don’t want to play this game anymore! To make sure that you read the instructions, please write the three following words ""I pay attention"" in the box below. I really dislike this game, it's the most overrated game ever.” 
+
+ 
+
+Do you agree with your friend?",How much do you feel you’ve learnt about ant behavior by reading this text?,How impressive did you find the findings of the myrmecologists (ant experts) described in the text?,How competent do you think myrmecologists are?,How much would you trust the discipline of myrmecology ?,How much do you feel you’ve learnt about human history behavior by reading this text?,How impressive did you find the findings of the archeologists described in the text?,How competent do you think archeologists are?,How much would you trust the discipline of archeology ?,How much do you feel you’ve learnt about human history behavior by reading this text?,How impressive did you find the findings of the archeologists described in the text?,How competent do you think archeologists are?,How much would you trust the discipline of archeology ?,How much do you feel you’ve learnt about ant behavior by reading this text?,How impressive did you find the findings of the myrmecologists (ant experts) described in the text?,How competent do you think myrmecologists are?,How much would you trust the discipline of myrmecology ?,How much do you feel you’ve learnt about ant behavior by reading this text?,How impressive did you find the findings of the myrmecologists (ant experts) described in the text?,How competent do you think myrmecologists are?,How much would you trust the discipline of myrmecology ?,How much do you feel you’ve learnt about human history behavior by reading this text?,How impressive did you find the findings of the archeologists described in the text?,How competent do you think archeologists are?,How much would you trust the discipline of archeology ?,How much do you feel you’ve learnt about human history behavior by reading this text?,How impressive did you find the findings of the archeologists described in the text?,How competent do you think archeologists are?,How much would you trust the discipline of archeology ?,How much do you feel you’ve learnt about ant behavior by reading this text?,How impressive did you find the findings of the myrmecologists (ant experts) described in the text?,How competent do you think myrmecologists are?,How much would you trust the discipline of myrmecology ?,"Before finishing, please provide the following information. Once you are done with these questions, please do not forget to press the arrow to complete the survey and get your completion code.",What is your gender?,What is your age?,What is the highest level of education you have completed?,PROLIFIC_PID,condition
+"{""ImportId"":""startDate"",""timeZone"":""Europe/Berlin""}","{""ImportId"":""endDate"",""timeZone"":""Europe/Berlin""}","{""ImportId"":""status""}","{""ImportId"":""ipAddress""}","{""ImportId"":""progress""}","{""ImportId"":""duration""}","{""ImportId"":""finished""}","{""ImportId"":""recordedDate"",""timeZone"":""Europe/Berlin""}","{""ImportId"":""_recordId""}","{""ImportId"":""recipientLastName""}","{""ImportId"":""recipientFirstName""}","{""ImportId"":""recipientEmail""}","{""ImportId"":""externalDataReference""}","{""ImportId"":""locationLatitude""}","{""ImportId"":""locationLongitude""}","{""ImportId"":""distributionChannel""}","{""ImportId"":""userLanguage""}","{""ImportId"":""QID1211687480""}","{""ImportId"":""QID1211687479_TEXT""}","{""ImportId"":""QID93""}","{""ImportId"":""QID94""}","{""ImportId"":""QID95""}","{""ImportId"":""QID96""}","{""ImportId"":""QID80""}","{""ImportId"":""QID82""}","{""ImportId"":""QID83""}","{""ImportId"":""QID84""}","{""ImportId"":""QID87""}","{""ImportId"":""QID88""}","{""ImportId"":""QID89""}","{""ImportId"":""QID90""}","{""ImportId"":""QID98""}","{""ImportId"":""QID99""}","{""ImportId"":""QID100""}","{""ImportId"":""QID101""}","{""ImportId"":""QID111""}","{""ImportId"":""QID112""}","{""ImportId"":""QID113""}","{""ImportId"":""QID114""}","{""ImportId"":""QID106""}","{""ImportId"":""QID107""}","{""ImportId"":""QID108""}","{""ImportId"":""QID109""}","{""ImportId"":""QID116""}","{""ImportId"":""QID117""}","{""ImportId"":""QID118""}","{""ImportId"":""QID119""}","{""ImportId"":""QID121""}","{""ImportId"":""QID122""}","{""ImportId"":""QID123""}","{""ImportId"":""QID124""}","{""ImportId"":""QID1211775182""}","{""ImportId"":""QID1211775183""}","{""ImportId"":""QID1211775184_TEXT""}","{""ImportId"":""QID1211775185""}","{""ImportId"":""PROLIFIC_PID""}","{""ImportId"":""condition""}"
+2024-01-24 16:20:57,2024-01-24 16:21:37,1,,100,39,1,2024-01-24 16:21:38,R_5kCmM30hxR3VyqB,,,,,48.8323,2.4075,preview,EN,1,I pay attention,,,,,3,3,4,5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+2024-01-24 16:27:58,2024-01-24 16:28:26,1,,100,28,1,2024-01-24 16:28:28,R_51k9BEDMnP98I8N,,,,,48.8323,2.4075,preview,EN,1,I pay attention,,,,,,,,,3,4,3,4,2,3,4,5,,,,,,,,,,,,,,,,,,,,,,
+2024-01-24 17:06:07,2024-01-24 17:06:35,1,,100,27,1,2024-01-24 17:06:36,R_5N5nspyzSx5wfGj,,,,,48.8323,2.4075,preview,EN,1,I pay attention,,,,,,,,,2,3,2,4,2,3,4,5,,,,,,,,,,,,,,,,,,,,,,
+2024-01-24 17:12:51,2024-01-24 17:13:14,1,,100,22,1,2024-01-24 17:13:14,R_5m2fuTuWqpCuCCE,,,,,48.8323,2.4075,preview,EN,1,I pay attention,2,4,4,5,3,2,3,4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+2024-01-24 17:14:01,2024-01-24 17:14:50,1,,100,49,1,2024-01-24 17:14:51,R_5ZEb2uoWzGC3iZU,,,,,48.8323,2.4075,preview,EN,1,I pay attention,,4,,,1,2,3,5,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+2024-01-24 17:17:18,2024-01-24 17:17:39,1,,100,20,1,2024-01-24 17:17:40,R_5QF3fW1dNncLN6x,,,,,48.8323,2.4075,preview,EN,1,I pay attention,2,4,4,5,4,3,2,2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+2024-02-07 14:40:56,2024-02-07 14:41:37,1,,100,41,1,2024-02-07 14:41:38,R_5P7RBougoGTeqUs,,,,,48.8323,2.4075,preview,EN,1," I pay attention",4,3,3,3,3,2,4,4,,,,,,,,,,,,,,,,,2,3,4,5,2,4,4,4,,,,,,
+2024-02-07 14:59:07,2024-02-07 15:04:06,1,,100,299,1,2024-02-07 15:04:07,R_8DuHncQhWF3xVrJ,,,,,48.8051,2.4197,preview,EN,1,I pay attention,,,,,,,,,3,2,3,3,2,4,4,4,,,,,,,,,,,,,,,,,,1,45,4,,labels
+2024-02-07 14:59:07,2024-02-07 15:04:59,1,,100,352,1,2024-02-07 15:05:00,R_5tn7JmooGUQCGoL,,,,,48.8323,2.4075,preview,EN,1,I pay attention,,,,,,,,,,,,,,,,,3,4,2,2,3,4,4,3,,,,,,,,,,1,19,4,,nolabels
+2024-02-07 15:12:35,2024-02-07 15:17:59,1,,100,323,1,2024-02-07 15:18:01,R_5w7tN7zUKyQiuQm,,,,,48.8323,2.4075,preview,EN,1,I pay attention,,,,,,,,,3,3,4,2,4,4,4,4,,,,,,,,,,,,,,,,,,1,18,4,,labels
+2024-02-07 15:18:10,2024-02-07 15:18:55,1,,100,44,1,2024-02-07 15:18:56,R_5EgJJALEAac29ji,,,,,48.8323,2.4075,preview,EN,1,I pay attention,,,,,,,,,3,3,2,3,4,3,4,4,,,,,,,,,,,,,,,,,,1,18,4,,labels
+2024-02-07 15:12:56,2024-02-07 15:20:04,1,,100,427,1,2024-02-07 15:20:04,R_8s07K3ld9hBc3ol,,,,,48.8051,2.4197,preview,EN,1,blalqqwe,,,,,,,,,,,,,,,,,,,,,,,,,1,5,1,3,4,2,4,5,,2,23,7,,nolabels

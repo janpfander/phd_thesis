@@ -1,0 +1,176 @@
+---
+title: "Data cleaning Pilot for Experiment 4 - Phase 1"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+```{r packages, message=FALSE}
+library(tidyverse)     # create plots with ggplot, manipulate data, etc.
+library(broom.mixed)   # convert regression models into nice tables
+library(modelsummary)  # combine multiple regression models into a single table
+library(lme4)          # model specification / estimation 
+library(lmerTest)      # provides p-values in the output
+library(ggpubr)        # stile feature of ggplot
+library(gghalves)      # do special plots in ggplot
+library(kableExtra)    # for tables
+library(readxl)
+library(lsr)
+library(effectsize)
+```
+
+## Import data
+
+```{r import, message=FALSE}
+
+#phase 1
+d <- read_xlsx("data") %>%
+  filter(StartDate != "Start Date") %>%
+  mutate(across(c(Finished, consent1:education), as.numeric))
+
+#phase 2, entomology and archeology
+d2e <- read_xlsx("data") %>%
+  filter(StartDate != "Start Date") %>%
+  mutate(across(c(Finished, consent:entom_knowledge5), as.numeric))
+
+d2a <- read_xlsx("data") %>%
+  filter(StartDate != "Start Date") %>%
+  mutate(across(c(Finished, consent:archeo_knowledge5), as.numeric))
+
+#exclude participants who did not finish the study
+d <- d[(d$Finished==1),]
+d2e <- d2e[(d2e$Finished==1),]
+d2a <- d2a[(d2a$Finished==1),]
+```
+
+## Attention check
+
+```{r}
+# filter to only valid attention check responses
+d <- d %>% filter(attention == 5)
+
+d2e <- d2e %>% filter(attention == 2)
+d2a <- d2a %>% filter(attention == 2)
+
+```
+
+## Re-shape data
+
+```{r}
+# check all names and their order
+names(d)
+```
+
+```{r}
+# clean and re-shape
+d <- d %>% 
+  # add an easy to read participant identifier
+  mutate(id = 1:nrow(.)) %>% 
+  # bring to long format
+  pivot_longer(cols = c(starts_with("archeo"), starts_with("entom")), 
+               names_to = "condition", values_to = "score") %>% 
+  # separate conditions into CONVERGENCE_OUTCOME_STIMULUS
+  separate_wider_delim(condition, "_", names = c("discipline", "outcome"),
+                       # make sure that it works also for archeo_comp_before
+                       too_many = "merge"
+                       ) %>%
+  # necessary because of the way we labeled
+  drop_na(score) %>% 
+  pivot_wider(names_from = outcome, values_from = score) %>% 
+  # create better variable names
+  rename(competence = comp, 
+         competence_before = comp_before,
+         impressed = imp, 
+         ) %>% 
+  # all variables are coded as `character` - make key variables numeric
+  mutate(across(c(competence, impressed, trust, starts_with("knowledge")), as.numeric),
+         # recode knowledge questions as TRUE and FALSE, such that 1 corresponds to TRUE and 0 to FALSE
+         across(starts_with("knowledge"), ~ifelse(.x == 1, TRUE, FALSE))
+         )
+
+
+d2e <- d2e %>% 
+  # create better variable names
+  rename_with( ~sub("entom", "t2", .x), starts_with("entom"))
+d2a <- d2a %>% 
+  # create better variable names
+  rename_with( ~sub("archeo", "t2", .x), starts_with("archeo"))
+
+```
+
+Calculate an average knowledge score and number of correctly answered questions per participant.
+
+```{r}
+d <- d %>% 
+  # add average knowledge score
+  rowwise() %>% 
+  mutate(
+    n_correct = sum(c_across(starts_with("knowledge")),na.rm = TRUE),
+    knowledge_avg = mean(c_across(starts_with("knowledge")),na.rm = TRUE),
+         ) %>% 
+  ungroup() # Turn off rowwise()
+
+d2e <- d2e %>% 
+  # add average knowledge score
+  rowwise() %>% 
+  mutate(
+    t2_n_correct = sum(c_across(starts_with("t2_knowledge")),na.rm = TRUE),
+    t2_knowledge_avg = mean(c_across(starts_with("t2_knowledge")),na.rm = TRUE),
+         ) %>% 
+  ungroup() # Turn off rowwise()
+
+d2a <- d2a %>% 
+  # add average knowledge score
+  rowwise() %>% 
+  mutate(
+    t2_n_correct = sum(c_across(starts_with("t2_knowledge")),na.rm = TRUE),
+    t2_knowledge_avg = mean(c_across(starts_with("t2_knowledge")),na.rm = TRUE),
+         ) %>% 
+  ungroup() # Turn off rowwise()
+```
+
+## Add scaled variables
+
+```{r}
+# Scale variables and add a suffix "std" to the new variables
+d <- d %>%
+  mutate(across(c(n_correct, trust, impressed, competence), 
+                ~as.numeric(scale(.x)),
+                .names = "{.col}_std"))
+```
+
+## Add demographics
+
+## Recode demographics
+
+```{r, message=FALSE}
+prolific_demographics <- read_csv("data")
+# 
+d <- inner_join(d, prolific_demographics, by = c("PROLIFIC_PID" = "Participant id")) 
+```
+
+```{r}
+ d <- d %>% 
+   mutate(gender = case_when(Sex == "Male" ~ "male", 
+                             Sex == "Female" ~  "female", 
+                             .default = NA), 
+          age = as.numeric(Age)
+          ) 
+```
+
+## Join phase 2 data
+
+```{r}
+
+d2 <- rbind(d2a, d2e)
+
+d <- left_join(d, d2, by = c("PROLIFIC_PID")) 
+
+```
+
+## Export data
+
+```{r}
+# wide format
+write_csv(d, "/Users/Sophie/Documents/Travail/Assistante de recherche - 2024/Confiance dans la science/Pilot/cleaned_wide.csv")
+```
