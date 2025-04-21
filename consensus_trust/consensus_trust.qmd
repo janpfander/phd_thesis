@@ -81,7 +81,7 @@ source("functions/own_functions.R")
 ::: {.callout-note}
 ## published as: 
 
-Pfänder, J., De Courson, B., & Mercier, H. (2025). *How wise is the crowd: Can we infer people are accurate and competent merely because they agree with each other?* *Cognition*, 255, 106005. [https://doi.org/10.1016/j.cognition.2024.106005](https://doi.org/10.1016/j.cognition.2024.106005)
+Pfänder, J., De Courson, B., & Mercier, H. (2025). *How wise is the crowd: Can we infer people are accurate and competent merely because they agree with each other?* **Cognition**, 255, 106005. [https://doi.org/10.1016/j.cognition.2024.106005](https://doi.org/10.1016/j.cognition.2024.106005)
 
 For supplementary materials, please refer either to the published version, or [the publicly available preprint via github](https://github.com/janpfander/consensus_trust/blob/main/paper.pdf).
 :::

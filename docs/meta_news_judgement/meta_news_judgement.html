@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.43">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Jan Pfänder">
+<meta name="author" content="Sacha Altay">
+
+<title>7&nbsp; Spotting False News and Doubting True News, A Meta-Analysis of News Judgments – A cognitive perspective on trust in science</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../references.html" rel="next">
+<link href="../trust_science_france/trust_science_france.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-d4d76bf8491c20bad77d141916dc28e1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-626149efe8f5d16e1d391ba177679bf0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../meta_news_judgement/meta_news_judgement.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Spotting False News and Doubting True News, A Meta-Analysis of News Judgments</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">A cognitive perspective on trust in science</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/jjallaire/hopr/" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+    <div class="dropdown">
+      <a href="" title="Download" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label="Download"><i class="bi bi-download"></i></a>
+      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="../A-cognitive-perspective-on-trust-in-science.pdf">
+              <i class="bi bi-file-pdf pe-1"></i>
+            Download PDF
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="../A-cognitive-perspective-on-trust-in-science.epub">
+              <i class="bi bi-journal pe-1"></i>
+            Download ePub
+            </a>
+          </li>
+      </ul>
+    </div>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../summary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Summary</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../everyone_trusts_science_abit/everyone_trusts_science_abit.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Quasi-universal acceptance of basic science in the US</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../impressive_science/impressive_science.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Trusting but forgetting impressive science</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../consensus_trust/consensus_trust.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">How wise is the crowd: Can we infer people are accurate and competent merely because they agree with each other?</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../trust_science_france/trust_science_france.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">The French trust more the sciences they perceive as precise and consensual</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../meta_news_judgement/meta_news_judgement.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Spotting False News and Doubting True News, A Meta-Analysis of News Judgments</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">7.1</span> Introduction</a></li>
+  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results"><span class="header-section-number">7.2</span> Results</a>
+  <ul class="collapse">
+  <li><a href="#descriptives" id="toc-descriptives" class="nav-link" data-scroll-target="#descriptives"><span class="header-section-number">7.2.1</span> Descriptives</a></li>
+  <li><a href="#analytic-procedures" id="toc-analytic-procedures" class="nav-link" data-scroll-target="#analytic-procedures"><span class="header-section-number">7.2.2</span> Analytic procedures</a></li>
+  <li><a href="#main-results" id="toc-main-results" class="nav-link" data-scroll-target="#main-results"><span class="header-section-number">7.2.3</span> Main results</a></li>
+  <li><a href="#moderators" id="toc-moderators" class="nav-link" data-scroll-target="#moderators"><span class="header-section-number">7.2.4</span> Moderators</a></li>
+  <li><a href="#individual-level-data" id="toc-individual-level-data" class="nav-link" data-scroll-target="#individual-level-data"><span class="header-section-number">7.2.5</span> Individual level data</a></li>
+  </ul></li>
+  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion"><span class="header-section-number">7.3</span> Discussion</a></li>
+  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods"><span class="header-section-number">7.4</span> Methods</a>
+  <ul class="collapse">
+  <li><a href="#data" id="toc-data" class="nav-link" data-scroll-target="#data"><span class="header-section-number">7.4.1</span> Data</a></li>
+  <li><a href="#statistical-methods" id="toc-statistical-methods" class="nav-link" data-scroll-target="#statistical-methods"><span class="header-section-number">7.4.2</span> Statistical methods</a></li>
+  </ul></li>
+  <li><a href="#data-availability" id="toc-data-availability" class="nav-link" data-scroll-target="#data-availability"><span class="header-section-number">7.5</span> Data availability</a></li>
+  <li><a href="#code-availability" id="toc-code-availability" class="nav-link" data-scroll-target="#code-availability"><span class="header-section-number">7.6</span> Code availability</a></li>
+  <li><a href="#acknowledgements" id="toc-acknowledgements" class="nav-link" data-scroll-target="#acknowledgements"><span class="header-section-number">7.7</span> Acknowledgements</a></li>
+  <li><a href="#author-contributions-statement" id="toc-author-contributions-statement" class="nav-link" data-scroll-target="#author-contributions-statement"><span class="header-section-number">7.8</span> Author Contributions Statement</a></li>
+  <li><a href="#competing-interest" id="toc-competing-interest" class="nav-link" data-scroll-target="#competing-interest"><span class="header-section-number">7.9</span> Competing interest</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/jjallaire/hopr/edit/main/meta_news_judgement/meta_news_judgement.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Spotting False News and Doubting True News, A Meta-Analysis of News Judgments</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Authors</div>
+    <div class="quarto-title-meta-contents">
+             <p>Jan Pfänder </p>
+             <p>Sacha Altay </p>
+          </div>
+  </div>
+    
+  
+    
+    <div>
+    <div class="quarto-title-meta-heading">Doi</div>
+    <div class="quarto-title-meta-contents">
+      <p class="doi">
+        <a href="https://doi.org/10.1038/s41562-024-02086-1">10.1038/s41562-024-02086-1</a>
+      </p>
+    </div>
+  </div>
+  </div>
+  
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    <p>How good are people at judging the veracity of news? We conducted a systematic literature review and pre-registered meta-analysis of 303 effect sizes from 67 experimental articles evaluating accuracy ratings of true and fact-checked false news (<span class="math inline">\(N_{participants}\)</span> = 194’438 from 40 countries across 6 continents). We found that people rated true news as more accurate than false news (Cohen’s d = 1.12 [1.01, 1.22], p &lt; .001) and were better at rating false news as false than at rating true news as true (Cohen’s d = 0.32 [0.24, 0.39], p &lt; .001). In other words, participants were able to discern true from false news, and erred on the side of skepticism rather than credulity. We found no evidence that the political concordance of the news had an effect on discernment, but participants were more skeptical of politically discordant news (Cohen’s d = 0.78 [0.62, 0.94], p &lt; .001). These findings lend support to crowdsourced fact-checking initiatives, and suggest that, to improve discernment, there is more room to increase the acceptance of true news than to reduce the acceptance of fact-checked false news.</p>
+  </div>
+</div>
+
+
+</header>
+
+
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+published as:
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Pfänder, J., &amp; Altay, S. (2025). <em>Spotting false news and doubting true news: A systematic review and meta-analysis of news judgements.</em> <strong>Nature Human Behaviour</strong>, 1–12. <a href="https://doi.org/10.1038/s41562-024-02086-1">https://doi.org/10.1038/s41562-024-02086-1</a></p>
+<p>For supplementary materials, please refer either to the open-access published version, or <a href="https://doi.org/10.31219/osf.io/n9h4y_v1">the preprint via the OSF</a>.</p>
+</div>
+</div>
+<section id="introduction" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="introduction"><span class="header-section-number">7.1</span> Introduction</h2>
+<p>Many have expressed concerns that we live in a “post-truth” era and that people cannot tell the truth from falsehoods anymore. In parallel, populist leaders around the world have tried to erode trust in the news by delegitimizing journalists and the news media more broadly <span class="citation" data-cites="egelhoferPopulistAttitudesPoliticians2022">(<a href="../references.html#ref-egelhoferPopulistAttitudesPoliticians2022" role="doc-biblioref">Egelhofer et al. 2022</a>)</span>. Since the 2016 US presidential election, our systematic literature review shows that over 4000 scientific articles have been published on the topic of false news. Across the world, numerous experiments evaluating the effect of interventions against misinformation or susceptibility to misinformation have relied on a similar design feature: having participants rate the accuracy of true and fact-checked false headlines–typically in a Facebook-like format, with an image, title, lede, and source, or as an isolated title/claim. Taken together, these studies allow us to shed some light on the most common fears voiced about false news, namely that people may fall for false news, distrust true news, or may be unable to discern between true and false news. In particular, we investigated whether people rate true news as more accurate than fact-checked false news (discernment) and whether they were better at rating false news as inaccurate than at rating true news as accurate (skepticism bias). We also investigated various moderators of discernment and skepticism bias such as political congruence, the topic of the news, or the presence of a source.</p>
+<p>Establishing whether people can spot false news is important to design interventions against misinformation: if people lack the skills to spot false news, interventions should be targeted at improving skills to detect false news, whereas if people have the ability to spot false news but nonetheless engage with it, the problem lies elsewhere and may be one of motivation or (in)attention that educational interventions may struggle to address.</p>
+<p>Past work has reliably shown that people do not fare better than chance at detecting lies because most verbal and non-verbal cues people use to detect lies are unreliable <span class="citation" data-cites="brennenLieDetectionWhat2023">(<a href="../references.html#ref-brennenLieDetectionWhat2023" role="doc-biblioref">Brennen and Magnussen 2023</a>)</span>. Why would this be any different for detecting false news? People make snap judgments to evaluate the quality of the news they come across <span class="citation" data-cites="montalverneTrustGapHow2022">(<a href="../references.html#ref-montalverneTrustGapHow2022" role="doc-biblioref">Mont’Alverne et al. 2022</a>)</span>, and rely on seemingly imperfect proxies such as the source of information, police and fonts, the presence of hyperlinks, the quality of visuals, ads, or the tone of the text <span class="citation" data-cites="metzgerMakingSenseCredibility2007 rossarguedasSnapJudgementsHow2022">(<a href="../references.html#ref-metzgerMakingSenseCredibility2007" role="doc-biblioref">Metzger 2007</a>; <a href="../references.html#ref-rossarguedasSnapJudgementsHow2022" role="doc-biblioref">Ross Arguedas et al. 2022</a>)</span>. In experimental settings, participants report relying on intuitions and tacit knowledge to judge the accuracy of news headlines <span class="citation" data-cites="altayExposureHigherRates2023">(<a href="../references.html#ref-altayExposureHigherRates2023" role="doc-biblioref">Altay, Lyons, and Modirrousta-Galian, n.d.</a>)</span>. Yet, a scoping review of the literature on belief in false news (including a total of 26 articles) has shown that, in experiments, participants “can detect deceitful messages reasonably well” <span class="citation" data-cites="bryanovDeterminantsIndividualsBelief2021">(<a href="../references.html#ref-bryanovDeterminantsIndividualsBelief2021" role="doc-biblioref">Bryanov and Vziatysheva 2021, 19</a>)</span>. Similarly, a survey on 150 misinformation experts has shown that 53% of experts agree that “people can tell the truth from falsehoods” – while only 25% of experts disagreed with the statement <span class="citation" data-cites="altayExposureHigherRates2023">(<a href="../references.html#ref-altayExposureHigherRates2023" role="doc-biblioref">Altay, Lyons, and Modirrousta-Galian, n.d.</a>)</span>. Unlike the unreliable proxies people rely on to detect lies in interpersonal contexts, there are reasons to believe that some of the cues people use to detect false news may, on average, be reliable. For instance, the news outlets people trust the least do publish lower quality news and more false news, as people’s trust ratings of news outlets correlate strongly with fact-checkers’ ratings in the US and Europe <span class="citation" data-cites="pennycookLazyNotBiased2019 schulzAreNewsOutlets2020">(<a href="../references.html#ref-pennycookLazyNotBiased2019" role="doc-biblioref">Pennycook and Rand 2019</a>; <a href="../references.html#ref-schulzAreNewsOutlets2020" role="doc-biblioref">Schulz, Fletcher, and Popescu 2020</a>)</span>. Moreover, false news has some distinctive properties, such as being more politically slanted <span class="citation" data-cites="mouraoFakeNewsDiscursive2019">(<a href="../references.html#ref-mouraoFakeNewsDiscursive2019" role="doc-biblioref">Mourão and Robertson 2019</a>)</span>, being more novel, surprising, or disgusting, being more sensationalist, funnier, less boring, and less negative <span class="citation" data-cites="vosoughiSpreadTrueFalse2018a chenWhatMakesNews2023">(<a href="../references.html#ref-vosoughiSpreadTrueFalse2018a" role="doc-biblioref">Vosoughi, Roy, and Aral 2018</a>; <a href="../references.html#ref-chenWhatMakesNews2023" role="doc-biblioref">Chen, Pennycook, and Rand 2023</a>)</span>, or being more interesting-if-true <span class="citation" data-cites="altayIfThisAccount2022">(<a href="../references.html#ref-altayIfThisAccount2022" role="doc-biblioref">Altay, Araujo, and Mercier 2022</a>)</span>. These features aim at increasing engagement, but they do so at the expense of accuracy, and in many cases, people may pick up on it. This led us to pre-register the hypothesis that people would rate true news as more accurate than false news. Yet, legitimate concerns have been raised about the lack of data outside of the US, especially in some Global South countries where the misinformation problem is arguably worse. Our meta-analysis covers 40 countries across 6 continents and directly addresses concerns about the over-representation of US-data.</p>
+<p><strong>H1: People rate true news as more accurate than false news.</strong></p>
+<p>While many fear that people are exposed to too much misinformation, too easily fall for it, and are overly influenced by it, a growing body of researchers is worried that people are exposed to too little reliable information, commonly reject it, and are excessively resistant to it <span class="citation" data-cites="acerbiResearchNoteFighting2022 mercierNotBornYesterday2020">(<a href="../references.html#ref-acerbiResearchNoteFighting2022" role="doc-biblioref">Acerbi, Altay, and Mercier 2022</a>; <a href="../references.html#ref-mercierNotBornYesterday2020" role="doc-biblioref">Mercier 2020</a>)</span>. Establishing whether true news skepticism (excessively rejecting true news) is of similar magnitude to false news gullibility (excessively accepting false news) is important for future studies on misinformation: if people are excessively gullible, interventions should primarily aim at fostering skepticism, whereas if people are excessively skeptical, interventions should focus on increasing trust in reliable information. For these reasons, in addition to investigating discernment (H1), we also looked at skepticism bias by comparing the magnitude of true news skepticism to false news gullibility. Research in psychology has shown that people exhibit a “truth bias” <span class="citation" data-cites="brashierJudgingTruth2020 streetSourceTruthBias2015">(<a href="../references.html#ref-brashierJudgingTruth2020" role="doc-biblioref">Brashier and Marsh 2020</a>; <a href="../references.html#ref-streetSourceTruthBias2015" role="doc-biblioref">Street and Masip 2015</a>)</span>, such that they tend to accept incoming statements rather than reject them. Similarly, work on interpersonal communication has shown that, by default, people tend to accept communicated information <span class="citation" data-cites="levineTruthDefaultTheoryTDT2014">(<a href="../references.html#ref-levineTruthDefaultTheoryTDT2014" role="doc-biblioref">Levine 2014</a>)</span>. However, there are reasons to think that the truth-default-theory may not apply to news judgments. It has been hypothesized that people display a truth bias in interpersonal contexts because information in these contexts is, in fact, often true <span class="citation" data-cites="brashierJudgingTruth2020">(<a href="../references.html#ref-brashierJudgingTruth2020" role="doc-biblioref">Brashier and Marsh 2020</a>)</span>. When it comes to news judgments, it is not clear that people by default expect news stories to be true. Trust in the news and journalists is low worldwide <span class="citation" data-cites="newmanReutersInstituteDigital2022">(<a href="../references.html#ref-newmanReutersInstituteDigital2022" role="doc-biblioref">Newman et al. 2022</a>)</span>, and a significant part of the population holds cynical views of the news <span class="citation" data-cites="mihailidisCostDisbeliefFracturing2021">(<a href="../references.html#ref-mihailidisCostDisbeliefFracturing2021" role="doc-biblioref">Mihailidis and Foster 2021</a>)</span>. Similarly, populist leaders across the world have attacked the credibility of the news media and instrumentalized the concept of fake news to discredit quality journalism <span class="citation" data-cites="egelhoferFakeNewsTwodimensional2019 vanduynPrimingFakeNews2019">(<a href="../references.html#ref-egelhoferFakeNewsTwodimensional2019" role="doc-biblioref">Egelhofer and Lecheler 2019</a>; <a href="../references.html#ref-vanduynPrimingFakeNews2019" role="doc-biblioref">Van Duyn and Collier 2019</a>)</span>. Disinformation strategies such as “flooding the zone” with false information <span class="citation" data-cites="paulRussianFirehoseFalsehood2016 ulusoyFloodingZoneHow2021">(<a href="../references.html#ref-paulRussianFirehoseFalsehood2016" role="doc-biblioref">Paul and Matthews 2016</a>; <a href="../references.html#ref-ulusoyFloodingZoneHow2021" role="doc-biblioref">Ulusoy et al. 2021</a>)</span> have been shown to increase skepticism in news judgments <span class="citation" data-cites="altayExposureHigherRates2023">(<a href="../references.html#ref-altayExposureHigherRates2023" role="doc-biblioref">Altay, Lyons, and Modirrousta-Galian, n.d.</a>)</span>. Moreover, in many studies included in our meta-analysis, the news stories were presented in a social media format (most often Facebook), which could fuel skepticism in news judgments. Indeed, people trust news <span class="citation" data-cites="montalverneTrustGapHow2022">(<a href="../references.html#ref-montalverneTrustGapHow2022" role="doc-biblioref">Mont’Alverne et al. 2022</a>)</span>–and information more generally <span class="citation" data-cites="fletcherPeopleDontTrust2017">(<a href="../references.html#ref-fletcherPeopleDontTrust2017" role="doc-biblioref">Fletcher and Nielsen 2017</a>)</span>–less on social media than on news websites. In line with these observations, some empirical evidence suggests that for news judgments, people display the opposite of a truth bias <span class="citation" data-cites="luoCredibilityPerceptionsDetection2022">(<a href="../references.html#ref-luoCredibilityPerceptionsDetection2022" role="doc-biblioref">Luo, Hancock, and Markowitz 2022</a>)</span>, namely a skepticism bias, whereby people tend to rate all news as more false than they are <span class="citation" data-cites="altayExposureHigherRates2023 bataillerSignalDetectionApproach2022 modirrousta-galianGamifiedInoculationInterventions2023">(<a href="../references.html#ref-altayExposureHigherRates2023" role="doc-biblioref">Altay, Lyons, and Modirrousta-Galian, n.d.</a>; <a href="../references.html#ref-bataillerSignalDetectionApproach2022" role="doc-biblioref">Batailler et al. 2022</a>; <a href="../references.html#ref-modirrousta-galianGamifiedInoculationInterventions2023" role="doc-biblioref">Modirrousta-Galian and Higham 2023</a>)</span>. We thus predicted that when judging the accuracy of news, participants will err on the side of skepticism more than on the side of gullibility.</p>
+<p><strong>H2: People are better at rating false news as false than true news as true.</strong></p>
+<p>Finally, we investigated potential moderators of H1 and H2, such as the country where the experiment was conducted, the format of the news headlines, the topic, whether the source of the news was displayed, and the political concordance of the news. Past work has suggested that displaying the source of the news has a small effect at best on accuracy ratings <span class="citation" data-cites="diasEmphasizingPublishersDoes2020">(<a href="../references.html#ref-diasEmphasizingPublishersDoes2020" role="doc-biblioref">Dias, Pennycook, and Rand 2020</a>)</span>, whereas little work has investigated differences in news judgments across countries, topics, and formats. The effect of political concordance on news judgments is debated. Participants may be motivated to believe politically congruent (true and false) news, motivated to disbelieve politically incongruent news, or not be politically motivated at all but still display such biases <span class="citation" data-cites="tappinBayesianBiasedAnalytic2020">(<a href="../references.html#ref-tappinBayesianBiasedAnalytic2020" role="doc-biblioref">Tappin, Pennycook, and Rand 2020</a>)</span>. We formulated research questions instead of hypotheses for our moderator analyses because of a lack of strong theoretical expectations.</p>
+</section>
+<section id="results" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="results"><span class="header-section-number">7.2</span> Results</h2>
+<section id="descriptives" class="level3" data-number="7.2.1">
+<h3 data-number="7.2.1" class="anchored" data-anchor-id="descriptives"><span class="header-section-number">7.2.1</span> Descriptives</h3>
+<p>We conducted a systematic literature review and pre-registered meta-analysis based on 67 publications, providing data on 195 samples (194438 participants) and 303 effects (i.e.&nbsp;<strong>k</strong>, the meta-analytic observations). Our meta-analysis includes publications from 40 countries across 6 continents. However, 34% of all participants were recruited in the United States alone, and 54% in Europe. Only 6% of participants were recruited in Asia, and even less in Africa (2%; see <a href="#fig-map" class="quarto-xref">Figure&nbsp;<span>7.1</span></a> for the number of effect sizes per country). The average sample size was 997.12 (min = 19, max = 32134, median = 482).</p>
+<p>In total, participants rated the accuracy of 2167 unique news items. On average, a participant rated 19.76 news items per study (min = 2, max = 240, median = 18). For 71 samples, news items were sampled from a pool of news (the pool size ranged from 12 to 255, with an average pool size of 57.46 items). The vast majority of studies (294 out of 303 effects) used a within participant design for manipulating news veracity, with each participant rating both true and false news items. Almost all effect sizes are from online studies (286 out of 294).</p>
+<p>(ref:map) A map of the number of effect sizes per country.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-map" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="output/figures/fig-map.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.1: A map of the number of effect sizes per country.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="analytic-procedures" class="level3" data-number="7.2.2">
+<h3 data-number="7.2.2" class="anchored" data-anchor-id="analytic-procedures"><span class="header-section-number">7.2.2</span> Analytic procedures</h3>
+<p>All analyses were pre-registered unless explicitly stated otherwise (for deviations see methods section). The choice of models was informed by simulations we conducted before having the data. To test H1, we calculated a discernment score by subtracting the mean accuracy ratings of false news from the mean accuracy ratings of true news, such that higher scores indicate better discernment. This differential measure of discernment is common in the literature on misinformation <span class="citation" data-cites="guayHowThinkWhether2023">(<a href="../references.html#ref-guayHowThinkWhether2023" role="doc-biblioref">Guay et al. 2023</a>)</span>. To test H2, we first calculated a judgment error for true and false news respectively. Error is defined as the distance between optimal accuracy ratings and actual accuracy ratings (see <a href="#fig-descriptive" class="quarto-xref">Figure&nbsp;<span>7.2</span></a>). We then calculate the skepticism bias as the difference between the two errors, subtracting the false news error score from the true news error score. Note that we cannot use more established Signal Detection Theory (SDT) measures, because we rely on mean ratings and not individual ratings. However, in the appendix, we show that for the studies we have raw data on, our main findings hold when relying on d’ (sensitivity) and c (response bias) from SDT.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-descriptive" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-descriptive-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="output/figures/fig-descriptive.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-descriptive-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.2: <em>Illustration of outcome measures</em>. The figure shows the distributions of accuracy ratings for true and fact-checked false news, scaled to range from 0 to 1. The figure illustrates discernment (the distance between the mean for true news and the mean for false news) and the errors (distance to the right end for true news and to the left end for false news) from which the skepticism bias is computed. A larger error for true news compared to false news yields a positive skepticism bias. In this descriptive figure, unlike in the meta-analysis, ratings and outcomes sizes are not weighted by sample size.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>To be able to compare effect sizes across different scales, we calculated Cohen’s d, a common standardized mean difference. To account for statistical dependence between true and false news ratings arising from the within-participant design used by most studies (294 out of 303 effect sizes), we calculated the standard error following the <a href="https://training.cochrane.org/handbook/current/chapter-23#section-23-2-7-3">Cochrane recommendations for crossover trials</a> <span class="citation" data-cites="higgins_cochrane_2019">(<a href="../references.html#ref-higgins_cochrane_2019" role="doc-biblioref">Higgins et al. 2019</a>)</span>. For the remaining 9 effect sizes from studies that used a between-participant design, we calculated the standard error assuming independence between true and false news ratings (see <a href="#methods">methods</a>). In the appendix, we show that our results hold across alternative standardized effect measures, among which the one we had originally pre-registered, a standardized mean change using change score standardization (SMCC). We chose to deviate from the pre-registration and use Cohen’s d instead, because it is easier to interpret and corresponds to the standards <a href="https://training.cochrane.org/handbook/current/chapter-23#section-23-2-7-3">for crossover trials recommended by the Cochrane manual</a> <span class="citation" data-cites="higgins_cochrane_2019">(<a href="../references.html#ref-higgins_cochrane_2019" role="doc-biblioref">Higgins et al. 2019</a>)</span>. In the appendix, we also provide effect estimates in units of the original scales separately for each scale.</p>
+<p>We used multilevel meta models with clustered standard errors at the sample level to account for cases in which the same sample contributed various effect sizes (i.e.&nbsp;the meta-analytic units of observation). All confidence intervals reported in this paper are 95% confidence intervals. All statistical tests are two-tailed.</p>
+</section>
+<section id="main-results" class="level3" data-number="7.2.3">
+<h3 data-number="7.2.3" class="anchored" data-anchor-id="main-results"><span class="header-section-number">7.2.3</span> Main results</h3>
+<section id="discernment-h1" class="level4" data-number="7.2.3.1">
+<h4 data-number="7.2.3.1" class="anchored" data-anchor-id="discernment-h1"><span class="header-section-number">7.2.3.1</span> Discernment (H1)</h4>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-forest" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-forest-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="output/figures/fig-forest.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-forest-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.3: <em>Forest plots for discernment and skepticism bias</em>. The figure displays all n = 303 effect sizes for both outcomes. Effects are weighed by their sample size. Effect sizes are calculated as Cohen’s d.&nbsp;Horizontal bars represent 95% confidence intervals. The average estimate is the result of a multilevel meta model with clustered standard errors at the sample level.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Supporting H1, participants rated true news as more accurate than false news on average. Pooled across all studies, the average discernment estimate is large (d = 1.12 [1.01, 1.22], z = 20.79, p &lt; .001). As shown in <a href="#fig-forest" class="quarto-xref">Figure&nbsp;<span>7.3</span></a>, 298 of 303 estimates are positive. Of the positive estimates, 3 have a confidence interval that includes 0, as does 1 of the negative estimates. Most of the variance in the effect sizes observed above is explained by between-sample heterogeneity (<span class="math inline">\(I2_{between}\)</span> = 92.04%). Within-sample heterogeneity is comparatively small (<span class="math inline">\(I2_{within}\)</span> = 7.93%), indicating that when the same participants were observed on several occasions (i.e.&nbsp;the same sample contributed several effect sizes), on average, discernment performance was similar across those observations. The share of the variance attributed to sampling error is very small (0.03%), which is indicative of the large sample sizes and thus precise estimates.</p>
+</section>
+<section id="skepticism-bias-h2" class="level4" data-number="7.2.3.2">
+<h4 data-number="7.2.3.2" class="anchored" data-anchor-id="skepticism-bias-h2"><span class="header-section-number">7.2.3.2</span> Skepticism bias (H2)</h4>
+<p>We found support for H2, with participants being better at rating false news as inaccurate than at rating true news as accurate (i.e.&nbsp;false news discrimination was on average higher than true news discrimination). However, the average skepticism bias estimate is small (d = 0.32 [0.24, 0.39], z = 8.11, p &lt; .001). As shown in Fig <a href="#fig-forest" class="quarto-xref">Figure&nbsp;<span>7.3</span></a>), 203 of 303 estimates are positive. Of the positive estimates, 6 have a confidence interval that includes 0, as do 7 of the negative estimates. By contrast with discernment, most of the variance in skepticism bias is explained by within-sample heterogeneity (<span class="math inline">\(I2_{within}\)</span> = 60.96%; <span class="math inline">\(I2_{between}\)</span> = 38.99%; sampling error = 0.05%). Whenever we observe within sample variation in our data, it is because several effects were available for the same sample. This is mostly the case for studies with multiple survey waves, or when effects were split by different news topics, suggesting that these factors may account for some of that variation. In the moderator analyses below, most variables vary between samples, thereby glossing over much of that within-variation. An exception is political concordance.</p>
+</section>
+</section>
+<section id="moderators" class="level3" data-number="7.2.4">
+<h3 data-number="7.2.4" class="anchored" data-anchor-id="moderators"><span class="header-section-number">7.2.4</span> Moderators</h3>
+<p>Following the pre-registered analysis plan, we ran a separate meta regression for each moderator by adding the respective moderator variable as a fixed effect to the multilevel meta models. We report regression tables and visualizations in the appendix. Here, we report the regression coefficients as “Delta”s, since they designate differences between categories. For example, in the moderator analysis of political concordance on skepticism bias, “concordant” marks the baseline category. The predicted value for this category can be read from the intercept (-.2). The “Delta” is the predicted difference between concordant and discordant (.78). To obtain the predicted value for discordant news, one needs to add the “Delta” to the intercept (-.2 + .78 = .58).</p>
+<section id="cross-cultural-variability" class="level5" data-number="7.2.4.0.1">
+<h5 data-number="7.2.4.0.1" class="anchored" data-anchor-id="cross-cultural-variability"><span class="header-section-number">7.2.4.0.1</span> Cross-cultural variability</h5>
+<p>For samples based in the United States (184/303 effect sizes), discernment was higher than for samples based in other countries, on average (<span class="math inline">\(\Delta\)</span> Discernment = 0.23 [0.02, 0.44], z = 2.14 , p = 0.033 ; baseline discernment other countries pooled = 0.99 [0.84, 1.14], z = 12.82, p &lt; .001). However, we did not find a statistically significant difference regarding skepticism bias (<span class="math inline">\(\Delta\)</span> Skepticism bias = 0.04 [-0.12, 0.19], z = 0.47 , p = 0.638). A visualization of discernment (<span class="quarto-unresolved-ref">?fig-discernment-countries</span>) and skepticism bias (<span class="quarto-unresolved-ref">?fig-bias-countries</span>) across countries can be found in the appendix.</p>
+</section>
+<section id="scales" class="level5" data-number="7.2.4.0.2">
+<h5 data-number="7.2.4.0.2" class="anchored" data-anchor-id="scales"><span class="header-section-number">7.2.4.0.2</span> Scales</h5>
+<p>The studies in our meta analysis used a variety of accuracy scales, including both binary (e.g.&nbsp;“Do you think the above headline is accurate? - Yes, No”) and continuous ones (e.g.&nbsp;“To the best of your knowledge, how accurate is the claim in the above headline” 1 = Not at all accurate, 4 = Very accurate).</p>
+<p>Regarding discernment, two scale types differed from the most common 4-point scale (Baseline discernment 4-point-scale = 1.28 [1.07, 1.49], z = 11.96, p &lt; .001): Both 6-point scales (<span class="math inline">\(\Delta\)</span> Discernment = -0.41 [-0.7, -0.12], z = -2.8, p = 0.006) and binary scales (<span class="math inline">\(\Delta\)</span> Discernment = -0.37 [-0.66, -0.08], z = -2.5, p = 0.013) yielded lower discernment. Regarding skepticism bias, studies using a 4-point scale (Baseline skepticism bias 4-point scale = 0.51 [0.3, 0.72], z = 4.75, p &lt; .001) reported a larger skepticism bias compared to studies using a binary and a 7-point scale (<span class="math inline">\(\Delta\)</span> Skepticism bias = -0.29 [-0.51, -0.06], z = -2.47, p = 0.014 for binary scales; -0.5 [-0.76, -0.23], z = -3.67, p &lt; .001 for 7-point scales). Interpreting these observed differences is not straightforward. We attempt a more detailed discussion of differences between binary and Likert-scale studies in the appendix.</p>
+</section>
+<section id="format" class="level5" data-number="7.2.4.0.3">
+<h5 data-number="7.2.4.0.3" class="anchored" data-anchor-id="format"><span class="header-section-number">7.2.4.0.3</span> Format</h5>
+<p>Studies using headlines with pictures as stimuli (<span class="math inline">\(\Delta\)</span> Skepticism bias = 0.22 [0.04, 0.39], z = 2.45, p = 0.015; 65 effects), or headlines with pictures and a lede (<span class="math inline">\(\Delta\)</span> Skepticism bias = 0.33 [0.14, 0.52], z = 3.4, p &lt; .001; 56 effects), displayed a stronger skepticism bias compared to studies relying on headlines with no picture/lede (Baseline skepticism bias headlines only = 0.23 [0.13, 0.33], z = 4.45, p &lt; .001; 163 effects). We do not find differences related to format for discernment, neither for headlines with pictures (<span class="math inline">\(\Delta\)</span> Discernment = -0.01 [-0.28, 0.27], z = -0.04, p = 0.969), nor for headlines with pictures and a lede (<span class="math inline">\(\Delta\)</span> Discernment = 0.11 [-0.12, 0.33], z = 0.93, p = 0.353).</p>
+</section>
+<section id="topic" class="level5" data-number="7.2.4.0.4">
+<h5 data-number="7.2.4.0.4" class="anchored" data-anchor-id="topic"><span class="header-section-number">7.2.4.0.4</span> Topic</h5>
+<p>We did not find statistically significant differences in discernment and skepticism bias across news topics, when distinguishing between the categories “political” (<span class="math inline">\(\Delta\)</span> Skepticism bias = 0.03 [-0.13, 0.19], z = 0.43, p = 0.671; <span class="math inline">\(\Delta\)</span> Discernment = -0.26 [-0.51, 0], z = -1.98, p = 0.049; 196 effects; 43 articles), “covid” (baseline; 54 effects; 13 articles) and “other” (<span class="math inline">\(\Delta\)</span> Skepticism bias = -0.02 [-0.2, 0.16], z = -0.22, p = 0.825; <span class="math inline">\(\Delta\)</span> Discernment = -0.01 [-0.35, 0.34], z = -0.03, p = 0.976; 53 effects; 20 articles), a category which regroups all not explicitly as “covid”or “political” labeled news topics by the authors for the respective papers, and which includes news topics reaching from health, cancer and science, to economics, history and military matters.</p>
+</section>
+<section id="sources" class="level5" data-number="7.2.4.0.5">
+<h5 data-number="7.2.4.0.5" class="anchored" data-anchor-id="sources"><span class="header-section-number">7.2.4.0.5</span> Sources</h5>
+<p>In line with past findings, we did not observe a statistically significant difference in discernment between studies displaying the source of the news items (<span class="math inline">\(\Delta\)</span> Discernment = -0.22 [-0.47, 0.03], z = -1.75, p = 0.082; 112 effects) and studies that did not (147 effects; for 44 this information was not explicitly provided). We do not find a difference regarding skepticism bias either (<span class="math inline">\(\Delta\)</span> Skepticism bias = 0.11 [-0.06, 0.29], z = 1.3, p = 0.194).</p>
+</section>
+<section id="political-concordance" class="level5" data-number="7.2.4.0.6">
+<h5 data-number="7.2.4.0.6" class="anchored" data-anchor-id="political-concordance"><span class="header-section-number">7.2.4.0.6</span> Political Concordance</h5>
+<p>The moderators investigated above were (mostly) not experimentally manipulated within studies, but instead varied between studies, which impedes causal inference. Political concordance is an exception in this regard. It was manipulated within 31 different samples, across 14 different papers. In those experiments, typically, a pre-test establishes the political slant of news headlines (e.g.&nbsp;pro-republican vs.&nbsp;pro-democrat). In the main study, participants then rate the accuracy for news items of both political slants, and provide information about their own political stance. The ratings of items are then grouped into concordant or discordant (e.g.&nbsp;pro-republican news rated by Republicans will be coded as concordant while pro-republican news rated by Democrats will be coded as discordant).</p>
+<p>Political concordance had no statistically significant effect on discernment (<span class="math inline">\(\Delta\)</span> Discernment = 0.08 [-0.01, 0.17], z = 1.72, p = 0.097). It did, however, make a difference regarding skepticism bias (see <a href="#fig-concordance" class="quarto-xref">Figure&nbsp;<span>7.4</span></a>): When rating concordant items, there was no evidence that participants showed a skepticism bias (Baseline skepticism bias concordant items = -0.2 [-0.42, 0.01], z = -1.93, p = 0.064), while for discordant news items, participants displayed a positive skepticism bias (<span class="math inline">\(\Delta\)</span> Skepticism bias = 0.78 [0.62, 0.94], z = 10.04, p &lt; .001). In other words, participants were not gullible when facing concordant news headlines (as would have suggested a negative skepticism bias), but were skeptical when facing discordant ones.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-concordance" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-concordance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="output/figures/fig-concordance.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-concordance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.4: <em>Effect of political concordance on discernment and skepticism bias</em>. The figure shows the distribution of the n = <code>r descriptives$concordance$n_effect$value</code> effect sizes for politically concordant and discordant items. The black dots represent the predicted average of the meta-regression, the black horizontal bars the 95% confidence intervals. Note that the figure does not represent the different weights (i.e.&nbsp;the varying sample sizes) of the data points, but that these weights are taken into account in the meta-regression.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="individual-level-data" class="level3" data-number="7.2.5">
+<h3 data-number="7.2.5" class="anchored" data-anchor-id="individual-level-data"><span class="header-section-number">7.2.5</span> Individual level data</h3>
+<p>In the results above, accuracy ratings were averaged across participants. It is unclear how these average results generalize to the individual level. Do they hold for most participants? Or are they driven by a relatively small group of participants with excellent discernment skills, or, respectively, extreme skepticism? For 22 articles (<span class="math inline">\(N_{Participants}\)</span> = 42074, <span class="math inline">\(N_{Observations}\)</span> = 813517), we have the raw data for all ratings that individual participants made on each news headline they saw. On this data, we ran a descriptive, non-preregistered analysis: We calculated a discernment and skepticism bias score for each participant based on all the news items they were rating. To compare across different scales, we transposed all accuracy scores on a scale from 0 to 1, resulting in a range of possible values from -1 to 1 for both discernment and skepticism bias.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-individual-level-plot" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-individual-level-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="output/figures/fig-individual-level-plot.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-individual-level-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.5: <em>Outcomes on the participant-level</em>. The figure shows the distribution of average discernment and skepticism bias scores of individual participants in the subset of studies that we have raw data on. We standardized original accuracy ratings to range from 0 to 1, to be able to compare across scales. Therefore, the worst possible score is -1 where, for discernment, an individual classified all news wrongly, and for skepticism bias, an individual classified all true news correctly (as true) and all false news incorrectly (as true). The best possible score is 1 where, for discernment, an individual classified all news correctly, and for skepticism bias, an individual classified all true news incorrectly (as false) and all false news correctly (as false). The percentage labels (from left to right) represent the share of participants with a negative score, a score of exactly 0, and a positive score, for both measures respectively.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>As shown in <a href="#fig-individual-level-plot" class="quarto-xref">Figure&nbsp;<span>7.5</span></a>, 79.92 % of individual participants had a positive discernment score, and 59.06 % of participants had a positive skepticism bias score. Therefore, our main results based on mean ratings across participants seem to be representative of individual participants (see appendix for further discussion).</p>
+</section>
+</section>
+<section id="discussion" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="discussion"><span class="header-section-number">7.3</span> Discussion</h2>
+<p>This meta-analysis sheds light on some of the most common fears voiced about false news. In particular, we investigated whether people are able to discern true from false news, and whether they are better at judging the veracity of true news or false news (skepticism bias). Across 303 effect sizes (<span class="math inline">\(N_{participants}\)</span> = 194438) from 40 countries across 6 continents, we found that people rated true news as much more accurate than fact-checked false news (<span class="math inline">\(d_{discernment}\)</span> = 1.12 [1.01, 1.22], z = 20.79, p &lt; .001) and are slightly better at rating fact-checked false news as inaccurate than at rating true news as accurate (<span class="math inline">\(d_{\text{skepticism bias}}\)</span> = 0.32 [0.24, 0.39], z = 8.11, p &lt; .001).</p>
+<p>The finding that people can discern true from false news when prompted to do so has important implications for interventions against misinformation. First, it suggests that most people do not lack the skills to spot false news–at least the kind of fact-checked false news used in the studies included in our meta-analysis. If people don’t lack the skills to spot false news, why do they sometimes fall for false news? In some contexts, people may lack the motivation to use their discernment skills or may only apply them selectively <span class="citation" data-cites="pennycook2021 rathje2023">(<a href="../references.html#ref-pennycook2021" role="doc-biblioref">Pennycook, Epstein, et al. 2021</a>; <a href="../references.html#ref-rathje2023" role="doc-biblioref">Rathje et al. 2023</a>)</span>. Thus, instead of teaching people how to spot false news, it may be more fruitful to target motivations, either by manipulating features of the environment in which people encounter news <span class="citation" data-cites="capraroThinkThisNews globigChangingIncentiveStructure2023">(<a href="../references.html#ref-capraroThinkThisNews" role="doc-biblioref">Capraro and Celadin, n.d.</a>; <a href="../references.html#ref-globigChangingIncentiveStructure2023" role="doc-biblioref">Globig, Holtz, and Sharot 2023</a>)</span>, or by intrinsically motivating people to use their skills and pay more attention to accuracy <span class="citation" data-cites="pennycook2021">(<a href="../references.html#ref-pennycook2021" role="doc-biblioref">Pennycook, Epstein, et al. 2021</a>)</span>. For instance, it has been shown that design features of current social media environments sometimes impede discernment <span class="citation" data-cites="epsteinSocialMediaContext2023">(<a href="../references.html#ref-epsteinSocialMediaContext2023" role="doc-biblioref">Epstein et al. 2023</a>)</span>.</p>
+<p>Second, the fact that people can, on average, discern true from false news lends support to crowdsourced fact-checking initiatives. While fact-checkers cannot keep up with the pace of false news production, the crowd can, and it has been shown that even small groups of participants perform as well as professional fact-checkers <span class="citation" data-cites="allenScalingFactcheckingUsing2021 martelCrowdsCanEffectively2022">(<a href="../references.html#ref-allenScalingFactcheckingUsing2021" role="doc-biblioref">Allen et al. 2021</a>; <a href="../references.html#ref-martelCrowdsCanEffectively2022" role="doc-biblioref">Martel et al. 2022</a>)</span>. The cross-cultural scope of our findings suggests that these initiatives may be fruitful in many countries across the world. In every country included in the meta-analysis, participants on average rated true news as more accurate than false news (see appendix). In line with past work <span class="citation" data-cites="allenScalingFactcheckingUsing2021">(<a href="../references.html#ref-allenScalingFactcheckingUsing2021" role="doc-biblioref">Allen et al. 2021</a>)</span>, we have shown that this was not only true on average, but for a large majority (79.92 %) of participants for which we had individual level data. Our results are also informative for the work of fact-checkers. Since people appear to be quite good at discerning true from false news, fact-checkers may want to focus on headlines that are less clearly false or true. However, we cannot rule out that people’s current discernment skills stem in part from the current and past work of fact-checking organizations.</p>
+<p>The fact that people disbelieve true news slightly more than they believe fact-checked false news speaks to the nature of the misinformation problem and how to fight it: the problem may be less that people are gullible, and fall for falsehoods too easily, but instead that people are excessively skeptical, and do not believe reliable information enough <span class="citation" data-cites="altayMisinformationMisinformationConceptual mercierNotBornYesterday2020">(<a href="../references.html#ref-altayMisinformationMisinformationConceptual" role="doc-biblioref">Altay, Berriche, and Acerbi, n.d.</a>; <a href="../references.html#ref-mercierNotBornYesterday2020" role="doc-biblioref">Mercier 2020</a>)</span>. Even assuming that the rejection of true news and the acceptance of false news are of similar magnitude (and that both can be improved), given that true news are much more prevalent in people’s news diet than false news <span class="citation" data-cites="allenEvaluatingFakeNews2020">(<a href="../references.html#ref-allenEvaluatingFakeNews2020" role="doc-biblioref">Allen et al. 2020</a>)</span>, true news skepticism may be more detrimental to the accuracy of people’s beliefs than false news acceptance <span class="citation" data-cites="acerbiResearchNoteFighting2022">(<a href="../references.html#ref-acerbiResearchNoteFighting2022" role="doc-biblioref">Acerbi, Altay, and Mercier 2022</a>)</span>. This skepticism is concerning in the context of the low and declining trust and interest in news across the world <span class="citation" data-cites="altayNewsParticipationDeclining2024">(<a href="../references.html#ref-altayNewsParticipationDeclining2024" role="doc-biblioref">Altay, Fletcher, and Nielsen 2024</a>)</span>, as well as the attacks of populist leaders on the news media <span class="citation" data-cites="vanduynPrimingFakeNews2019">(<a href="../references.html#ref-vanduynPrimingFakeNews2019" role="doc-biblioref">Van Duyn and Collier 2019</a>)</span> and growing news avoidance <span class="citation" data-cites="newmanDigitalNewsReport2023">(<a href="../references.html#ref-newmanDigitalNewsReport2023" role="doc-biblioref">Newman et al. 2023</a>)</span>. Interventions aimed at reducing misperceptions should therefore consider increasing the acceptance of true news in addition to reducing the acceptance of false news <span class="citation" data-cites="acerbiResearchNoteFighting2022 altaySkepticismFramingMedia2023">(<a href="../references.html#ref-acerbiResearchNoteFighting2022" role="doc-biblioref">Acerbi, Altay, and Mercier 2022</a>; <a href="../references.html#ref-altaySkepticismFramingMedia2023" role="doc-biblioref">Altay, De Angelis, and Hoes, n.d.</a>)</span>. At the very least, when testing interventions, researchers should evaluate their effect on both true and false news, not just false news <span class="citation" data-cites="guayHowThinkWhether2022">(<a href="../references.html#ref-guayHowThinkWhether2022" role="doc-biblioref">Guay et al., n.d.</a>)</span>. At best, interventions should use methods that allow to estimate discrimination while accounting for response bias, such as Signal Detection Theory, and make sure that apparent increases in discernment are not due to a more conservative response bias <span class="citation" data-cites="highamMeanRatingDifference2024a modirrousta-galianGamifiedInoculationInterventions2023">(<a href="../references.html#ref-highamMeanRatingDifference2024a" role="doc-biblioref">Higham, Modirrousta-Galian, and Seabrooke 2024</a>; <a href="../references.html#ref-modirrousta-galianGamifiedInoculationInterventions2023" role="doc-biblioref">Modirrousta-Galian and Higham 2023</a>)</span>. This is all the more important given that recent evidence suggests that many interventions against misinformation, such as media literacy tips <span class="citation" data-cites="hoesProminentMisinformationInterventions2023">(<a href="../references.html#ref-hoesProminentMisinformationInterventions2023" role="doc-biblioref">Hoes et al. 2023</a>)</span>, fact-checking <span class="citation" data-cites="bachmannStudyingDownstreamEffects2023">(<a href="../references.html#ref-bachmannStudyingDownstreamEffects2023" role="doc-biblioref">Bachmann and Valenzuela 2023</a>)</span>, or educational games aimed at inoculating people against misinformation <span class="citation" data-cites="modirrousta-galianGamifiedInoculationInterventions2023">(<a href="../references.html#ref-modirrousta-galianGamifiedInoculationInterventions2023" role="doc-biblioref">Modirrousta-Galian and Higham 2023</a>)</span>, may reduce belief in false news at the expense of fostering skepticism towards true news.</p>
+<p>We also investigated various moderators of discernment and skepticism bias. We found that discernment was greater in studies conducted in the United States compared to the rest of the world. This could be due to the inclusion of many countries from the Global South, where belief in misinformation and conspiracy theories has been documented to be higher <span class="citation" data-cites="alperWhenConspiracyTheories2021">(<a href="../references.html#ref-alperWhenConspiracyTheories2021" role="doc-biblioref">Alper, n.d.</a>)</span>. In line with past work <span class="citation" data-cites="diasEmphasizingPublishersDoes2020">(<a href="../references.html#ref-diasEmphasizingPublishersDoes2020" role="doc-biblioref">Dias, Pennycook, and Rand 2020</a>)</span>, the presence of a source had no statistically significant effects on discernment or skepticism bias. Neither did the topic of the news. Participants showed greater skepticism in studies that presented headlines in a social media format (with an image and lede) or along with an image compared to studies that used plain headlines. This suggests that the skepticism towards true news documented in this meta-analysis may be partially due to the social media format of the news headlines. Past work has shown that people report trusting news on social media less <span class="citation" data-cites="montalverneTrustGapHow2022 newmanReutersInstituteDigital2022">(<a href="../references.html#ref-montalverneTrustGapHow2022" role="doc-biblioref">Mont’Alverne et al. 2022</a>; <a href="../references.html#ref-newmanReutersInstituteDigital2022" role="doc-biblioref">Newman et al. 2022</a>)</span>, and experimental manipulations have shown that the Facebook news format reduces belief in news <span class="citation" data-cites="besaluCredibilityDigitalPolitical2021 karlsenSocialMediaTrust2023">(<a href="../references.html#ref-besaluCredibilityDigitalPolitical2021" role="doc-biblioref">Besalú and Pont-Sorribes 2021</a>; <a href="../references.html#ref-karlsenSocialMediaTrust2023" role="doc-biblioref">Karlsen and Aalberg 2023</a>)</span>–although the causal effects documented in these experiments are much smaller than observational differences in reported trust levels between news on social media and on news outlets <span class="citation" data-cites="agadjanianPlatformPenaltyNews2023">(<a href="../references.html#ref-agadjanianPlatformPenaltyNews2023" role="doc-biblioref">Agadjanian et al. 2023</a>)</span>. Low trust in news on social media may be a good thing, given that on average news on social media may be less accurate than news on news websites, but it is also worrying given that most of news consumption worldwide is shifting online and on social media in particular <span class="citation" data-cites="newmanDigitalNewsReport2023">(<a href="../references.html#ref-newmanDigitalNewsReport2023" role="doc-biblioref">Newman et al. 2023</a>)</span>.</p>
+<p>The political concordance of the news had no effect on discernment, but participants were excessively skeptical of politically discordant news. That is, participants were equally skilled at discerning true from false news for concordant and discordant items, but they rated news generally (true and false) as more false when politically discordant. This finding is in line with recent evidence on partisan biases in news judgments <span class="citation" data-cites="gawronskiTruthSensitivityPartisan2023">(<a href="../references.html#ref-gawronskiTruthSensitivityPartisan2023" role="doc-biblioref">Gawronski, Ng, and Luke 2023</a>)</span>, and supports the idea that people are not excessively gullible of news they agree with, but are instead excessively skeptical of news they disagree with <span class="citation" data-cites="mercierNotBornYesterday2020 troucheVigilantConservatismEvaluating2018">(<a href="../references.html#ref-mercierNotBornYesterday2020" role="doc-biblioref">Mercier 2020</a>; <a href="../references.html#ref-troucheVigilantConservatismEvaluating2018" role="doc-biblioref">Trouche et al. 2018</a>)</span>. It suggests that interventions aimed at reducing partisan motivated reasoning, or at improving political reasoning in general, should focus more on increasing openness to opposing viewpoints than on increasing skepticism towards concordant viewpoints. Future studies should investigate whether the effect of congruence is specific to politics or if it holds across other topics, and compare it to a baseline of neutral items.</p>
+<p>Our meta-analysis has two main conceptual limitations. First, participants evaluated the news stories in artificial settings that do not mimic the real-world. For instance, the mere fact of asking participants to rate the accuracy of the news stories may have increased discernment by increasing attention to accuracy <span class="citation" data-cites="pennycook2021">(<a href="../references.html#ref-pennycook2021" role="doc-biblioref">Pennycook, Epstein, et al. 2021</a>)</span>. When browsing on social media, people may be less discerning (and perhaps less skeptical) than in experimental settings because they would pay less attention to accuracy <span class="citation" data-cites="epsteinSocialMediaContext2023">(<a href="../references.html#ref-epsteinSocialMediaContext2023" role="doc-biblioref">Epstein et al. 2023</a>)</span>. However, given people’s low exposure to misinformation online <span class="citation" data-cites="altayQuantifyingInfodemicPeople2022">(<a href="../references.html#ref-altayQuantifyingInfodemicPeople2022" role="doc-biblioref">Altay, Kleis Nielsen, and Fletcher 2022</a>)</span>, people may mostly protect themselves from misinformation not by detecting misinformation on the spot, but by relying on the reputation of the sources and avoiding unreliable sources <span class="citation" data-cites="altayWhyFewPeople2022">(<a href="../references.html#ref-altayWhyFewPeople2022" role="doc-biblioref">Altay, Hacquin, and Mercier 2022</a>)</span>. Second, our results reflect choices made by researchers about news selection. The vast majority of studies in our meta-analysis relied on fact-checked false news, determined by fact-checking websites (e.g.&nbsp;Snopes, PolitiFact). By contrast, three papers <span class="citation" data-cites="garrettConservativesSusceptibilityPolitical2021 aslettOnlineSearchesEvaluate2024 allenScalingFactcheckingUsing2021">(<a href="../references.html#ref-garrettConservativesSusceptibilityPolitical2021" role="doc-biblioref">Garrett and Bond 2021</a>; <a href="../references.html#ref-aslettOnlineSearchesEvaluate2024" role="doc-biblioref">Aslett et al. 2024</a>; <a href="../references.html#ref-allenScalingFactcheckingUsing2021" role="doc-biblioref">Allen et al. 2021</a>)</span> automated their news selection by scraping headlines from media outlets in real-time, and had both participants and fact-checkers (or the researchers themselves, in the case of <span class="citation" data-cites="garrettConservativesSusceptibilityPolitical2021">Garrett and Bond (<a href="../references.html#ref-garrettConservativesSusceptibilityPolitical2021" role="doc-biblioref">2021</a>)</span>) rating the veracity of the headlines shortly after. The three studies (53 effect sizes; 10170 participants; all in the United States) find (i) lower discernment than our meta-analytic average, and (ii) a negative skepticism (i.e.&nbsp;a credulity) bias (see appendix for a detailed discussion). This highlights the importance of news selection in misinformation research: Researchers need to think carefully about what population of news they sample from, and be clear about the generalizability of their findings <span class="citation" data-cites="pennycookPracticalGuideDoing2021 altayMisinformationMisinformationConceptual">(<a href="../references.html#ref-pennycookPracticalGuideDoing2021" role="doc-biblioref">Pennycook, Binnendyk, et al. 2021</a>; <a href="../references.html#ref-altayMisinformationMisinformationConceptual" role="doc-biblioref">Altay, Berriche, and Acerbi, n.d.</a>)</span>.</p>
+<p>Our meta-analysis further has methodological limitations which we address in a series of robustness checks in the appendix. We show that our results hold across alternative effect size estimators. We also show that we obtain similar results when running a participant-level analysis on a subset of studies for which we have raw data and when relying on d’ (sensitivity) and c (response bias) from Signal Detection Theory for that subset. A comparison of binary and Likert-scale ratings suggests that skepticism bias stems partly from mis-classifications, partly from degrees of confidence.</p>
+<p>In conclusion, we found that in experimental settings, people are able to discern mainstream true news from fact-checked false news, but when they err, they tend to do so on the side of skepticism more than on the side of gullibility (although the effect is small and likely contingent on false news selection). These findings lend support to crowdsourced fact-checking initiatives, and suggest that, to improve discernment, there may be more room to increase the acceptance of true news than to reduce the acceptance of false news.</p>
+</section>
+<section id="methods" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="methods"><span class="header-section-number">7.4</span> Methods</h2>
+<section id="data" class="level3" data-number="7.4.1">
+<h3 data-number="7.4.1" class="anchored" data-anchor-id="data"><span class="header-section-number">7.4.1</span> Data</h3>
+<p>We undertook a systematic review and meta-analysis of the experimental literature on accuracy judgments of news, following the PRISMA guidelines <span class="citation" data-cites="page2021">(<a href="../references.html#ref-page2021" role="doc-biblioref">Page et al. 2021</a>)</span>. All records resulting from our literature searches can be found on the OSF project page (https://osf.io/96zbp/). We documented rejection decisions for all retrieved papers. They, too, can be found on the OSF project page.</p>
+<div id="fig-prisma-flowchart" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-prisma-flowchart-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="literature_search/PRISMA_2020_flow_diagram.jpg" class="img-fluid figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-prisma-flowchart-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.6: <em>PRISMA flow diagram</em>. A flow diagram for the systematic literature review, based on the 2020 PRISMA template.
+</figcaption>
+</figure>
+</div>
+<section id="eligibility-criteria" class="level4" data-number="7.4.1.1">
+<h4 data-number="7.4.1.1" class="anchored" data-anchor-id="eligibility-criteria"><span class="header-section-number">7.4.1.1</span> Eligibility criteria</h4>
+<p>For a publication to be included in our meta-analysis, we set six eligibility criteria: (1) We considered as relevant all document types with original data (not only published ones, but also reports, pre-prints and working papers). When different publications were using the same data, a scenario we encountered several times, we included only one publication (which we picked arbitrarily). (2) We only included articles that measured perceived accuracy (including “accuracy”, “credibility”, “trustworthiness”, “reliability” or “manipulativeness”), and (3) did so for both true and false news. (4) We only included studies relying on real-world news items. Accordingly, we excluded studies in which researchers made up the false news items, or manipulated the properties of the true news items. (5) We could only include articles that provided us with the relevant summary statistics (means and standard deviations for both false and true news), or publicly available data that allowed us to calculate those. In cases where we were not able to retrieve the relevant summary statistics either way, we contacted the authors. (6) Finally, to ensure comparability, we only included studies that provided a neutral control condition. For example, <span class="citation" data-cites="calvilloInitialAccuracyFocus2020">Calvillo and Smelter (<a href="../references.html#ref-calvilloInitialAccuracyFocus2020" role="doc-biblioref">2020</a>)</span>, among other things, test the effect of an interest prime vs.&nbsp;an accuracy prime. A neutral control condition–one that is comparable to those of other studies–would have been no prime at all. We therefore excluded the paper. Rejection decisions for all retrieved papers are documented and can be accessed on the OSF project page (https://osf.io/96zbp/). We provide a list of all included articles in the appendix.</p>
+</section>
+<section id="deviations-from-eligibility-criteria" class="level4" data-number="7.4.1.2">
+<h4 data-number="7.4.1.2" class="anchored" data-anchor-id="deviations-from-eligibility-criteria"><span class="header-section-number">7.4.1.2</span> Deviations from eligibility criteria</h4>
+<p>We followed our eligibility criteria with 4 exceptions. We rejected one paper based on a criterion that we had not previously set: scale asymmetry. <span class="citation" data-cites="baptistaInfluencePoliticalIdeology2021">Baptista et al. (<a href="../references.html#ref-baptistaInfluencePoliticalIdeology2021" role="doc-biblioref">2021</a>)</span> asked participants: “According to your knowledge, how do you rate the following headline?”, providing a very asymmetrical set of answer options (“1—not credible; 2—somehow credible; 3—quite credible; 4—credible; 5—very credible”). The paper provides 6 effect sizes, all of which strongly favor our second hypothesis (one effect being as large as d = 2.54). We decided to exclude this paper from our analysis because of its very asymmetric scale (no clear scale midpoint, and labels not symmetrically mapping onto a false/true dichotomy, by contrast to all other response scales included here). Further, we stretched our criterion for real-world news on three instances. <span class="citation" data-cites="maertensMisinformationSusceptibilityTest2021">Maertens et al. (<a href="../references.html#ref-maertensMisinformationSusceptibilityTest2021" role="doc-biblioref">2021</a>)</span> and <span class="citation" data-cites="roozenbeekSusceptibilityMisinformationCOVID192020">Roozenbeek et al. (<a href="../references.html#ref-roozenbeekSusceptibilityMisinformationCOVID192020" role="doc-biblioref">2020</a>)</span> used artificial intelligence trained on real-world news to generate false news. <span class="citation" data-cites="bryanovWhatDrivesPerceptions2023">Bryanov et al. (<a href="../references.html#ref-bryanovWhatDrivesPerceptions2023" role="doc-biblioref">2023</a>)</span> had journalists create the false news items. We reasoned that asking journalists to write news should be similar enough to real-wolrd news, and that LLMs already produce news headlines that are indistinguishable from real news, so it should not make a big difference.</p>
+</section>
+<section id="literature-search" class="level4" data-number="7.4.1.3">
+<h4 data-number="7.4.1.3" class="anchored" data-anchor-id="literature-search"><span class="header-section-number">7.4.1.3</span> Literature search</h4>
+<p>Our literature review is based on two systematic searches. We conducted our first search on March 2, 2023 using Scopus (search string: ‘“false news” OR “fake news” OR “false stor*” AND “accuracy” OR “discernment” OR “credibilit*” OR “belief” OR “susceptib*”’) and google scholar (search string: ‘“Fake news” | “False news”|“False stor*” “Accuracy” | “Discernment”|“Credibility”|“Belief”|“Suceptib*”, no citations, no patents’). On Scopus, given the initially high volume of papers (12425), we excluded papers not written in English, that were not articles or conference papers, and that were from disciplines that are likely irrelevant for the present search (e.g., Dentistry, Veterinary, Chemical Engineering, Chemistry, Nursing, Pharmacology, Microbiology, Materials Science, Medicine) or unlikely to use an experimental design (e.g.&nbsp;Computer Science, Engineering, Mathematics, see appendix for detailed search string). After these filters were applied, we ended up with 4002 results. The Google Scholar search was intended to identify important pre-prints or working papers that the Scopus search would have missed. We only considered the first 980 results of that search–a limit imposed by the “Publish or Perish” software we used to store Google Scholar search results in a data frame.</p>
+<p>After submitting a manuscript version, reviewers remarked that not including the terms “misinformation” or “disinformation” in our search string might have omitted relevant results. On March 22nd, 2024, we therefor conducted a second, pre-registered (<a href="https://doi.org/10.17605/OSF.IO/YN6R2" class="uri">https://doi.org/10.17605/OSF.IO/YN6R2</a>, registered on March 12, 2024) search using an extended query string (search string for both Scopus and Google Scholar: ‘“false news” OR “fake news” OR “false stor*” OR “misinformation” OR “disinformation” ) AND ( “accuracy” OR “discernment” OR “credibilit*” OR “belief” OR “suceptib*” OR “reliab*” OR “vulnerabi*”’; see appendix for detailed search string). After removing duplicates–642 between the first and the second Scopus search and 269 between the first and the second Google Scholar search–the second search yielded an additional 1157 results for Scopus and 711 results for Google Scholar. In total, the Scopus searches yielded 5159, the Google Scholar searches 1691 unique results.</p>
+<p>We identified and removed 338 duplicates between the Google Scholar and the Scopus searches and ended up with 6512 documents for screening. We had two screening phases: first titles, second abstracts. For the results from the second literature search, both authors screened the results independently. In case of conflicting decisions, an article passed onto the next stage (i.e.&nbsp;received abstract screening or full text assessment). For the results from the second literature search, screening was done based on titles and abstracts only, so that the screeners would not be influenced by information on the authors or the publishing journal. The vast majority of documents (6248) had irrelevant titles and were removed during that phase. Most irrelevant titles were not about false news or misinformation (e.g.&nbsp;“Formation of a tourist destination image: Co-occurrence analysis of destination promotion videos”), and some were about false news or misinformation but were not about belief or accuracy (e.g.&nbsp;“Freedom of Expression and Misinformation Laws During the COVID-19 Pandemic and the European Court of Human Rights”). We stored the remaining 264 records in the reference management system Zotero for retrieval. Of those, we rejected a total of 217 papers that did not meet our inclusion criteria. We rejected 87 papers based on their abstract and 130 after assessment of the full text. We documented all rejection decisions, available on the OSF project page (https://osf.io/96zbp/). We included the remaining 47 papers from the systematic literature search. To complement the systematic search results, we conducted forward and backward citation search through Google Scholar. We also reviewed additional studies that we had on our computers and papers we found scrolling through twitter (mostly unpublished manuscripts). Taken together, we identified an additional 47 papers via those methods. Of these, we excluded 27 papers after full text assessment because they did not meet our inclusion criteria. For these papers, too, we documented our exclusion decisions. They can be found together with the ones of the systematic search on the OSF project page (https://osf.io/96zbp/). We included the remaining 20 papers. In total, we included 67 papers in our meta analysis, 47 of which were peer-reviewed and 20 grey literature (reports and working papers). We retrieved the relevant summary statistics directly from the paper for 21 papers, calculated them ourselves based on publicly available raw data for 31 papers, and got them from the authors after request for 15 papers.</p>
+</section>
+</section>
+<section id="statistical-methods" class="level3" data-number="7.4.2">
+<h3 data-number="7.4.2" class="anchored" data-anchor-id="statistical-methods"><span class="header-section-number">7.4.2</span> Statistical methods</h3>
+<p>Unless explicitly stated otherwise, we pre-registered (<a href="https://doi.org/10.17605/OSF.IO/SVC7U" class="uri">https://doi.org/10.17605/OSF.IO/SVC7U</a>, registered on April 28, 2023) all reported analyses. Our choice of statistical models was informed by simulations, which can also be found on the OSF project page. We conducted all analyses in R version 4.4.1 (2024-06-14) <span class="citation" data-cites="rcoreteam2022">(<a href="../references.html#ref-rcoreteam2022" role="doc-biblioref">R Core Team 2022</a>)</span> using Rstudio version 2024.9.0.375 <span class="citation" data-cites="positteam2023">(<a href="../references.html#ref-positteam2023" role="doc-biblioref">Posit team 2023</a>)</span> and the <code>tidyverse</code> package version 2.0.0 <span class="citation" data-cites="wickham2019">(<a href="../references.html#ref-wickham2019" role="doc-biblioref">Wickham et al. 2019</a>)</span>. For effect size calculations, we rely on the <code>escalc()</code>, for models on the <code>rma.mv()</code>, for clustered standard errors on the <code>robust()</code> function, all from the <code>metafor</code> package version 4.6.0 <span class="citation" data-cites="viechtbauer_conducting_2010">(<a href="../references.html#ref-viechtbauer_conducting_2010" role="doc-biblioref">Viechtbauer 2010</a>)</span>.</p>
+<section id="deviations-from-pre-registration" class="level4" data-number="7.4.2.1">
+<h4 data-number="7.4.2.1" class="anchored" data-anchor-id="deviations-from-pre-registration"><span class="header-section-number">7.4.2.1</span> Deviations from pre-registration</h4>
+<p>We pre-registered standardized mean changes using change score standardization (SMCC) as an estimator for our effect sizes <span class="citation" data-cites="gibbons_estimation_1993">(<a href="../references.html#ref-gibbons_estimation_1993" role="doc-biblioref">Gibbons, Hedeker, and Davis 1993</a>)</span>. However, in line with Cochrane guidelines <span class="citation" data-cites="higgins_cochrane_2019">(<a href="../references.html#ref-higgins_cochrane_2019" role="doc-biblioref">Higgins et al. 2019</a>)</span>, we chose to rely on the more common Cohen’s d for the main analysis. We report results from the pre-registered SMCC (along with other alternative estimators) in the appendix. All estimators yield similar results. We did not pre-register considering scale symmetry, proportion of true news and false news selection (taken from fact checking sites vs.&nbsp;verified by researchers) as moderator variables. We report the results regarding these variables in the appendix.</p>
+</section>
+<section id="outcomes" class="level4" data-number="7.4.2.2">
+<h4 data-number="7.4.2.2" class="anchored" data-anchor-id="outcomes"><span class="header-section-number">7.4.2.2</span> Outcomes</h4>
+<p>We have two complementary measures of assessing the quality of people’s news judgment. The first measure is discernment. It measures the overall quality of news judgment across true and false news. We calculate discernment by subtracting the mean accuracy ratings of false news from the mean accuracy ratings of true news, such that more positive scores indicate better discernment. However, discernment is a limited diagnostic of the quality of people’s news judgment. Imagine a study A in which participants rate 50% of true news and 20% of false news as accurate, and a study B finding 80% of true news and 50% of false news rated as accurate. In both cases, the discernment is the same: Participants rated true news as more accurate by 30 percentage points than false news. However, the performance by news type is very different. In study A, people do well for false news–they only mistakenly classify 20% as accurate–but are at chance for true news. In study B, it’s the opposite. We therefore use a second measure: skepticism bias. For any given level of discernment, it indicates whether people’s judgments were better on true news or on false news, and to what extent. First, we calculate an error for false and true news separately, which we define as the distance of participants’ actual ratings to the best possible ratings. For example, for study A, the mean error for true news is 50% (100%-50%), because in the best possible scenario, participants would have classified 100% of true news as true. The error for false news in Study A is 20% (20%-0%), because the best possible performance for participants would have been to classify 0% of false news as accurate. We calculate skepticism bias by subtracting the mean error for false news from the mean error for true news. For example, for Study A, the skepticism bias is 30% (50%-20%). A positive skepticism bias indicates that people doubt true news more than they believe false news.</p>
+<p>Skepticism bias can only be (meaningfully) interpreted on scales using symmetrical labels, i.e.&nbsp;the intensity of the labels to qualify true and false news are equivalent (e.g., “True” vs “False” or “Definitely fake” [1] to “Definitely real” [7]). 69% of effects included in the meta-analysis used scales with perfectly symmetrical labels, while 26% used imperfectly symmetrical scale labels, i.e., the intensity of the labels to qualify true and false news are similar but not equivalent (e.g., [1] not at all accurate, [2] not very accurate, [3] somewhat accurate, [4] very accurate; here for instance ‘not all accurate’ is stronger than ‘very accurate’). We could only compute this variable for scales that explicitly labeled scale points, resulting in missing values for 5% of effects. In the appendix, we show that scale symmetry has no statistically significant effect on skepticism bias.</p>
+</section>
+<section id="effect-sizes" class="level4" data-number="7.4.2.3">
+<h4 data-number="7.4.2.3" class="anchored" data-anchor-id="effect-sizes"><span class="header-section-number">7.4.2.3</span> Effect sizes</h4>
+<p>The studies in our meta analysis used a variety of response scales, including both binary (e.g.&nbsp;“Do you think the above headline is accurate? - Yes, No”) and continuous ones (e.g.&nbsp;“To the best of your knowledge, how accurate is the claim in the above headline” 1 = Not at all accurate, 4 = Very accurate). To be able to compare across the different scales, we calculated standardized effects, i.e.&nbsp;effects expressed in units of standard deviations. Precisely, we calculated Cohen’s d as</p>
+<p><span class="math display">\[
+\text{Cohen's d} = \frac{\bar{x}_{\text{true}} - \bar{x}_{\text{false}}}{SD_{\text{pooled}}}
+\]</span> with</p>
+<p><span class="math display">\[
+SD_{\text{pooled}} = \sqrt{\frac{SD_{\text{true}}^2+SD_{\text{false}}^2}{2}}
+\]</span></p>
+<p>The vast majority of experiments (294 out of 303 effects) in our meta analysis manipulated news veracity within participants, i.e.&nbsp;having participants rate both false and true news. Following the Cochrane manual, we account for the dependency between ratings that this design generates when calculating the standard error for Cohen’s d.&nbsp;Precisely, we calculate the standard error for within participant designs as</p>
+<p><span class="math display">\[
+SE_{\text{Cohen's d (within)}} = \sqrt{\frac{2(1-r_{\text{true},\text{false}})}{n}+\frac{\text{Cohen's d}^2}{2n}}
+\]</span></p>
+<p>where <span class="math inline">\(r\)</span> is the correlation between true and false news. Ideally, for each effect size (i.e.&nbsp;the meta-analytic units of observation) in our data, we need the estimate of <span class="math inline">\(r\)</span>. However, this correlation is generally not reported in the original papers. We could only obtain it for a subset of samples for which we collected the summary statistics ourselves, based on the raw data. Based on this subset of correlations, we calculated an average correlation, which we then imputed for all effect size calculations. This approach is in line with the <a href="https://training.cochrane.org/handbook/current/chapter-23#section-23-2-7-3">Cochrane recommendations for crossover trials</a> <span class="citation" data-cites="higgins_cochrane_2019">(<a href="../references.html#ref-higgins_cochrane_2019" role="doc-biblioref">Higgins et al. 2019</a>)</span>. In our case, this average correlation is 0.26.</p>
+<p>For the 9 (out of 303) effects from studies that used a between participant design, we calculated the standard error as</p>
+<p><span class="math display">\[
+SE_{\text{Cohen's d (between)}} = \sqrt{\frac{n_{\text{true}}+n_{\text{false}}}{n_{\text{true}}n_{\text{false}}}+\frac{\text{Cohen's d}^2}{2(n_{\text{true}}+n_{\text{false}})}}
+\]</span></p>
+<p>For all effect size calculations, we defined the sample size <span class="math inline">\(n\)</span> as the number of instances of news ratings. That is, we multiplied the number of participants with the number of news items rated per participant.</p>
+</section>
+<section id="models" class="level4" data-number="7.4.2.4">
+<h4 data-number="7.4.2.4" class="anchored" data-anchor-id="models"><span class="header-section-number">7.4.2.4</span> Models</h4>
+<p>In our models for the meta analysis, each effect size was weighted by the inverse of its standard error, thereby giving more weight to studies with larger sample sizes. We used random effects models, which assume that there is not only one true effect size but a distribution of true effect sizes <span class="citation" data-cites="harrer2021">(<a href="../references.html#ref-harrer2021" role="doc-biblioref">Harrer et al. 2021</a>)</span>. These models assume that variation in effect sizes is not only due to sampling error alone, and thereby allow to model other sources of variance. We estimated the overall effect of our outcome variables using a three-level meta-analytic model with random effects on the sample and the publication level. This approach allowed us to account for the hierarchical structure of our data, in which samples (level three) contribute multiple effects (level two), (level one being the participant level of the original studies, see <span class="citation" data-cites="harrer2021">Harrer et al. (<a href="../references.html#ref-harrer2021" role="doc-biblioref">2021</a>)</span>). A common case where a sample provides several effect sizes occurs when participants rated both politically concordant and discordant news. In this case, if possible, we entered summary statistics separately for the concordant and discordant items, yielding two effect sizes (i.e.&nbsp;two different rows in our data frame). Another case where multiple effects per sample occurred was when follow-up studies were conducted on the same participants (but different news items). While our multi-level models account for this hierarchical structure of the data, they do not account for dependencies in sampling error. When one same sample contributes several effect sizes, one should expect their respective sampling errors to be correlated <span class="citation" data-cites="harrer2021">(<a href="../references.html#ref-harrer2021" role="doc-biblioref">Harrer et al. 2021</a>)</span>. To account for dependency in sampling errors, we computed cluster-robust standard errors, confidence intervals, and statistical tests for all meta-analytic estimates.</p>
+<p>To assess the effect of moderator variables, we calculated meta regressions. We calculated a separate regression for each moderator, by adding the moderator variable as a fixed effect to the multilevel meta models presented above. We pre-registered a list of six moderator variables to test. Those included the <em>country</em> of studies (levels: United States vs.&nbsp;all other countries), <em>political concordance</em> (levels: politically concordant vs.&nbsp;politically discordant), <em>news family</em> (levels: political, including both concordant and discordant vs.&nbsp;covid related vs.&nbsp;other, including categories as diverse as history, environment, health, science and military related news items), the <em>format</em> in which the news were presented (levels: headline only vs.&nbsp;headline and picture vs.&nbsp;headline, picture and lede), whether news items were accompanied by a <em>source</em> or not, and the <em>response scale</em> used (levels: 4-point vs.&nbsp;binary vs.&nbsp;6-point vs.&nbsp;7-point vs.&nbsp;other, for all other numeric scales that were not frequent). We ran an additional regression for two non-preregistered variables, namely the <em>symmetry of scales</em> (levels: perfectly symmetrical vs.&nbsp;imperfectly symmetrical) and <em>false news selection</em> (levels: taken from fact check sites vs.&nbsp;verified by researchers). We further descriptively checked whether the <em>proportion of true news</em> among all news would yield differences.</p>
+</section>
+<section id="publication-bias" class="level4" data-number="7.4.2.5">
+<h4 data-number="7.4.2.5" class="anchored" data-anchor-id="publication-bias"><span class="header-section-number">7.4.2.5</span> Publication bias</h4>
+<p>We ran some standard procedures for detecting publication bias. However, a priori we did not expect publication bias to be present because our variables of interest were not those of interest to the researchers of the original studies: Researchers generally set out to test factors that alter discernment, and not the state of discernment in the control group. No study measured skepticism bias in the way we define it here.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-funnel" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-funnel-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="output/figures/fig-funnel.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-funnel-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.7: <em>Funnel plots for discernment and skepticism bias</em>. Dots represent effect sizes. In the absence of publication bias and heterogeneity, one would then expect to see the points forming a funnel shape, with the majority of the points falling inside of the pseudo-confidence region centered around the average effect estimate, with bounds of ±1.96 SE (the standard error value from the y-axis). The dashed red regression line illustrates the estimate of the Egger’s regression test. For both outcomes, the slope differs significantly from zero, see Appendix.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Regarding discernment, we find evidence that smaller studies tend to report larger effect sizes, according to Egger’s regression test (see <a href="#fig-funnel" class="quarto-xref">Figure&nbsp;<span>7.7</span></a>); see also the appendix). We do not find evidence for asymmetry regarding skepticism bias. However, it is unclear how meaningful these results are. As illustrated by the funnel plot, there is generally high between-effect size heterogeneity: Even when focusing only on the most precise effect sizes (top of the funnel), the estimates vary substantially. It thus seems reasonable to assume that most of the dispersion of effect sizes does not arise from studies’ sampling error, but from studies estimating different true effects. Further, even the small studies are relatively high powered, suggesting that they would have yielded significant, publishable results even with smaller effect sizes. Lastly, Egger’s regression test can lead to an inflation of false positive results when applied to standardized mean differences <span class="citation" data-cites="pustejovsky2019 harrer2021">(<a href="../references.html#ref-pustejovsky2019" role="doc-biblioref">Pustejovsky 2019</a>; <a href="../references.html#ref-harrer2021" role="doc-biblioref">Harrer et al. 2021</a>)</span>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-p-curve" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-p-curve-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="output/figures/fig-p-curve.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-p-curve-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.8: <em>P-curves for discernment and skepticism bias</em>. The p-curve shows the percentage of effect sizes for a given p value within the range of 0.1 and 0.5. All values smaller than 0.01 are rounded to that value. The reference lines indicate the expected percentage of studies for a given p value, assuming that there is a true effect and certain statistical power to detect it (either 0% or 30% power). The observed p-curve is negatively sloped and heavily right skewed (the tail points to the right) for both outcomes, which suggests no widespread p-hacking.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>We do not find any evidence to suspect p-hacking for either discernment or skepticism bias from visually inspecting p-curves for both outcomes (see <a href="#fig-p-curve" class="quarto-xref">Figure&nbsp;<span>7.8</span></a>).</p>
+</section>
+</section>
+</section>
+<section id="data-availability" class="level2" data-number="7.5">
+<h2 data-number="7.5" class="anchored" data-anchor-id="data-availability"><span class="header-section-number">7.5</span> Data availability</h2>
+<p>The extracted data used to produce our results are available on the OSF project page (https://osf.io/96zbp/).</p>
+</section>
+<section id="code-availability" class="level2" data-number="7.6">
+<h2 data-number="7.6" class="anchored" data-anchor-id="code-availability"><span class="header-section-number">7.6</span> Code availability</h2>
+<p>The code used to create all results (including tables and figures) of this manuscript is also available on the OSF project page (https://osf.io/96zbp/).</p>
+</section>
+<section id="acknowledgements" class="level2" data-number="7.7">
+<h2 data-number="7.7" class="anchored" data-anchor-id="acknowledgements"><span class="header-section-number">7.7</span> Acknowledgements</h2>
+<p>The authors thank Aurélien Allard, Hugo Mercier, Gordon Pennycook, Ariana Modirrousta-Galian and Ben Tappin for their valuable feedback on earlier versions of the manuscript. JP received funding from the SCALUP ANR grant ANR-21-CE28-0016-01. SA received funding from the European Research Council (ERC) under the European Union’s Horizon 2020 research and innovation program (grant agreement nr. 883121). The funders had no role in study design, data collection and analysis, decision to publish or preparation of the manuscript.</p>
+</section>
+<section id="author-contributions-statement" class="level2" data-number="7.8">
+<h2 data-number="7.8" class="anchored" data-anchor-id="author-contributions-statement"><span class="header-section-number">7.8</span> Author Contributions Statement</h2>
+<p>JP: Conceptualization, Systematic literature search, Methodology, Software, Formal Analysis, Data curation, Visualization, Writing - Original draft, Writing - Review &amp; Editing. SA: Conceptualization, Systematic literature search, Writing - Original draft, Writing - Review &amp; Editing.</p>
+</section>
+<section id="competing-interest" class="level2" data-number="7.9">
+<h2 data-number="7.9" class="anchored" data-anchor-id="competing-interest"><span class="header-section-number">7.9</span> Competing interest</h2>
+<p>The authors declare having no competing interests.</p>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<div id="ref-acerbiResearchNoteFighting2022" class="csl-entry" role="listitem">
+Acerbi, Alberto, Sacha Altay, and Hugo Mercier. 2022. <span>“Research Note: Fighting Misinformation or Fighting for Information?”</span> <em>Harvard Kennedy School Misinformation Review</em>, January. <a href="https://doi.org/10.37016/mr-2020-87">https://doi.org/10.37016/mr-2020-87</a>.
+</div>
+<div id="ref-agadjanianPlatformPenaltyNews2023" class="csl-entry" role="listitem">
+Agadjanian, Alexander, Jacob Cruger, Sydney House, Annie Huang, Noah Kanter, Celeste Kearney, Junghye Kim, Isabelle Leonaitis, Sarah Petroni, and Leonardo Placeres. 2023. <span>“A Platform Penalty for News? How Social Media Context Can Alter Information Credibility Online.”</span> <em>Journal of Information Technology &amp; Politics</em> 20 (3): 338–48.
+</div>
+<div id="ref-aliFakeNewsFacebook2022" class="csl-entry" role="listitem">
+*Ali, Khudejah, Cong Li, Khawaja Zain-ul-abdin, and Muhammad Adeel Zaffar. 2022. <span>“Fake News on Facebook: Examining the Impact of Heuristic Cues on Perceived Credibility and Sharing Intention.”</span> <em>Internet Research</em> 32 (1): 379–97.
+</div>
+<div id="ref-allenScalingFactcheckingUsing2021" class="csl-entry" role="listitem">
+Allen, Jennifer, Antonio A. Arechar, Gordon Pennycook, and David G. Rand. 2021. <span>“Scaling up Fact-Checking Using the Wisdom of Crowds.”</span> <em>Science Advances</em> 7 (36): eabf4393.
+</div>
+<div id="ref-allenEvaluatingFakeNews2020" class="csl-entry" role="listitem">
+Allen, Jennifer, Baird Howland, Markus Mobius, David Rothschild, and Duncan J. Watts. 2020. <span>“Evaluating the Fake News Problem at the Scale of the Information Ecosystem.”</span> <em>Science Advances</em> 6 (14): eaay3539.
+</div>
+<div id="ref-alperWhenConspiracyTheories2021" class="csl-entry" role="listitem">
+Alper, Sinan. n.d. <span>“When Conspiracy Theories Make Sense: The Role of Social Inclusiveness.”</span>
+</div>
+<div id="ref-altayMediaLiteracyTips2024" class="csl-entry" role="listitem">
+*Altay, Sacha, Andrea De Angelis, and Emma Hoes. 2024. <span>“Media Literacy Tips Promoting Reliable News Improve Discernment and Enhance Trust in Traditional Media.”</span> <em>Communications Psychology</em> 2 (1): 1–9. <a href="https://doi.org/10.1038/s44271-024-00121-5">https://doi.org/10.1038/s44271-024-00121-5</a>.
+</div>
+<div id="ref-altayPeopleAreSkeptical2023" class="csl-entry" role="listitem">
+*Altay, Sacha, and Fabrizio Gilardi. n.d. <span>“People Are Skeptical of Headlines Labeled as AI-Generated, Even If True or Human-Made, Because They Assume Full AI Automation.”</span> <a href="https://doi.org/10.31234/osf.io/83k9r">https://doi.org/10.31234/osf.io/83k9r</a>.
+</div>
+<div id="ref-altayExposureHigherRates2024" class="csl-entry" role="listitem">
+*Altay, Sacha, Benjamin A. Lyons, and Ariana Modirrousta-Galian. 2024. <span>“Exposure to Higher Rates of False News Erodes Media Trust and Fuels Overconfidence.”</span> <em>Mass Communication and Society</em>, August, 1–25. <a href="https://doi.org/10.1080/15205436.2024.2382776">https://doi.org/10.1080/15205436.2024.2382776</a>.
+</div>
+<div id="ref-altayImpactNewsMedia2022" class="csl-entry" role="listitem">
+*Altay, Sacha, Rasmus Kleis Nielsen, and Richard Fletcher. 2022. <span>“The Impact of News Media and Digital Platform Use on Awareness of and Belief in COVID-19 Misinformation.”</span> <a href="https://doi.org/10.31234/osf.io/7tm3s">https://doi.org/10.31234/osf.io/7tm3s</a>.
+</div>
+<div id="ref-altayIfThisAccount2022" class="csl-entry" role="listitem">
+Altay, Sacha, Emma de Araujo, and Hugo Mercier. 2022. <span>“<span>“</span>If This Account Is True, It Is Most Enormously Wonderful<span>”</span>: Interestingness-If-True and the Sharing of True and False News.”</span> <em>Digital Journalism</em> 10 (3): 373–94. <a href="https://doi.org/10.1080/21670811.2021.1941163">https://doi.org/10.1080/21670811.2021.1941163</a>.
+</div>
+<div id="ref-altayMisinformationMisinformationConceptual" class="csl-entry" role="listitem">
+Altay, Sacha, Manon Berriche, and Alberto Acerbi. n.d. <span>“Misinformation on Misinformation: Conceptual and Methodological Challenges.”</span> <em>Social Media</em>.
+</div>
+<div id="ref-altaySkepticismFramingMedia2023" class="csl-entry" role="listitem">
+Altay, Sacha, Andrea De Angelis, and Emma Hoes. n.d. <span>“Beyond Skepticism: Framing Media Literacy Tips to Promote Reliable Informatio.”</span> <a href="https://doi.org/10.31234/osf.io/5gckb">https://doi.org/10.31234/osf.io/5gckb</a>.
+</div>
+<div id="ref-altayNewsParticipationDeclining2024" class="csl-entry" role="listitem">
+Altay, Sacha, Richard Fletcher, and Rasmus Kleis Nielsen. 2024. <span>“News Participation Is Declining: Evidence from 46 Countries Between 2015 and 2022.”</span> <em>New Media &amp; Society</em>, May, 14614448241247822. <a href="https://doi.org/10.1177/14614448241247822">https://doi.org/10.1177/14614448241247822</a>.
+</div>
+<div id="ref-altayWhyFewPeople2022" class="csl-entry" role="listitem">
+Altay, Sacha, Anne-Sophie Hacquin, and Hugo Mercier. 2022. <span>“Why Do so Few People Share Fake News? It Hurts Their Reputation.”</span> <em>New Media &amp; Society</em> 24 (6): 1303–24. <a href="https://doi.org/10.1177/1461444820969893">https://doi.org/10.1177/1461444820969893</a>.
+</div>
+<div id="ref-altayQuantifyingInfodemicPeople2022" class="csl-entry" role="listitem">
+Altay, Sacha, Rasmus Kleis Nielsen, and Richard Fletcher. 2022. <span>“Quantifying the <span>“</span>Infodemic<span>”</span>: People Turned to Trustworthy News Outlets During the 2020 Coronavirus Pandemic.”</span> <em>Journal of Quantitative Description: Digital Media</em> 2 (August). <a href="https://doi.org/10.51685/jqd.2022.020">https://doi.org/10.51685/jqd.2022.020</a>.
+</div>
+<div id="ref-altayExposureHigherRates2023" class="csl-entry" role="listitem">
+Altay, Sacha, Benjamin Lyons, and Ariana Modirrousta-Galian. n.d. <span>“Exposure to Higher Rates of False News Erodes Media Trust and Fuels Skepticism in News Judgment.”</span> <a href="https://doi.org/10.31234/osf.io/t9r43">https://doi.org/10.31234/osf.io/t9r43</a>.
+</div>
+<div id="ref-arecharUnderstandingCombattingMisinformation2023" class="csl-entry" role="listitem">
+*Arechar, Antonio A., Jennifer Allen, Adam J. Berinsky, Rocky Cole, Ziv Epstein, Kiran Garimella, Andrew Gully, et al. 2023. <span>“Understanding and Combatting Misinformation Across 16 Countries on Six Continents.”</span> <em>Nature Human Behaviour</em> 7 (9): 1502–13. <a href="https://doi.org/10.1038/s41562-023-01641-6">https://doi.org/10.1038/s41562-023-01641-6</a>.
+</div>
+<div id="ref-arinAbilityDetectingWillingness2023" class="csl-entry" role="listitem">
+*Arin, K. Peren, Deni Mazrekaj, and Marcel Thum. 2023. <span>“Ability of Detecting and Willingness to Share Fake News.”</span> <em>Scientific Reports</em> 13 (1): 7298. <a href="https://doi.org/10.1038/s41598-023-34402-6">https://doi.org/10.1038/s41598-023-34402-6</a>.
+</div>
+<div id="ref-aslettOnlineSearchesEvaluate2024" class="csl-entry" role="listitem">
+Aslett, Kevin, Zeve Sanderson, William Godel, Nathaniel Persily, Jonathan Nagler, and Joshua A. Tucker. 2024. <span>“Online Searches to Evaluate Misinformation Can Increase Its Perceived Veracity.”</span> <em>Nature</em> 625 (7995): 548–56. <a href="https://doi.org/10.1038/s41586-023-06883-y">https://doi.org/10.1038/s41586-023-06883-y</a>.
+</div>
+<div id="ref-bachmannStudyingDownstreamEffects2023" class="csl-entry" role="listitem">
+Bachmann, Ingrid, and Sebastián Valenzuela. 2023. <span>“Studying the Downstream Effects of Fact-Checking on Social Media: Experiments on Correction Formats, Belief Accuracy, and Media Trust.”</span> <em>Social Media + Society</em> 9 (2): 20563051231179694. <a href="https://doi.org/10.1177/20563051231179694">https://doi.org/10.1177/20563051231179694</a>.
+</div>
+<div id="ref-badrinathanEducativeInterventionsCombat2021" class="csl-entry" role="listitem">
+*Badrinathan, Sumitra. 2021. <span>“Educative Interventions to Combat Misinformation: Evidence from a Field Experiment in India.”</span> <em>American Political Science Review</em> 115 (4): 1325–41. <a href="https://doi.org/10.1017/S0003055421000459">https://doi.org/10.1017/S0003055421000459</a>.
+</div>
+<div id="ref-bagoFakeNewsFast2020" class="csl-entry" role="listitem">
+*Bago, Bence, David G. Rand, and Gordon Pennycook. 2020. <span>“Fake News, Fast and Slow: Deliberation Reduces Belief in False (but Not True) News Headlines.”</span> <em>Journal of Experimental Psychology: General</em> 149 (8): 1608–13. <a href="https://doi.org/10.1037/xge0000729">https://doi.org/10.1037/xge0000729</a>.
+</div>
+<div id="ref-bagoEmotionMayPredict2022" class="csl-entry" role="listitem">
+*Bago, Bence, Leah R. Rosenzweig, Adam J. Berinsky, and David G. Rand. 2022. <span>“Emotion May Predict Susceptibility to Fake News but Emotion Regulation Does Not Seem to Help.”</span> <em>Cognition and Emotion</em>, June, 1–15. <a href="https://doi.org/10.1080/02699931.2022.2090318">https://doi.org/10.1080/02699931.2022.2090318</a>.
+</div>
+<div id="ref-baptistaInfluencePoliticalIdeology2021" class="csl-entry" role="listitem">
+Baptista, João Pedro, Elisete Correia, Anabela Gradim, and Valeriano Piñeiro-Naval. 2021. <span>“The Influence of Political Ideology on Fake News Belief: The Portuguese Case.”</span> <em>Publications</em> 9 (2): 23. <a href="https://doi.org/10.3390/publications9020023">https://doi.org/10.3390/publications9020023</a>.
+</div>
+<div id="ref-basolPsychologicalHerdImmunity2021" class="csl-entry" role="listitem">
+*Basol, Melisa, Jon Roozenbeek, Manon Berriche, Fatih Uenal, William P. McClanahan, and Sander van der Linden. 2021. <span>“Towards Psychological Herd Immunity: Cross-Cultural Evidence for Two Prebunking Interventions Against COVID-19 Misinformation.”</span> <em>Big Data &amp; Society</em> 8 (1): 205395172110138. <a href="https://doi.org/10.1177/20539517211013868">https://doi.org/10.1177/20539517211013868</a>.
+</div>
+<div id="ref-bataillerSignalDetectionApproach2022" class="csl-entry" role="listitem">
+Batailler, Cédric, Skylar M. Brannon, Paul E. Teas, and Bertram Gawronski. 2022. <span>“A Signal Detection Approach to Understanding the Identification of Fake News.”</span> <em>Perspectives on Psychological Science</em> 17 (1): 78–98. <a href="https://doi.org/10.1177/1745691620986135">https://doi.org/10.1177/1745691620986135</a>.
+</div>
+<div id="ref-besaluCredibilityDigitalPolitical2021" class="csl-entry" role="listitem">
+Besalú, Reinald, and Carles Pont-Sorribes. 2021. <span>“Credibility of Digital Political News in Spain: Comparison Between Traditional Media and Social Media.”</span> <em>Social Sciences</em> 10 (5): 170. <a href="https://doi.org/10.3390/socsci10050170">https://doi.org/10.3390/socsci10050170</a>.
+</div>
+<div id="ref-brashierTimingMattersWhen2021" class="csl-entry" role="listitem">
+*Brashier, Nadia M., Gordon Pennycook, Adam J. Berinsky, and David G. Rand. 2021. <span>“Timing Matters When Correcting Fake News.”</span> <em>Proceedings of the National Academy of Sciences</em> 118 (5): e2020043118. <a href="https://doi.org/10.1073/pnas.2020043118">https://doi.org/10.1073/pnas.2020043118</a>.
+</div>
+<div id="ref-brashierJudgingTruth2020" class="csl-entry" role="listitem">
+Brashier, Nadia M., and Elizabeth J. Marsh. 2020. <span>“Judging Truth.”</span> <em>Annual Review of Psychology</em> 71 (1): 499–515. <a href="https://doi.org/10.1146/annurev-psych-010419-050807">https://doi.org/10.1146/annurev-psych-010419-050807</a>.
+</div>
+<div id="ref-brennenLieDetectionWhat2023" class="csl-entry" role="listitem">
+Brennen, Tim, and Svein Magnussen. 2023. <span>“Lie Detection: What Works?”</span> <em>Current Directions in Psychological Science</em>, May, 096372142311730. <a href="https://doi.org/10.1177/09637214231173095">https://doi.org/10.1177/09637214231173095</a>.
+</div>
+<div id="ref-bronsteinBeliefFakeNews2019" class="csl-entry" role="listitem">
+*Bronstein, Michael V., Gordon Pennycook, Adam Bear, David G. Rand, and Tyrone D. Cannon. 2019. <span>“Belief in Fake News Is Associated with Delusionality, Dogmatism, Religious Fundamentalism, and Reduced Analytic Thinking.”</span> <em>Journal of Applied Research in Memory and Cognition</em> 8 (1): 108–17. <a href="https://doi.org/10.1016/j.jarmac.2018.09.005">https://doi.org/10.1016/j.jarmac.2018.09.005</a>.
+</div>
+<div id="ref-bryanovWhatDrivesPerceptions2023" class="csl-entry" role="listitem">
+Bryanov, Kirill, Reinhold Kliegl, Olessia Koltsova, Alex Miltsov, Sergei Pashakhin, Alexander Porshnev, Yadviga Sinyavskaya, Maksim Terpilovskii, and Victoria Vziatysheva. 2023. <span>“What Drives Perceptions of Foreign News Coverage Credibility? A Cross-National Experiment Including Kazakhstan, Russia, and Ukraine.”</span> <em>Political Communication</em> 40 (2): 115–46. <a href="https://doi.org/10.1080/10584609.2023.2172492">https://doi.org/10.1080/10584609.2023.2172492</a>.
+</div>
+<div id="ref-bryanovDeterminantsIndividualsBelief2021" class="csl-entry" role="listitem">
+Bryanov, Kirill, and Victoria Vziatysheva. 2021. <span>“Determinants of Individuals<span>’</span> Belief in Fake News: A Scoping Review Determinants of Belief in Fake News.”</span> Edited by Stefano Triberti. <em>PLOS ONE</em> 16 (6): e0253717. <a href="https://doi.org/10.1371/journal.pone.0253717">https://doi.org/10.1371/journal.pone.0253717</a>.
+</div>
+<div id="ref-calvilloInitialAccuracyFocus2020" class="csl-entry" role="listitem">
+Calvillo, Dustin P., and Thomas J. Smelter. 2020. <span>“An Initial Accuracy Focus Reduces the Effect of Prior Exposure on Perceived Accuracy of News Headlines.”</span> <em>Cognitive Research: Principles and Implications</em> 5 (1): 55. <a href="https://doi.org/10.1186/s41235-020-00257-y">https://doi.org/10.1186/s41235-020-00257-y</a>.
+</div>
+<div id="ref-capraroThinkThisNews" class="csl-entry" role="listitem">
+Capraro, Valerio, and Tatiana Celadin. n.d. <span>“<span>“</span>I Think This News Is Accurate<span>”</span>: Endorsing Accuracy Decreases the Sharing of Fake News and Increases the Sharing of Real News.”</span> <em>Personality and Social Psychology Bulletin</em>.
+</div>
+<div id="ref-chenWhatMakesNews2023" class="csl-entry" role="listitem">
+Chen, Xi, Gordon Pennycook, and David Rand. 2023. <span>“What Makes News Sharable on Social Media?”</span> <em>Journal of Quantitative Description: Digital Media</em> 3.
+</div>
+<div id="ref-claytonRealSolutionsFake2020" class="csl-entry" role="listitem">
+*Clayton, Katherine, Spencer Blair, Jonathan A. Busam, Samuel Forstner, John Glance, Guy Green, Anna Kawata, et al. 2020. <span>“Real Solutions for Fake News? Measuring the Effectiveness of General Warnings and Fact-Check Tags in Reducing Belief in False Stories on Social Media.”</span> <em>Political Behavior</em> 42 (4): 1073–95. <a href="https://doi.org/10.1007/s11109-019-09533-0">https://doi.org/10.1007/s11109-019-09533-0</a>.
+</div>
+<div id="ref-clemmvonhohenbergTruthBiasLeft2023" class="csl-entry" role="listitem">
+Clemm Von Hohenberg, Bernhard. 2023. <span>“Truth and Bias, Left and Right: Testing Ideological Asymmetries with a Realistic News Supply.”</span> <em>Public Opinion Quarterly</em> 87 (2): 267–92. <a href="https://doi.org/10.1093/poq/nfad013">https://doi.org/10.1093/poq/nfad013</a>.
+</div>
+<div id="ref-diasEmphasizingPublishersDoes2020" class="csl-entry" role="listitem">
+Dias, Nicholas, Gordon Pennycook, and David G. Rand. 2020. <span>“Emphasizing Publishers Does Not Effectively Reduce Susceptibility to Misinformation on Social Media.”</span> <em>Harvard Kennedy School Misinformation Review</em>, January. <a href="https://doi.org/10.37016/mr-2020-001">https://doi.org/10.37016/mr-2020-001</a>.
+</div>
+<div id="ref-egelhoferPopulistAttitudesPoliticians2022" class="csl-entry" role="listitem">
+Egelhofer, Jana Laura, Ming Boyer, Sophie Lecheler, and Loes Aaldering. 2022. <span>“Populist Attitudes and Politicians<span>’</span> Disinformation Accusations: Effects on Perceptions of Media and Politicians.”</span> <em>Journal of Communication</em> 72 (6): 619–32. <a href="https://doi.org/10.1093/joc/jqac031">https://doi.org/10.1093/joc/jqac031</a>.
+</div>
+<div id="ref-egelhoferFakeNewsTwodimensional2019" class="csl-entry" role="listitem">
+Egelhofer, Jana Laura, and Sophie Lecheler. 2019. <span>“Fake News as a Two-Dimensional Phenomenon: A Framework and Research Agenda.”</span> <em>Annals of the International Communication Association</em> 43 (2): 97–116. <a href="https://doi.org/10.1080/23808985.2019.1602782">https://doi.org/10.1080/23808985.2019.1602782</a>.
+</div>
+<div id="ref-epsteinSocialMediaContext2023" class="csl-entry" role="listitem">
+Epstein, Ziv, Nathaniel Sirlin, Antonio Arechar, Gordon Pennycook, and David Rand. 2023. <span>“The Social Media Context Interferes with Truth Discernment.”</span> <em>Science Advances</em> 9 (9): eabo6169.
+</div>
+<div id="ref-erlichProKremlinDisinformationEffective2023" class="csl-entry" role="listitem">
+*Erlich, Aaron, and Calvin Garner. 2023. <span>“Is Pro-Kremlin Disinformation Effective? Evidence from Ukraine.”</span> <em>The International Journal of Press/Politics</em> 28 (1): 5–28. <a href="https://doi.org/10.1177/19401612211045221">https://doi.org/10.1177/19401612211045221</a>.
+</div>
+<div id="ref-faragoHungarianLazyBiased2023" class="csl-entry" role="listitem">
+*Faragó, Laura, Péter Krekó, and Gábor Orosz. 2023. <span>“Hungarian, Lazy, and Biased: The Role of Analytic Thinking and Partisanship in Fake News Discernment on a Hungarian Representative Sample.”</span> <em>Scientific Reports</em> 13 (1): 178. <a href="https://doi.org/10.1038/s41598-022-26724-8">https://doi.org/10.1038/s41598-022-26724-8</a>.
+</div>
+<div id="ref-fazioCombatingMisinformationMegastudy2024" class="csl-entry" role="listitem">
+*Fazio, Lisa, David Rand, Stephan Lewandowsky, Mark Susmann, Adam J. Berinsky, Andrew Guess, Panayiota Kendeou, et al. n.d. <span>“Combating Misinformation: A Megastudy of Nine Interventions Designed to Reduce the Sharing of and Belief in False and Misleading Headlines.”</span> <a href="https://doi.org/10.31234/osf.io/uyjha">https://doi.org/10.31234/osf.io/uyjha</a>.
+</div>
+<div id="ref-fletcherPeopleDontTrust2017" class="csl-entry" role="listitem">
+Fletcher, Richard, and Rasmus-Kleis Nielsen. 2017. <span>“People Dont Trust News Media<span></span>and This Is Key to the Global Misinformation Debate.”</span> <em>AA. VV., Understanding and Addressing the Disinformation Ecosystem</em>, 13–17.
+</div>
+<div id="ref-garrettConservativesSusceptibilityPolitical2021" class="csl-entry" role="listitem">
+Garrett, R. Kelly, and Robert M. Bond. 2021. <span>“Conservatives<span>’</span> Susceptibility to Political Misperceptions.”</span> <em>Science Advances</em> 7 (23): eabf1234. <a href="https://doi.org/10.1126/sciadv.abf1234">https://doi.org/10.1126/sciadv.abf1234</a>.
+</div>
+<div id="ref-gawronskiTruthSensitivityPartisan2023" class="csl-entry" role="listitem">
+Gawronski, Bertram, Nyx L. Ng, and Dillon M. Luke. 2023. <span>“Truth Sensitivity and Partisan Bias in Responses to Misinformation.”</span> <em>Journal of Experimental Psychology: General</em> 152 (8): 2205–36. <a href="https://doi.org/10.1037/xge0001381">https://doi.org/10.1037/xge0001381</a>.
+</div>
+<div id="ref-gibbons_estimation_1993" class="csl-entry" role="listitem">
+Gibbons, Robert D., Donald R. Hedeker, and John M. Davis. 1993. <span>“Estimation of Effect Size from a Series of Experiments Involving Paired Comparisons.”</span> <em>Journal of Educational Statistics</em> 18 (3): 271–79. <a href="https://doi.org/10.3102/10769986018003271">https://doi.org/10.3102/10769986018003271</a>.
+</div>
+<div id="ref-globigChangingIncentiveStructure2023" class="csl-entry" role="listitem">
+Globig, Laura K, Nora Holtz, and Tali Sharot. 2023. <span>“Changing the Incentive Structure of Social Media Platforms to Halt the Spread of Misinformation.”</span> <em>eLife</em> 12 (June): e85767. <a href="https://doi.org/10.7554/eLife.85767">https://doi.org/10.7554/eLife.85767</a>.
+</div>
+<div id="ref-gottliebReducingMisinformationPolarized2022" class="csl-entry" role="listitem">
+*Gottlieb, Jessica, Claire Adida, and Richard Moussa. n.d. <span>“Reducing Misinformation in a Polarized Context: Experimental Evidence from Côte d<span>’</span>ivoire.”</span> <a href="https://doi.org/10.31219/osf.io/6x4wy">https://doi.org/10.31219/osf.io/6x4wy</a>.
+</div>
+<div id="ref-guayHowThinkWhether2023" class="csl-entry" role="listitem">
+Guay, Brian, Adam J. Berinsky, Gordon Pennycook, and David Rand. 2023. <span>“How to Think about Whether Misinformation Interventions Work.”</span> <em>Nature Human Behaviour</em> 7 (8): 1231–33. <a href="https://doi.org/10.1038/s41562-023-01667-w">https://doi.org/10.1038/s41562-023-01667-w</a>.
+</div>
+<div id="ref-guayHowThinkWhether2022" class="csl-entry" role="listitem">
+Guay, Brian, Adam Berinsky, Gordon Pennycook, and David Rand. n.d. <span>“How to Think about Whether Misinformation Interventions Work.”</span> <a href="https://doi.org/10.31234/osf.io/gv8qx">https://doi.org/10.31234/osf.io/gv8qx</a>.
+</div>
+<div id="ref-guessDigitalMediaLiteracy2020" class="csl-entry" role="listitem">
+*Guess, Andrew M., Michael Lerner, Benjamin Lyons, Jacob M. Montgomery, Brendan Nyhan, Jason Reifler, and Neelanjan Sircar. 2020. <span>“A Digital Media Literacy Intervention Increases Discernment Between Mainstream and False News in the United States and India.”</span> <em>Proceedings of the National Academy of Sciences</em> 117 (27): 15536–45. <a href="https://doi.org/10.1073/pnas.1920498117">https://doi.org/10.1073/pnas.1920498117</a>.
+</div>
+<div id="ref-guessUnbundlingDigitalMedia2024" class="csl-entry" role="listitem">
+*Guess, Andrew, Shannon McGregor, Gordon Pennycook, and David Rand. n.d. <span>“Unbundling Digital Media Literacy Tips: Results from Two Experiments.”</span> <a href="https://doi.org/10.31234/osf.io/u34fp">https://doi.org/10.31234/osf.io/u34fp</a>.
+</div>
+<div id="ref-hameleersMistakenlyMisinformedIntentionally2023" class="csl-entry" role="listitem">
+*Hameleers, Michael, Marina Tulin, Claes De Vreese, Toril Aalberg, Peter Van Aelst, Ana Sofia Cardenal, Nicoleta Corbu, et al. 2023. <span>“Mistakenly Misinformed or Intentionally Deceived? Mis<span>-</span> and Disinformation Perceptions on the Russian War in Ukraine Among Citizens in 19 Countries.”</span> <em>European Journal of Political Research</em>, December, 1475–6765.12646. <a href="https://doi.org/10.1111/1475-6765.12646">https://doi.org/10.1111/1475-6765.12646</a>.
+</div>
+<div id="ref-harrer2021" class="csl-entry" role="listitem">
+Harrer, Mathias, Pim Cuijpers, Furukawa Toshi A, and David D Ebert. 2021. <em>Doing Meta-Analysis with r: A Hands-on Guide</em>. 1st ed. Boca Raton, FL; London: Chapman &amp; Hall/CRC Press.
+</div>
+<div id="ref-higgins_cochrane_2019" class="csl-entry" role="listitem">
+Higgins, Julian PT, James Thomas, Jacqueline Chandler, Miranda Cumpston, Tianjing Li, Matthew J. Page, and Vivian A. Welch. 2019. <em>Cochrane Handbook for Systematic Reviews of Interventions</em>. John Wiley &amp; Sons.
+</div>
+<div id="ref-highamMeanRatingDifference2024a" class="csl-entry" role="listitem">
+Higham, Philip A., Ariana Modirrousta-Galian, and Tina Seabrooke. 2024. <span>“Mean Rating Difference Scores Are Poor Measures of Discernment: The Role of Response Criteria.”</span> <em>Current Opinion in Psychology</em> 56 (April): 101785. <a href="https://doi.org/10.1016/j.copsyc.2023.101785">https://doi.org/10.1016/j.copsyc.2023.101785</a>.
+</div>
+<div id="ref-hlatkyUnintendedConsequencesRussian2024" class="csl-entry" role="listitem">
+*Hlatky, Roman. n.d. <span>“Unintended Consequences? Russian Disinformation and Public Opinion.”</span> <a href="https://doi.org/10.31219/osf.io/85vmt">https://doi.org/10.31219/osf.io/85vmt</a>.
+</div>
+<div id="ref-hoesProminentMisinformationInterventions2023" class="csl-entry" role="listitem">
+Hoes, Emma, Brian Aitken, Jingwen Zhang, Tomasz Gackowski, and Magdalena Wojcieszak. 2023. <span>“Prominent Misinformation Interventions Reduce Misperceptions but Increase Skepticism.”</span> <a href="https://doi.org/10.31234/osf.io/zmpdu">https://doi.org/10.31234/osf.io/zmpdu</a>.
+</div>
+<div id="ref-karlsenSocialMediaTrust2023" class="csl-entry" role="listitem">
+Karlsen, Rune, and Toril Aalberg. 2023. <span>“Social Media and Trust in News: An Experimental Study of the Effect of Facebook on News Story Credibility.”</span> <em>Digital Journalism</em> 11 (1): 144–60. <a href="https://doi.org/10.1080/21670811.2021.1945938">https://doi.org/10.1080/21670811.2021.1945938</a>.
+</div>
+<div id="ref-koetkeFallibilitySalienceIncreases2023" class="csl-entry" role="listitem">
+*Koetke, Jonah, Karina Schumann, Tenelle Porter, and Ilse Smilo-Morgan. 2023. <span>“Fallibility Salience Increases Intellectual Humility: Implications for People<span>’</span>s Willingness to Investigate Political Misinformation.”</span> <em>Personality and Social Psychology Bulletin</em> 49 (5): 806–20. <a href="https://doi.org/10.1177/01461672221080979">https://doi.org/10.1177/01461672221080979</a>.
+</div>
+<div id="ref-krepsAssessingMisinformationRecall2023" class="csl-entry" role="listitem">
+*Kreps, Sarah E., and Douglas L. Kriner. 2023. <span>“Assessing Misinformation Recall and Accuracy Perceptions: Evidence from the COVID-19 Pandemic.”</span> <em>Harvard Kennedy School Misinformation Review</em>, October. <a href="https://doi.org/10.37016/mr-2020-123">https://doi.org/10.37016/mr-2020-123</a>.
+</div>
+<div id="ref-leeHowPoliticalIdentity2023" class="csl-entry" role="listitem">
+*Lee, Eun-Ju, and Jeong-woo Jang. 2023. <span>“How Political Identity and Misinformation Priming Affect Truth Judgments and Sharing Intention of Partisan News.”</span> <em>Digital Journalism</em> 0 (0): 1–20. <a href="https://doi.org/10.1080/21670811.2022.2163413">https://doi.org/10.1080/21670811.2022.2163413</a>.
+</div>
+<div id="ref-levineTruthDefaultTheoryTDT2014" class="csl-entry" role="listitem">
+Levine, Timothy R. 2014. <span>“Truth-Default Theory (TDT): A Theory of Human Deception and Deception Detection.”</span> <em>Journal of Language and Social Psychology</em> 33 (4): 378–92. <a href="https://doi.org/10.1177/0261927X14535916">https://doi.org/10.1177/0261927X14535916</a>.
+</div>
+<div id="ref-luhringEmotionsMisinformationStudies2023" class="csl-entry" role="listitem">
+*Lühring, Jula, Apeksha Shetty, Corinna Koschmieder, David Garcia, Annie Waldherr, and Hannah Metzler. n.d. <span>“Emotions in Misinformation Studies: Distinguishing Affective State from Emotional Response and Misinformation Recognition from Acceptance.”</span> <a href="https://doi.org/10.31234/osf.io/udqms">https://doi.org/10.31234/osf.io/udqms</a>.
+</div>
+<div id="ref-luoCredibilityPerceptionsDetection2022" class="csl-entry" role="listitem">
+Luo, Mufan, Jeffrey T. Hancock, and David M. Markowitz. 2022. <span>“Credibility Perceptions and Detection Accuracy of Fake News Headlines on Social Media: Effects of Truth-Bias and Endorsement Cues.”</span> <em>Communication Research</em> 49 (2): 171–95. <a href="https://doi.org/10.1177/0093650220921321">https://doi.org/10.1177/0093650220921321</a>.
+</div>
+<div id="ref-lutzkePrimingCriticalThinking2019" class="csl-entry" role="listitem">
+*Lutzke, Lauren, Caitlin Drummond, Paul Slovic, and Joseph Árvai. 2019. <span>“Priming Critical Thinking: Simple Interventions Limit the Influence of Fake News about Climate Change on Facebook.”</span> <em>Global Environmental Change</em> 58 (September): 101964. <a href="https://doi.org/10.1016/j.gloenvcha.2019.101964">https://doi.org/10.1016/j.gloenvcha.2019.101964</a>.
+</div>
+<div id="ref-lyonsHealthMediaLiteracy2024" class="csl-entry" role="listitem">
+*Lyons, Benjamin, Andy J. King, and Kimberly Kaphingst. n.d. <span>“A Health Media Literacy Intervention Increases Skepticism of Both Inaccurate and Accurate Cancer News Among U.S. Adults.”</span> <a href="https://doi.org/10.31219/osf.io/hm9ty">https://doi.org/10.31219/osf.io/hm9ty</a>.
+</div>
+<div id="ref-lyonsReduceBlindSpots2024" class="csl-entry" role="listitem">
+*Lyons, Benjamin, Ariana Modirrousta-Galian, Sacha Altay, and Nikita Antonia Salovich. 2024. <span>“Reduce Blind Spots to Improve News Discernment? Performance Feedback Reduces Overconfidence but Does Not Improve Subsequent Discernment,”</span> February. <a href="https://doi.org/10.31219/osf.io/kgfrb">https://doi.org/10.31219/osf.io/kgfrb</a>.
+</div>
+<div id="ref-lyonsPartisanshipOlderAmericans2023" class="csl-entry" role="listitem">
+*Lyons, Benjamin, Jacob Montgomery, and Jason Reifler. n.d. <span>“Partisanship and Older Americans<span>’</span> Engagement with Dubious Political News.”</span> <a href="https://doi.org/10.31219/osf.io/etb89">https://doi.org/10.31219/osf.io/etb89</a>.
+</div>
+<div id="ref-maertensMisinformationSusceptibilityTest2024" class="csl-entry" role="listitem">
+*Maertens, Rakoen, Friedrich M. Götz, Hudson F. Golino, Jon Roozenbeek, Claudia R. Schneider, Yara Kyrychenko, John R. Kerr, et al. 2024. <span>“The Misinformation Susceptibility Test (MIST): A Psychometrically Validated Measure of News Veracity Discernment.”</span> <em>Behavior Research Methods</em> 56 (3): 1863–99. <a href="https://doi.org/10.3758/s13428-023-02124-2">https://doi.org/10.3758/s13428-023-02124-2</a>.
+</div>
+<div id="ref-maertensMisinformationSusceptibilityTest2021" class="csl-entry" role="listitem">
+Maertens, Rakoen, Friedrich Martin Götz, Claudia R. Schneider, Jon Roozenbeek, John R Kerr, Stefan Stieger, William Patrick McClanahan, Karly Drabot, and Sander van der Linden. 2021. <span>“The Misinformation Susceptibility Test (MIST): A Psychometrically Validated Measure of News Veracity Discernment.”</span> <a href="https://doi.org/10.31234/osf.io/gk68h">https://doi.org/10.31234/osf.io/gk68h</a>.
+</div>
+<div id="ref-espinamairalInteractiveCrowdsourcingFactcheck2023" class="csl-entry" role="listitem">
+Mairal, Santos *Espina, Florencia Bustos, Guillermo Solovey, and Joaquín Navajas. 2023. <span>“Interactive Crowdsourcing to Fact-Check Politicians.”</span> <em>Journal of Experimental Psychology: Applied</em>, August. <a href="https://doi.org/10.1037/xap0000492">https://doi.org/10.1037/xap0000492</a>.
+</div>
+<div id="ref-martelRelianceEmotionPromotes2020" class="csl-entry" role="listitem">
+*Martel, Cameron, Gordon Pennycook, and David G. Rand. 2020. <span>“Reliance on Emotion Promotes Belief in Fake News.”</span> <em>Cognitive Research: Principles and Implications</em> 5 (1): 47. <a href="https://doi.org/10.1186/s41235-020-00252-3">https://doi.org/10.1186/s41235-020-00252-3</a>.
+</div>
+<div id="ref-martelCrowdsCanEffectively2022" class="csl-entry" role="listitem">
+Martel, Cameron, Jennifer Nancy Lee Allen, Gordon Pennycook, and David Gertler Rand. 2022. <span>“Crowds Can Effectively Identify Misinformation at Scale.”</span> <a href="https://doi.org/10.31234/osf.io/2tjk7">https://doi.org/10.31234/osf.io/2tjk7</a>.
+</div>
+<div id="ref-mercierNotBornYesterday2020" class="csl-entry" role="listitem">
+Mercier, Hugo. 2020. <em>Not Born Yesterday: The Science of Who We Trust and What We Believe</em>. <a href="https://doi.org/10.1515/9780691198842">https://doi.org/10.1515/9780691198842</a>.
+</div>
+<div id="ref-metzgerMakingSenseCredibility2007" class="csl-entry" role="listitem">
+Metzger, Miriam J. 2007. <span>“Making Sense of Credibility on the Web: Models for Evaluating Online Information and Recommendations for Future Research.”</span> <em>Journal of the American Society for Information Science and Technology</em> 58 (13): 2078–91. <a href="https://doi.org/10.1002/asi.20672">https://doi.org/10.1002/asi.20672</a>.
+</div>
+<div id="ref-mihailidisCostDisbeliefFracturing2021" class="csl-entry" role="listitem">
+Mihailidis, Paul, and Bobbie Foster. 2021. <span>“The Cost of Disbelief: Fracturing News Ecosystems in an Age of Rampant Media Cynicism.”</span> <em>American Behavioral Scientist</em> 65 (4): 616–31. <a href="https://doi.org/10.1177/0002764220978470">https://doi.org/10.1177/0002764220978470</a>.
+</div>
+<div id="ref-modirrousta-galianEffectsInductiveLearning2023" class="csl-entry" role="listitem">
+*Modirrousta-Galian, Ariana, Philip A. Higham, and Tina Seabrooke. 2023. <span>“Effects of Inductive Learning and Gamification on News Veracity Discernment.”</span> <em>Journal of Experimental Psychology: Applied</em> 29 (3): 599–619. <a href="https://doi.org/10.1037/xap0000458">https://doi.org/10.1037/xap0000458</a>.
+</div>
+<div id="ref-modirrousta-galianWordlessWisdomDominant2024" class="csl-entry" role="listitem">
+———. 2024. <span>“Wordless Wisdom: The Dominant Role of Tacit Knowledge in True and Fake News Discrimination.”</span> <em>Journal of Applied Research in Memory and Cognition</em>.
+</div>
+<div id="ref-modirrousta-galianGamifiedInoculationInterventions2023" class="csl-entry" role="listitem">
+Modirrousta-Galian, Ariana, and Philip A. Higham. 2023. <span>“Gamified Inoculation Interventions Do Not Improve Discrimination Between True and Fake News: Reanalyzing Existing Research with Receiver Operating Characteristic Analysis.”</span> <em>Journal of Experimental Psychology: General</em>.
+</div>
+<div id="ref-montalverneTrustGapHow2022" class="csl-entry" role="listitem">
+Mont’Alverne, Camila, Sumitra Badrinathan, A. Ross Arguedas, Benjamin Toff, Richard Fletcher, and R. Nielsen. 2022. <span>“The Trust Gap: How and Why News on Digital Platforms Is Viewed More Sceptically Versus News in General.”</span>
+</div>
+<div id="ref-mouraoFakeNewsDiscursive2019" class="csl-entry" role="listitem">
+Mourão, Rachel R., and Craig T. Robertson. 2019. <span>“Fake News as Discursive Integration: An Analysis of Sites That Publish False, Misleading, Hyperpartisan and Sensational Information.”</span> <em>Journalism Studies</em> 20 (14): 2077–95. <a href="https://doi.org/10.1080/1461670X.2019.1566871">https://doi.org/10.1080/1461670X.2019.1566871</a>.
+</div>
+<div id="ref-mudaPeopleAreWorse2023" class="csl-entry" role="listitem">
+*Muda, Rafał, Gordon Pennycook, Damian Hamerski, and Michał Białek. 2023. <span>“People Are Worse at Detecting Fake News in Their Foreign Language.”</span> <em>Journal of Experimental Psychology: Applied</em> 29 (4): 712–24. <a href="https://doi.org/10.1037/xap0000475">https://doi.org/10.1037/xap0000475</a>.
+</div>
+<div id="ref-newmanDigitalNewsReport2023" class="csl-entry" role="listitem">
+Newman, Nic, Richard Fletcher, Kirsten Eddy, Craig T. Robertson, and Rasmus Kleis Nielsen. 2023. <span>“Digital News Report 2023.”</span>
+</div>
+<div id="ref-newmanReutersInstituteDigital2022" class="csl-entry" role="listitem">
+Newman, Nic, Richard Fletcher, Craig T Robertson, Kirsten Eddy, and Rasmus Kleis Nielsen. 2022. <span>“Reuters Institute Digital News Report 2022.”</span>
+</div>
+<div id="ref-oecdInternationalEffortUsing2022" class="csl-entry" role="listitem">
+*OECD. 2022. <span>“An International Effort Using Behavioural Science to Tackle the Spread of Misinformation.”</span> <a href="https://doi.org/10.1787/b7709d4f-en">https://doi.org/10.1787/b7709d4f-en</a>.
+</div>
+<div id="ref-oroszProsocialFakeNews2023" class="csl-entry" role="listitem">
+*Orosz, Gábor, Benedek Paskuj, Laura Faragó, and Péter Krekó. 2023. <span>“A Prosocial Fake News Intervention with Durable Effects.”</span> <em>Scientific Reports</em> 13 (1): 3958. <a href="https://doi.org/10.1038/s41598-023-30867-7">https://doi.org/10.1038/s41598-023-30867-7</a>.
+</div>
+<div id="ref-page2021" class="csl-entry" role="listitem">
+Page, Matthew J., Joanne E. McKenzie, Patrick M. Bossuyt, Isabelle Boutron, Tammy C. Hoffmann, Cynthia D. Mulrow, Larissa Shamseer, et al. 2021. <span>“The PRISMA 2020 Statement: An Updated Guideline for Reporting Systematic Reviews.”</span> <em>BMJ</em> 372 (March): n71. <a href="https://doi.org/10.1136/bmj.n71">https://doi.org/10.1136/bmj.n71</a>.
+</div>
+<div id="ref-paulRussianFirehoseFalsehood2016" class="csl-entry" role="listitem">
+Paul, Christopher, and Miriam Matthews. 2016. <span>“The Russian <span>“</span>Firehose of Falsehood<span>”</span> Propaganda Model.”</span> <em>Rand Corporation</em> 2 (7): 1–10.
+</div>
+<div id="ref-pehlivanogluRoleAnalyticalReasoning2021" class="csl-entry" role="listitem">
+*Pehlivanoglu, Didem, Tian Lin, Farha Deceus, Amber Heemskerk, Natalie C. Ebner, and Brian S. Cahill. 2021. <span>“The Role of Analytical Reasoning and Source Credibility on the Evaluation of Real and Fake Full-Length News Articles.”</span> <em>Cognitive Research: Principles and Implications</em> 6 (1): 24. <a href="https://doi.org/10.1186/s41235-021-00292-3">https://doi.org/10.1186/s41235-021-00292-3</a>.
+</div>
+<div id="ref-pennycookPriorExposureIncreases2018" class="csl-entry" role="listitem">
+*Pennycook, Gordon, Tyrone D. Cannon, and David G. Rand. 2018. <span>“Prior Exposure Increases Perceived Accuracy of Fake News.”</span> <em>Journal of Experimental Psychology: General</em> 147 (12): 1865–80. <a href="https://doi.org/10.1037/xge0000465">https://doi.org/10.1037/xge0000465</a>.
+</div>
+<div id="ref-pennycookFightingCOVID19Misinformation2020a" class="csl-entry" role="listitem">
+*Pennycook, Gordon, Jonathon McPhetres, Yunhao Zhang, Jackson G. Lu, and David G. Rand. 2020. <span>“Fighting COVID-19 Misinformation on Social Media: Experimental Evidence for a Scalable Accuracy-Nudge Intervention.”</span> <em>Psychological Science</em> 31 (7): 770–80. <a href="https://doi.org/10.1177/0956797620939054">https://doi.org/10.1177/0956797620939054</a>.
+</div>
+<div id="ref-pennycookWhoFallsFake2020" class="csl-entry" role="listitem">
+*Pennycook, Gordon, and David G. Rand. 2020. <span>“Who Falls for Fake News? The Roles of Bullshit Receptivity, Overclaiming, Familiarity, and Analytic Thinking.”</span> <em>Journal of Personality</em> 88 (2): 185–200. <a href="https://doi.org/10.1111/jopy.12476">https://doi.org/10.1111/jopy.12476</a>.
+</div>
+<div id="ref-pennycookPracticalGuideDoing2021" class="csl-entry" role="listitem">
+Pennycook, Gordon, Jabin Binnendyk, Christie Newton, and David G. Rand. 2021. <span>“A Practical Guide to Doing Behavioral Research on Fake News and Misinformation.”</span> <em>Collabra: Psychology</em> 7 (1): 25293. <a href="https://doi.org/10.1525/collabra.25293">https://doi.org/10.1525/collabra.25293</a>.
+</div>
+<div id="ref-pennycook2021" class="csl-entry" role="listitem">
+Pennycook, Gordon, Ziv Epstein, Mohsen Mosleh, Antonio A. Arechar, Dean Eckles, and David G. Rand. 2021. <span>“Shifting Attention to Accuracy Can Reduce Misinformation Online.”</span> <em>Nature</em> 592 (7855): 590–95. <a href="https://doi.org/10.1038/s41586-021-03344-2">https://doi.org/10.1038/s41586-021-03344-2</a>.
+</div>
+<div id="ref-pennycookLazyNotBiased2019" class="csl-entry" role="listitem">
+Pennycook, Gordon, and David G. Rand. 2019. <span>“Lazy, Not Biased: Susceptibility to Partisan Fake News Is Better Explained by Lack of Reasoning Than by Motivated Reasoning.”</span> <em>Cognition</em> 188 (July): 39–50. <a href="https://doi.org/10.1016/j.cognition.2018.06.011">https://doi.org/10.1016/j.cognition.2018.06.011</a>.
+</div>
+<div id="ref-pereiraInoculationReducesMisinformation2023" class="csl-entry" role="listitem">
+*Pereira, Frederico Batista, Natália S. Bueno, Felipe Nunes, and Nara Pavão. 2023. <span>“Inoculation Reduces Misinformation: Experimental Evidence from Multidimensional Interventions in Brazil.”</span> <em>Journal of Experimental Political Science</em>, July, 1–12. <a href="https://doi.org/10.1017/XPS.2023.11">https://doi.org/10.1017/XPS.2023.11</a>.
+</div>
+<div id="ref-positteam2023" class="csl-entry" role="listitem">
+Posit team. 2023. <em>RStudio: Integrated Development Environment for r</em>. Boston, MA: Posit Software, PBC. <a href="http://www.posit.co/">http://www.posit.co/</a>.
+</div>
+<div id="ref-pustejovsky2019" class="csl-entry" role="listitem">
+Pustejovsky, James E. 2019. <span>“Simulating Correlated Standardized Mean Differences for Meta-Analysis.”</span> <a href="https://www.jepusto.com/simulating-correlated-smds/">https://www.jepusto.com/simulating-correlated-smds/</a>.
+</div>
+<div id="ref-rcoreteam2022" class="csl-entry" role="listitem">
+R Core Team. 2022. <em>R: A Language and Environment for Statistical Computing</em>. Vienna, Austria: R Foundation for Statistical Computing. <a href="https://www.R-project.org/">https://www.R-project.org/</a>.
+</div>
+<div id="ref-rathjeAccuracySocialMotivations2023" class="csl-entry" role="listitem">
+*Rathje, Steve, Jon Roozenbeek, Jay J. Van Bavel, and Sander Van Der Linden. 2023. <span>“Accuracy and Social Motivations Shape Judgements of (Mis)information.”</span> <em>Nature Human Behaviour</em>, March. <a href="https://doi.org/10.1038/s41562-023-01540-w">https://doi.org/10.1038/s41562-023-01540-w</a>.
+</div>
+<div id="ref-rathje2023" class="csl-entry" role="listitem">
+Rathje, Steve, Jon Roozenbeek, Jay J. Van Bavel, and Sander Van Der Linden. 2023. <span>“Accuracy and Social Motivations Shape Judgements of (Mis)information.”</span> <em>Nature Human Behaviour</em>, March. <a href="https://doi.org/10.1038/s41562-023-01540-w">https://doi.org/10.1038/s41562-023-01540-w</a>.
+</div>
+<div id="ref-roozenbeekSusceptibilityMisinformationConsistent2022" class="csl-entry" role="listitem">
+*Roozenbeek, Jon, Rakoen Maertens, Stefan M Herzog, Michael Geers, Ralf Kurvers, and Mubashir Sultan. 2022. <span>“Susceptibility to Misinformation Is Consistent Across Question Framings and Response Modes and Better Explained by Myside Bias and Partisanship Than Analytical Thinking.”</span> <em>Judgment and Decision Making</em> 17 (3): 27.
+</div>
+<div id="ref-roozenbeekSusceptibilityMisinformationCOVID192020" class="csl-entry" role="listitem">
+Roozenbeek, Jon, Claudia R. Schneider, Sarah Dryhurst, John Kerr, Alexandra L. J. Freeman, Gabriel Recchia, Anne Marthe van der Bles, and Sander van der Linden. 2020. <span>“Susceptibility to Misinformation about COVID-19 Around the World.”</span> <em>Royal Society Open Science</em> 7 (10): 201199. <a href="https://doi.org/10.1098/rsos.201199">https://doi.org/10.1098/rsos.201199</a>.
+</div>
+<div id="ref-rosenzweigHappinessSurpriseAre2021" class="csl-entry" role="listitem">
+*Rosenzweig, Leah R., Bence Bago, Adam J. Berinsky, and David G. Rand. 2021. <span>“Happiness and Surprise Are Associated with Worse Truth Discernment of COVID-19 Headlines Among Social Media Users in Nigeria.”</span> <em>Harvard Kennedy School Misinformation Review</em>, August. <a href="https://doi.org/10.37016/mr-2020-75">https://doi.org/10.37016/mr-2020-75</a>.
+</div>
+<div id="ref-rossFakeNewsSocial2018" class="csl-entry" role="listitem">
+*Ross, Björn, Jennifer Heisel, Anna-Katharina Jung, and Stefan Stieglitz. 2018. <span>“Fake News on Social Media: The (In)Effectiveness of Warning Messages.”</span>
+</div>
+<div id="ref-rossFakeNewsAnalytic2021" class="csl-entry" role="listitem">
+*Ross, Robert M, David G Rand, and Gordon Pennycook. 2021. <span>“Beyond <span>“</span>Fake News<span>”</span>: Analytic Thinking and the Detection of False and Hyperpartisan News Headlines.”</span> <em>Judgment and Decision Making</em> 16 (2): 22.
+</div>
+<div id="ref-rossarguedasSnapJudgementsHow2022" class="csl-entry" role="listitem">
+Ross Arguedas, A., Sumitra Badrinathan, Camila Mont’Alverne, Benjamin Toff, Richard Fletcher, and R. Nielsen. 2022. <span>“Snap Judgements: How Audiences Who Lack Trust in News Navigate Information on Digital Platforms.”</span>
+</div>
+<div id="ref-schulzAreNewsOutlets2020" class="csl-entry" role="listitem">
+Schulz, Anne, Richard Fletcher, and Marina Popescu. 2020. <span>“Are News Outlets Viewed in the Same Way by Experts and the Public? A Comparison Across 23 European Countries.”</span> <em>Reuters Institute for the Study of Journalism</em>.
+</div>
+<div id="ref-shirikovFakeNewsAll2024" class="csl-entry" role="listitem">
+Shirikov, Anton. 2024. <span>“Fake News for All: How Citizens Discern Disinformation in Autocracies.”</span> <em>Political Communication</em> 41 (1): 4565. <a href="https://doi.org/10.1080/10584609.2023.2257618">https://doi.org/10.1080/10584609.2023.2257618</a>.
+</div>
+<div id="ref-smelterPicturesRepeatedExposure2020" class="csl-entry" role="listitem">
+*Smelter, Thomas J., and Dustin P. Calvillo. 2020. <span>“Pictures and Repeated Exposure Increase Perceived Accuracy of News Headlines.”</span> <em>Applied Cognitive Psychology</em> 34 (5): 1061–71. <a href="https://doi.org/10.1002/acp.3684">https://doi.org/10.1002/acp.3684</a>.
+</div>
+<div id="ref-stagnaroIncreasingAccuracyMotivations2023" class="csl-entry" role="listitem">
+*Stagnaro, Michael, Sophia Pink, David G. Rand, and Robb Willer. 2023. <span>“Increasing Accuracy Motivations Using Moral Reframing Does Not Reduce Republicans<span>’</span> Belief in False News.”</span> <em>Harvard Kennedy School Misinformation Review</em>, November. <a href="https://doi.org/10.37016/mr-2020-128">https://doi.org/10.37016/mr-2020-128</a>.
+</div>
+<div id="ref-streetSourceTruthBias2015" class="csl-entry" role="listitem">
+Street, Chris N. H., and Jaume Masip. 2015. <span>“The Source of the Truth Bias: Heuristic Processing?”</span> <em>Scandinavian Journal of Psychology</em> 56 (3): 254–63. <a href="https://doi.org/10.1111/sjop.12204">https://doi.org/10.1111/sjop.12204</a>.
+</div>
+<div id="ref-sultanTimePressureReduces2022a" class="csl-entry" role="listitem">
+*Sultan, Mubashir, Alan N. Tump, Michael Geers, Philipp Lorenz-Spreen, Stefan M. Herzog, and Ralf H. J. M. Kurvers. 2022. <span>“Time Pressure Reduces Misinformation Discrimination Ability but Does Not Alter Response Bias.”</span> <em>Scientific Reports</em> 12 (1): 22416. <a href="https://doi.org/10.1038/s41598-022-26209-8">https://doi.org/10.1038/s41598-022-26209-8</a>.
+</div>
+<div id="ref-tappinBayesianBiasedAnalytic2020" class="csl-entry" role="listitem">
+Tappin, Ben M., Gordon Pennycook, and David G. Rand. 2020. <span>“Bayesian or Biased? Analytic Thinking and Political Belief Updating.”</span> <em>Cognition</em> 204 (November): 104375. <a href="https://doi.org/10.1016/j.cognition.2020.104375">https://doi.org/10.1016/j.cognition.2020.104375</a>.
+</div>
+<div id="ref-troucheVigilantConservatismEvaluating2018" class="csl-entry" role="listitem">
+Trouche, Emmanuel, Petter Johansson, Lars Hall, and Hugo Mercier. 2018. <span>“Vigilant Conservatism in Evaluating Communicated Information.”</span> Edited by Alexander N. Sokolov. <em>PLOS ONE</em> 13 (1): e0188825. <a href="https://doi.org/10.1371/journal.pone.0188825">https://doi.org/10.1371/journal.pone.0188825</a>.
+</div>
+<div id="ref-ulusoyFloodingZoneHow2021" class="csl-entry" role="listitem">
+Ulusoy, Ezgi, Dustin Carnahan, Daniel E. Bergan, Rachel C. Barry, Siyuan Ma, Suhwoo Ahn, and Johnny McGraw. 2021. <span>“Flooding the Zone: How Exposure to Implausible Statements Shapes Subsequent Belief Judgments.”</span> <em>International Journal of Public Opinion Research</em> 33 (4): 856–72.
+</div>
+<div id="ref-vanduynPrimingFakeNews2019" class="csl-entry" role="listitem">
+Van Duyn, Emily, and Jessica Collier. 2019. <span>“Priming and Fake News: The Effects of Elite Discourse on Evaluations of News Media.”</span> <em>Mass Communication and Society</em> 22 (1): 29–48. <a href="https://doi.org/10.1080/15205436.2018.1511807">https://doi.org/10.1080/15205436.2018.1511807</a>.
+</div>
+<div id="ref-viechtbauer_conducting_2010" class="csl-entry" role="listitem">
+Viechtbauer, Wolfgang. 2010. <span>“Conducting Meta-Analyses in <em>r</em> with the <strong>Metafor</strong> Package.”</span> <em>Journal of Statistical Software</em> 36 (3). <a href="https://doi.org/10.18637/jss.v036.i03">https://doi.org/10.18637/jss.v036.i03</a>.
+</div>
+<div id="ref-vosoughiSpreadTrueFalse2018a" class="csl-entry" role="listitem">
+Vosoughi, Soroush, Deb Roy, and Sinan Aral. 2018. <span>“The Spread of True and False News Online.”</span> <em>Science</em> 359 (6380): 1146–51. <a href="https://doi.org/10.1126/science.aap9559">https://doi.org/10.1126/science.aap9559</a>.
+</div>
+<div id="ref-wickham2019" class="csl-entry" role="listitem">
+Wickham, Hadley, Mara Averick, Jennifer Bryan, Winston Chang, Lucy D’Agostino McGowan, Romain François, Garrett Grolemund, et al. 2019. <span>“Welcome to the Tidyverse.”</span> <em>Journal of Open Source Software</em> 4 (43): 1686. <a href="https://doi.org/10.21105/joss.01686">https://doi.org/10.21105/joss.01686</a>.
+</div>
+<div id="ref-winterDontStopBelieving2024" class="csl-entry" role="listitem">
+*Winter, Stephan, Sebastián Valenzuela, Marcelo Luis Barbosa Santos, Tobias Schreyer, Lena Iwertowski, and Tobias Rothmund. n.d. <span>“(Don<span>’</span>t) Stop Believing: A Signal Detection Approach to Risk and Protective Factors for Engagement with Politicized (Mis)information in Social Media.”</span> <a href="https://doi.org/10.31234/osf.io/84c36">https://doi.org/10.31234/osf.io/84c36</a>.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../trust_science_france/trust_science_france.html" class="pagination-link" aria-label="The French trust more the sciences they perceive as precise and consensual">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">The French trust more the sciences they perceive as precise and consensual</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../references.html" class="pagination-link" aria-label="References">
+        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/jjallaire/hopr/edit/main/meta_news_judgement/meta_news_judgement.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div></div></footer></body></html>

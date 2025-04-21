@@ -1,0 +1,471 @@
+---
+author:
+  - name: Jan Pfänder
+  - name: Hugo Mercier
+abstract: >
+  Past research has shown that in the US, people’s trust in science varies considerably between disciplines. Here, we show that this is the case also for France: A representative sample of the French population (N = 1,012) trusted researchers in biology and physics more than researchers studying climate science, economics, or sociology. We further show that trust differences within and between disciplines are associated with perceptions of consensus and precision: the more precise and consensual people perceive findings of a discipline to be, the more they tend to trust it. While these findings remain correlational, they are predicted by the rational impression account of trust in science, and they could have practical implications in terms of science communication.
+doi: 10.31219/osf.io/k9m6e_v1
+---
+
+# The French trust more the sciences they perceive as precise and consensual
+
+```{r setup, include=FALSE}
+## Knitr options
+knitr::opts_chunk$set(
+  echo = FALSE, warning = FALSE, message = FALSE,
+  fig.path = "output/figures/",
+  cache.path = "output/_cache/",
+  fig.process = function(x) {  ## Remove "-1" from figure names
+    x2 = sub('-\\d+([.][a-z]+)$', '\\1', x)
+    if (file.rename(x, x2)) x2 else x
+  },
+  options(scipen = 99999999)  ## Prevent scientific notation
+)
+```
+
+```{r packages, include=FALSE}
+## load required packages
+library("tidyverse")   ## data wrangling and visualisation
+library("broom")       ## extracting data from model fits 
+library("broom.mixed") ## extracting data from mixed models
+library("kableExtra")  ## also for tables
+library("modelsummary") ## for regression tables
+library(gtsummary)
+library(flextable)
+library(tinytable)
+library(gt)
+library(labelled)  ## For adding and extracting labels
+library(broom.mixed)
+library(broom)
+library(lmerTest)
+library(ggrepel)
+library(patchwork)
+library(ggpubr)
+library(wesanderson) ## colours
+library(gghalves) ## for plots
+```
+
+```{r functions}
+## load functions
+source("functions/functions.R")
+```
+
+```{r data}
+
+## read data
+data_wide <- readRDS("data/cleaned_wide.rds")
+data_long <- readRDS("data/cleaned_long.rds")
+
+## for the main analysis, we use the composite measure of trust in scientists in general, instead of the single item measure 
+data_long <- data_long %>% 
+  ## make sure to use the composite trust measure for trust in general, keep the 
+  ## single item measure (the only available) for the specific disciplines
+  mutate(trust = ifelse(discipline == "general", trust_composite, trust)) 
+
+
+## calculate models
+consensus_models <- calculate_models("consensus") 
+precision_models <- calculate_models("precision") 
+
+## as lists
+consensus_models_list <- calculate_models("consensus", return_as = "raw")
+precision_models_list <- calculate_models("precision", return_as = "raw")
+
+## exploratory analysis: differences in consensus vs. precision
+precision_vs_consensus_data <- data_long |> 
+  pivot_longer(cols = c(precision, consensus), 
+               names_to = "variable", 
+               values_to = "score") 
+
+precision_vs_consensus_model <- lmer(score ~ variable + (1 | id) + (1 | discipline), 
+                                     data = precision_vs_consensus_data |> 
+                                       filter(discipline != "general")) |> 
+  tidy(conf.int = TRUE) |> 
+  mutate(model = "precision_vs_consensus")
+
+## make a list for inline reporting
+descriptives <- list(
+  n_subj = n_distinct(data_wide$ResponseId), 
+  date = data_wide |> 
+    summarise(min_date = min(date), 
+              max_date = max(date)),
+  consensus = text_ready(consensus_models),
+  precision = text_ready(precision_models),
+  trust_by_discipline = data_long |> 
+    group_by(discipline) |> 
+    summarize(mean_trust = mean(trust, na.rm = TRUE), 
+              sd_trust = sd(trust, na.rm = TRUE),
+    ) |> 
+    rounded_numbers() %>%
+    split(.$discipline), 
+  precision_vs_consensus = text_ready(precision_vs_consensus_model)
+)
+
+```
+
+::: {.callout-note}
+#### available as a preprint here: 
+
+Pfänder, J., & Mercier, H. (2025). *The French trust more the sciences they perceive as precise and consensual.* [https://doi.org/10.31219/osf.io/k9m6e_v1](https://doi.org/10.31219/osf.io/k9m6e_v1)
+
+:::
+
+## Introduction
+
+Past research has shown that in the US, people’s trust in science varies considerably between disciplines. For example, @altenmullerExplainingPolarizedTrust2024 found that among 20 different scientific disciplines, participants trusted (for instance) mathematicians, physicists and biologists more than climate scientists or historians, who in turn were more trusted than economists or political scientists. Analyzing trust in 45 different disciplines, @gligoricHowSocialEvaluations2024 found that participants trusted neuroscientists the most, closely followed by various specialists in physics and biology. Psychologists, sociologists, economists and political scientists were trusted less.
+
+Several explanations have been put forward to account for these differences. @altenmullerExplainingPolarizedTrust2024 showed that people assign different political inclinations to scientists in different disciplines. For example, people consider climate scientists to be liberal while they tended to see economists as more conservative (although all scientists of all disciplines were perceived to be rather liberal, with some as disciplines seen as moderate, but none as clearly conservative). Conservative participants trusted conservative scientists more and liberal participants would trust liberal scientists more. @gligoricHowSocialEvaluations2024 have shown that people perceive some scientists–such as physicists–as more competent (than other scientists), while some–such as zoologists–as warmer, with both dimensions contributing to overall trust [see also @fiskeGainingTrustWell2014]. Laypeople also appear to believe that some disciplines are more ‘scientific’ than others–for example physics and biology by comparison with economics or sociology [@gauchatCulturalCognitiveMappingScientific2018]. On the whole, these beliefs about how scientific a discipline is track how much people trust it. However, it’s unclear what leads to these beliefs in the first place.
+
+The current research makes two contributions. First, past research on trust differences between scientific disciplines has focused on the US. We seek to extend the findings above to a different country: France. Although we expect to see broadly similar patterns, some differences with US results might also be obtained, for instance with regards to climate science, which tends to be particularly polarizing in the US [@smithPolarisationClimateEnvironmental2024; @huangAmericansAreLess2021].
+
+Second, we seek to better understand why some disciplines are more trusted than others, in particular by relying on the rational impression account of trust in science. This account suggests that people come to trust science because they are impressed by scientific findings, and that even if they then forget the specific findings, the impression of competence and trust persists [@pfanderTrustingForgettingImpressive2025]. Different features of a scientific result can make it impressive: for instance, how difficult the objects being studied are to perceive (elementary particles, distant galaxies) and to understand (the human brain). However, there are two dimensions that should make scientific results more impressive across the board: being precise, and being consensual. All else being equal, providing a more precise estimate or understanding of one’s object of study should be deemed more impressive–compare someone who tells you the universe is several billion years old, versus someone who tells you it is 13.7 billion years old. However, precision is only impressive if it is accurate–saying that the big bang happened on a Tuesday at 3.35pm is precise, but implausibly precise. What makes the figure of 13.7 billion years plausible, for someone who doesn’t evaluate the relevant evidence first-hand? The fact that relevant scientists agree on this figure [@cartwrightTangleScienceReliability2022, @vaupoticTrustScienceScientists2021]. Even outside of a scientific context, people appear to have that intuition: people who converge more precisely on an estimate are deemed more likely to be correct, and more competent [@pfanderHowWiseCrowd2025].
+
+If people trust more scientific results they deem more impressive, and that to be impressive a result must be precise and consensual, the following two hypotheses should be true (both across and within disciplines, as well as for science in general):
+
+
+>H1: People trust scientists more when they are perceived as more consensual.
+
+>H2: People trust scientists more when they are perceived as more precise.
+
+
+The present study has been conducted alongside a manylabs project on trust in science [@colognaTrustScientistsTheir2025; @medePerceptionsScienceScience2025]. In addition to the main survey identical in all countries, we asked a representative sample of the French population about their trust in different scientific disciplines, as well as their impressions of these disciplines in terms of precision and consensus. Unless it is mentioned otherwise, the analyses (along with the hypotheses and materials) were pre-registered (https://osf.io/t6cbw). All data and code are publicly available via this article’s [OSF project page](https://osf.io/u8f3v/) (https://osf.io/u8f3v/).
+
+## Method
+
+### Participants
+
+We recruited a sample of `r descriptives$n_subj` participants representative of the French population (see @tbl-demographics)[^1]. Participants were recruited from online panels by the market research company *Bilendi & respondi*. The survey was programmed with the survey software *Qualtrics*. Participants received vouchers or credit points for finishing the full survey. Participants had to be at least 18 years old and agree with the terms and conditions of the consent form. We excluded participants who failed to pass at least one of two attention checks, the first one consisting of of writing “213” into a text box at the beginning of the survey, the second of of selecting “strongly disagree” for an extra item in a scale of science-related populist attitudes towards the middle of the survey [for more details on the data collection, see @medePerceptionsScienceScience2025]. Data was collected between `r descriptives$date$min_date` and `r descriptives$date$max_date`.
+
+[^1]: Note that this is half of the participants of the overall French sample in the manylabs study [@medePerceptionsScienceScience2025]. That is because the sample was (randomly) split into two additional question conditions, among one of which the items used in the present article
+
+```{r}
+#| label: tbl-demographics
+#| tbl-cap: Summary table of sample demographics
+#| ft.align: left
+#| apa-twocolumn: true
+
+demographics <- c("gender", "age", "education", "income", "residence", "religious")
+
+## set gtsummary themes
+## gtsummary::reset_gtsummary_theme()
+#theme_gtsummary_journal(journal = "nejm", set_theme = TRUE)
+
+## create demographics table
+table <- data_wide %>%
+  select(all_of(demographics)) |> 
+  rename_with(~ str_to_title(.), all_of(demographics))  %>%
+  tbl_summary(
+    type = all_continuous() ~ "continuous2",
+    statistic = list(
+      all_continuous() ~ c(
+        "{mean} ({sd})",
+        "{median}",
+        "{min}, {max}"
+      ),
+      all_categorical() ~ "{n} ({p}%)"
+    ),
+    digits = list(all_continuous() ~ 1),
+    missing = "no",
+  ) %>%
+  bold_labels() %>%
+  modify_header(
+    label = "",
+    all_stat_cols() ~ "**{level}**, {n} ({style_percent(p)}%)"
+  ) %>%
+  gtsummary::as_flex_table() %>%
+  fontsize(size = 9, part = "all") 
+  ## width(width = 1.7)  ## Set width to match one APA column
+
+table
+```
+
+### Measures
+
+The complete questionnaires in English and French are available on the OSF project page. Here, we present only the measures used for the study at hand.
+
+#### Trust in scientists in general
+
+To measure trust in scientists in general, we follow @medePerceptionsScienceScience2025 who use a composite measure of twelve questions that are based on @besleyReassessingVariablesUsed2021a and cover four essential dimensions of trust in scientists: competence, integrity, benevolence, and openness (see @tbl-trust-measures). For more information on the psychometric properties of the trustworthiness scale, see @medePerceptionsScienceScience2025.
+
+Using this scale presents a deviation from the preregistration, in which we had mentioned building a composite trust measure based on the benevolence and competence dimensions only. Since the pre-registration, however, the more faceted measure has been well validated and it would have been arbitrary to rely on only two dimensions. For full transparency, we show that all analyses replicate using our preregistered, reduced trust measure (@sec-models-preregistered, @tbl-regression-consensus-preregistered and @tbl-regression-precision-preregistered). We also replicate our findings using the same single item trust measure we use to assess trust in scientists of specific disciplines (@sec-models-single, @tbl-regression-consensus-single and @tbl-regression-precision-single).
+
+#### Perceptions of scientists across different disciplines
+
+To measure trust in scientists across disciplines, participants were asked "How much do you trust the researchers working in these disciplines? Biology/Physics/Climate science/ Economics/Sociology/Science in general \[1 = Do not trust at all, 5 = Trust very much\]". We proceeded similarly for perceived precision ("How precise do you think the results obtained by researchers in these disciplines are? \[1 = Not precise at all, 5 = Extremely precise\]") and consensus ("How much do you think researchers in these disciplines agree on fundamental findings? \[1 = They do not agree at all, 5 = They agree very much\]").
+
+### Procedure
+
+Participants first filled out a questionnaire containing 111 variables from the main manylabs survey [@medePerceptionsScienceScience2025], among which the questions about the trustworthiness of scientists in general. After that, they responded to the questions about differences between scientific disciplines.
+
+## Results
+
+@fig-summary provides an overview of the results. On average, participants trusted scientists in general above the scale midpoint (of 3, mean = `r descriptives$trust_by_discipline$general$mean_trust`, sd = `r descriptives$trust_by_discipline$general$sd_trust`). They tended to trust biologists most (mean = `r descriptives$trust_by_discipline$biology$mean_trust`, sd = `r descriptives$trust_by_discipline$biology$sd_trust`), followed by physicists (mean = `r descriptives$trust_by_discipline$physics$mean_trust`, sd = `r descriptives$trust_by_discipline$physics$sd_trust`) and climate scientists (mean = `r descriptives$trust_by_discipline$climate$mean_trust`, sd = `r descriptives$trust_by_discipline$climate$sd_trust`). Below the score of trust in scientists in general was trust in sociologists (mean = `r descriptives$trust_by_discipline$sociology$mean_trust`, sd = `r descriptives$trust_by_discipline$sociology$sd_trust`) and economists (mean = `r descriptives$trust_by_discipline$economics$mean_trust`, sd = `r descriptives$trust_by_discipline$economics$sd_trust`).
+
+To test the hypotheses we calculated three different types of models, all with trust as an outcome variable and either precision or consensus as predictor variable. The first type of model assessed associations of these three variables across all disciplines. Measures for all the scientific disciplines were pooled together and mixed effects models with random intercept and slope for participants were conducted. These models account for the fact that each participant provides several ratings, but they do not differentiate between disciplines. The second type of model assessed associations within disciplines. We added random effects for discipline to the previous models, both for the intercept and the slope. These models provide an average estimate of the within-discipline association. Additionally, they provide an estimate of how much this association varies between disciplines (the standard deviation of the random effects). For these two kinds of models, we restricted the data to only discipline-specific measures, excluding perceptions of scientists in general. The third type of model was used to measure the associations regarding science in general. For this purpose, we relied on perceptions of science in general, using the composite measure of trust described above. Since for perceptions of trust, precision, and consensus of scientists in general there was only one measure per participant, we calculated simple linear regression models.
+
+Pooling across disciplines, people tended to trust the scientists of these disciplines more, the more they perceived the results of the scientists' discipline to be precise ($\hat{\beta}_{\text{across disciplines}}$ = `r descriptives$precision$across_disciplines$precision$estimate`, p `r descriptives$precision$across_disciplines$precision$p.value`), and consensual ($\hat{\beta}_{\text{across disciplines}}$ = `r descriptives$consensus$across_disciplines$consensus$estimate`, p `r descriptives$consensus$across_disciplines$consensus$p.value`). These results hold when looking at within discipline variation (precision: $\hat{\beta}_{\text{within disciplines}}$ = `r descriptives$precision$within_disciplines$precision$estimate`, p `r descriptives$precision$within_disciplines$precision$p.value`; consensus: $\hat{\beta}_{\text{within disciplines}}$ = `r descriptives$consensus$within_disciplines$consensus$estimate`, p `r descriptives$consensus$within_disciplines$consensus$p.value`). We also obtain a statistically significant associations when focusing on perceptions of scientists in general (precision: $\hat{\beta}_{\text{general}}$ = `r descriptives$precision$science_in_general_only$precision$estimate`, p `r descriptives$precision$science_in_general_only$precision$p.value`; consensus: $\hat{\beta}_{\text{general}}$ = `r descriptives$consensus$science_in_general_only$consensus$estimate`, p `r descriptives$consensus$science_in_general_only$consensus$p.value`).
+
+```{r}
+#| label: fig-summary
+#| fig-cap: "**A.** Plots show the association of consensus (left) and precision (right) with trust between the different disciplines. Dots represent average scores. For reference, we adde the score of scientists in general ('general'). **B.** Plots show the same associations but separately for all disciplines. Each dot represents a participant. Note that all scores are integer values ranging from 1 to 5, but dots are jittered within their respective quadrant for better visibility."
+#| fig-width: 8
+#| fig-height: 8
+
+## make between plots
+consensus_plot_between <- plot_between(data_long, "consensus") + 
+  rremove("xlab") +
+  rremove("ylab") +
+  labs(title = "Between Disciplines", tag = "A")
+
+precision_plot_between <- plot_between(data_long, "precision") + 
+  rremove("xlab") +
+  rremove("ylab")
+
+## make within plots
+consensus_plot_within <- plot_within(data_long, consensus) +
+  guides(fill = "none") +
+  rremove("ylab") +
+  labs(title = "Within Disciplines", tag = "B")
+
+precision_plot_within <- plot_within(data_long, precision) +
+  rremove("ylab")
+
+## Patchwork layout
+composite_plot <- (consensus_plot_between + precision_plot_between) / 
+                    (consensus_plot_within + precision_plot_within) 
+
+wrap_elements(composite_plot) +
+  plot_layout(axis_titles = "collect") +
+  labs(tag = "Trust") +
+  theme(
+    plot.tag = element_text(size = 12, angle = 90, face = "bold"),
+    plot.tag.position = "left"
+  )
+```
+
+In an exploratory, non-preregistered analysis, we investigated whether people's perceptions of precision and consensus differed. To do so, we pooled all consensus and precision ratings participants gave for the different disciplines (but not science in general) in a long-format data. We then ran a mixed model of a binary predictor variable (indicating whether precision of consensus was measured), on the outcome score. We added by-participant and by-discipline random intercepts. Since both variables were assessed on a 5-point Likert scale, we did not standardize the scores. We find that participants, on average, rated scientists as slightly more precise than consensual ($\hat{\beta}_{\text{precision vs. consensus}}$ = `r descriptives$precision_vs_consensus$precision_vs_consensus$variableprecision$estimate`, p `r descriptives$precision_vs_consensus$precision_vs_consensus$variableprecision$p.value`; on a scale from 1 to 5).
+
+## Discussion and conclusion
+
+French participants trust more some scientific disciplines (biology and physics) than others (economics and sociology), with climate science falling in between. This is in line with the pattern observed in the US [@altenmullerExplainingPolarizedTrust2024, @gligoricHowSocialEvaluations2024], suggesting some degree of cross-cultural robustness to how scientific disciplines are perceived.
+
+The results also show that disciplines perceived as more precise and more consensual tend to be trusted more. We take this to support the rational impression account of trust in science, since this account predicts that science is trusted because it generates impressive knowledge, and that in turn precise and consensual knowledge tends to be more impressive. In this account, it would be (inter alia) because participants perceive a scientific discipline as precise and consensual that they trust it. However, the main issue with the current results is that they are only correlational. The causality could thus e.g. reversed: people who, for other reasons, trust a scientific discipline might then say that it is more precise and more consensual, since they are both positive traits–a type of halo effect [for a review, see @forgasHaloEffects2016].
+
+Although it is impossible to rule out that the answers are partly driven by a halo effect, two lines of arguments suggest it would not account for all of the results. First, it has been shown that people have different impressions of the features of different disciplines, such that for instance they can deem rocket scientists (compared to other scientists) to be competent but less warm, while zoologists are thought to be warmer but less competent [@gligoricHowSocialEvaluations2024]. Similarly, in the present results for instance, participants deemed scientists to be slightly more precise than consensual, on average. Second, experiments demonstrating causal effects of consensus and precision (or impressiveness more generally) lend credence to a causal account of the present findings. Many experiments have shown that, as a rule, telling participants that a given scientific fact is consensual (e.g. the existence of anthropogenic climate change) increases acceptance of that belief [@vanstekelenburgScientificConsensusCommunicationContested2022; @veckalov27countryTestCommunicating2024]. In turn, it is plausible that accepting that belief would lead to higher ratings of competence and trust of climate scientists. As for precision, experiments have shown that people tend to trust more a discipline after having been told of impressive results from that discipline–impressiveness being the broader trait relevant for the rational impression account, but it was also operationalized in part as precision in these experiments [@pfanderTrustingForgettingImpressive2025].
+
+Besides the correlational nature of the data, the current study is also limited in only having recruited French participants, and not having questions about a broader range of disciplines, or more narrow subdisciplines.
+
+The current results, and the rational impression account more generally, suggest ways to communicate about science that could affect trust in science in the public. Many studies have already attempted to increase the perception of consensus in specific scientific facts [@vanstekelenburgScientificConsensusCommunicationContested2022]. However, communication could also stress how impressive some scientific disciplines are, for instance by stressing how precise some of their findings are. In the case of climate science, for examples, researchers have impressively precise findings, e.g. that over the past 485 million years, Earth’s average temperature has varied between 11° and 36°C [@judd485millionyearHistoryEarths2024].
+
+### Data availability
+
+Data is available on the [OSF project page](https://osf.io/u8f3v/) (https://osf.io/u8f3v/). 
+
+### Code availability
+
+The code used to create all results (including tables and figures) of this manuscript is also available on the [OSF project page](https://osf.io/u8f3v/) (https://osf.io/u8f3v/).
+
+### Competing interest
+
+The authors declare having no competing interests.
+
+## Appendix A 
+
+### Scale for measuring trust in scientists {#sec-trust-measures}
+
+```{r}
+#| label: tbl-trust-measures ## we can't use a label that starts with "tbl" since otherwise longtable won't work
+#| tbl-cap: Items of the scale assessing general trust in scientists
+#| ft.align: left
+#| disable-apaquarto-processing: true
+#| apa-twocolumn: true
+
+## Select relevant variables for trust constructs
+trust_data <- data_wide %>%
+  select(starts_with("openness_") | starts_with("integrity_") | starts_with("competence_") | starts_with("benevolence_"))
+
+## Extract variable labels
+var_labels <- var_label(trust_data)
+
+## Extract value labels
+value_labels <- lapply(trust_data, function(x) if (is.labelled(x)) val_labels(x) else NULL)
+
+## Calculate summary statistics
+summary_stats <- trust_data %>%
+  summarise(across(everything(), list(
+    Mean = ~mean(. , na.rm = TRUE),
+    SD = ~sd(. , na.rm = TRUE)
+  ), .names = "{col}_{fn}")) %>%
+  pivot_longer(cols = everything(), names_to = c("Variable", "Statistic"), names_pattern = "(.*)_(.*)", values_to = "Value") %>%
+  pivot_wider(names_from = "Statistic", values_from = "Value") |> 
+  rounded_numbers() |> 
+  mutate(`Mean (SD)` = paste0(Mean, " (", SD, ")")) |> 
+  select(-Mean, -SD)
+
+## Combine variable labels and summary stats into one overview table
+overview_table <- tibble(
+  Variable = names(var_labels),
+  Question = purrr::map_chr(var_labels, ~ .),  ## Use purrr::map_chr to extract labels as character
+  `Answer Options` = sapply(names(var_labels), function(v) {
+    if (!is.null(value_labels[[v]])) {
+      paste(names(value_labels[[v]]), "=", value_labels[[v]], collapse = ", ")
+    } else {
+      NA
+    }
+  })
+) %>%
+  left_join(summary_stats, by = c("Variable" = "Variable"))
+
+## Print the table with row titles and summary statistics
+overview_table %>%
+  select(-Variable, ) |>
+  kable(booktabs = TRUE, longtable = TRUE) 
+
+## Unfortunately, in the current template version, the options below won't work
+  ## kable_paper(full_width = F) %>%
+  ## pack_rows("Openness", 1, 3) %>%
+  ## pack_rows("Integrity", 4, 6) %>%
+  ## pack_rows("Competence", 7, 9) %>%
+  ## pack_rows("Benevolence", 10, 12) |>
+  ## column_spec(1, width = "10em") %>%
+  ## column_spec(2, width = "10em") %>%
+  ## column_spec(3, width = "2em") %>%
+  ## column_spec(4, width = "2em")
+
+
+
+```
+
+
+## Appendix B 
+
+
+### Regression tables main article {#sec-models}
+
+@tbl-regression-consensus and @tbl-regression-precision show the regression tables for the results presented in the main article.
+
+```{r}
+#| label: tbl-regression-consensus 
+#| tbl-cap: Summary of mixed models with trust as outcome and consensus as predictor
+#| ft.align: left
+#| disable-apaquarto-processing: true
+#| apa-twocolumn: true
+modelsummary(
+  setNames(consensus_models_list, names(consensus_models_list)),
+  stars = TRUE,
+  output = "kableExtra"
+) 
+
+```
+
+```{r}
+#| label: tbl-regression-precision
+#| tbl-cap: Summary of mixed models with trust as outcome and precision as predictor
+#| ft.align: left
+#| disable-apaquarto-processing: true
+#| apa-twocolumn: true
+modelsummary(
+  setNames(precision_models_list, names(precision_models_list)),
+  stars = TRUE,
+  output = "kableExtra"
+) 
+
+```
+
+## Appendix C 
+
+### Regression tables preregistration {#sec-models-preregistered}
+
+```{r}
+## read data
+data_long <- readRDS("data/cleaned_long.rds")
+
+## for the this analysis, we use the preregistered composite measure of trust in scientists in general, instead of the single item measure 
+data_long <- data_long %>% 
+  ## make sure to use the preregistered composite trust measure for trust in general, keep the 
+  ## single item measure (the only available) for the specific disciplines
+  mutate(trust = ifelse(discipline == "general", trust_composite_reduced, trust)) 
+
+
+## calculate models as lists
+preregistered_consensus_models_list <- calculate_models("consensus", return_as = "raw")
+preregistered_precision_models_list <- calculate_models("precision", return_as = "raw")
+```
+
+
+As stated in the main article, we had preregistered using a composite measure of only the competence and the benevolence dimensions (see @tbl-trust-measures). We report the results of our models using this measure in @tbl-regression-consensus-preregistered and @tbl-regression-precision-preregistered. 
+
+```{r}
+#| label: tbl-regression-consensus-preregistered
+#| tbl-cap: Summary of mixed models with trust as outcome, as preregistered using benevolence and competence only, and consensus as predictor
+#| ft.align: left
+#| disable-apaquarto-processing: true
+#| apa-twocolumn: true
+modelsummary(
+  setNames(preregistered_consensus_models_list, names(consensus_models_list)),
+  stars = TRUE,
+  output = "kableExtra"
+) 
+
+```
+
+```{r}
+#| label: tbl-regression-precision-preregistered
+#| tbl-cap: Summary of mixed models with trust as outcome, as preregistered using benevolence and competence only, and precision as predictor
+#| ft.align: left
+#| disable-apaquarto-processing: true
+#| apa-twocolumn: true
+modelsummary(
+  setNames(preregistered_precision_models_list, names(precision_models_list)),
+  stars = TRUE,
+  output = "kableExtra"
+) 
+
+```
+
+## Appendix D 
+
+### Regression tables single-item general trust {#sec-models-single}
+
+```{r}
+## read data
+data_long <- readRDS("data/cleaned_long.rds")
+
+## for the this analysis, we use the single item measure 
+
+
+## calculate models as lists
+preregistered_consensus_models_list <- calculate_models("consensus", return_as = "raw")
+preregistered_precision_models_list <- calculate_models("precision", return_as = "raw")
+```
+
+We had also assessed trust in scientists in general via a single item ("How much do you trust the researchers working in these disciplines? Science in general \[1 = Do not trust at all, 5 = Trust very much\]"), along with the measures for the different scientific disciplines. In @tbl-regression-consensus-single and @tbl-regression-precision-single we report the results of our models when relying on this single-item trust question. 
+
+```{r}
+#| label: tbl-regression-consensus-single
+#| tbl-cap: Summary of mixed models with trust as outcome, using the single-item measure, and consensus as predictor
+#| ft.align: left
+#| disable-apaquarto-processing: true
+#| apa-twocolumn: true
+modelsummary(
+  setNames(preregistered_consensus_models_list, names(consensus_models_list)),
+  stars = TRUE,
+  output = "kableExtra"
+) 
+
+```
+
+```{r}
+#| label: tbl-regression-precision-single
+#| tbl-cap: Summary of mixed models with trust as outcome, using the single-item measure, and precision as predictor
+#| ft.align: left
+#| disable-apaquarto-processing: true
+#| apa-twocolumn: true
+modelsummary(
+  setNames(preregistered_precision_models_list, names(precision_models_list)),
+  stars = TRUE,
+  output = "kableExtra"
+) 
+
+```
+

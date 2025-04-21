@@ -1,0 +1,30 @@
+# R stuff
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+
+# knitr and caching stuff
+*_files
+*output
+data_from_papers/
+data_from_simulation/
+
+# file types
+*.docx
+*.log
+*.md
+*.html
+
+# but do track...
+!*.R 
+
+# add "simulation" scripts
+!*.Rmd
+
+# remove
+/no_git
+
+
+

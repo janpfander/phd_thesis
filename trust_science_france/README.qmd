@@ -1,0 +1,54 @@
+---
+format: gfm
+---
+
+<!-- README.md is generated from README.qmd. Please edit that file -->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-",
+  fig.retina = 3
+)
+
+yaml_metadata <- rmarkdown::yaml_front_matter(here::here("manuscript.qmd"))
+title <- yaml_metadata$title
+abstract <- yaml_metadata$abstract
+```
+
+# `r title`
+
+---
+
+## Abstract
+
+`r abstract`
+
+---
+
+## How to download and replicate
+
+To reproduce the findings and re-run the analysis, do the following:
+
+1. Download and install this repository. You can use GitHub to clone or fork the repository (see the green "Clone or download" button at the top of the GitHub page).
+2. Open `trust_science_france.Rproj` to open an [RStudio Project](https://r4ds.had.co.nz/workflow-projects.html).
+3. Within the RStudio Project, open the `manuscript.qmd` file and run it. 
+
+Please find the [session info below](#session-info).
+
+*Estimated installation time* : If you have R and Rstudio installed, then adding additional packages required in our R scripts is quick (a couple of minutes)
+
+*Estimated run time*: Rendering the `manuscript.qmd` document takes less than 1min on our machine (see [session info](#session-info))
+
+## Session info {#session-info}
+
+```{r, echo=FALSE}
+sessionInfo()
+```
+
+## Licenses
+
+**Text and figures:** All prose and images are licensed under Creative Commons ([CC-BY-4.0](http://creativecommons.org/licenses/by/4.0/)).
+
+**Code:** All code is licensed under the [MIT License](LICENSE.md).

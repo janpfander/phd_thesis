@@ -1,4 +1,8 @@
 # References {.unnumbered}
 
+::: {.callout-note}
+References preceeded by a '*' are studies included in the meta-analysis
+:::
+
 ::: {#refs}
 :::

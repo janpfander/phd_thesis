@@ -6,16 +6,20 @@ execute:
   freeze: auto
 
 book:
-  title: "A cognitive perspective on trust in science (PhD thesis)"
+  title: "A cognitive perspective on trust in science"
+  subtitle: "(PhD thesis)"
   author: "Jan Pfänder"
   date: "4/15/2025"
+  cover-image: cover/couverture.jpeg
   chapters:
     - index.qmd
-    - intro.qmd
     - summary.qmd
+    - intro.qmd
     - everyone_trusts_science_abit/everyone_trusts_science_abit.qmd
     - impressive_science/impressive_science.qmd
     - consensus_trust/consensus_trust.qmd
+    - trust_science_france/trust_science_france.qmd
+    - meta_news_judgement/meta_news_judgement.qmd
     - references.qmd
   search: true
   repo-url: https://github.com/jjallaire/hopr/
@@ -27,7 +31,11 @@ bibliography:
   - consensus_trust/references.bib  
   - everyone_trusts_science_abit/references.bib
   - impressive_science/references.bib  
-
+  - trust_science_france/bibliography.bib
+  # bibliography are in-text citations, references are studies included in meta-analysis
+  - meta_news_judgement/references.bib  
+  - meta_news_judgement/bibliography.bib 
+  
 format:
   html:
     theme:
@@ -35,6 +43,76 @@ format:
       - brand
   pdf:
     documentclass: scrreprt
+    
+    
+nocite: |
+  @aliFakeNewsFacebook2022
+  @allenScalingFactcheckingUsing2021
+  @altayPeopleAreSkeptical2023
+  @altayIfThisAccount2022
+  @altayImpactNewsMedia2022
+  @altayExposureHigherRates2024
+  @arecharUnderstandingCombattingMisinformation2023
+  @aslettOnlineSearchesEvaluate2024
+  @badrinathanEducativeInterventionsCombat2021
+  @bagoFakeNewsFast2020
+  @bagoEmotionMayPredict2022
+  @basolPsychologicalHerdImmunity2021
+  @brashierTimingMattersWhen2021
+  @bronsteinBeliefFakeNews2019
+  @bryanovWhatDrivesPerceptions2023
+  @chenWhatMakesNews2023
+  @claytonRealSolutionsFake2020
+  @diasEmphasizingPublishersDoes2020
+  @epsteinSocialMediaContext2023
+  @erlichProKremlinDisinformationEffective2023
+  @leeHowPoliticalIdentity2023
+  @faragoHungarianLazyBiased2023
+  @fazioCombatingMisinformationMegastudy2024
+  @garrettConservativesSusceptibilityPolitical2021
+  @gawronskiTruthSensitivityPartisan2023
+  @gottliebReducingMisinformationPolarized2022
+  @guessDigitalMediaLiteracy2020
+  @guessUnbundlingDigitalMedia2024
+  @hameleersMistakenlyMisinformedIntentionally2023
+  @clemmvonhohenbergTruthBiasLeft2023
+  @koetkeFallibilitySalienceIncreases2023
+  @krepsAssessingMisinformationRecall2023
+  @luhringEmotionsMisinformationStudies2023
+  @luoCredibilityPerceptionsDetection2022
+  @lutzkePrimingCriticalThinking2019
+  @lyonsReduceBlindSpots2024
+  @lyonsHealthMediaLiteracy2024
+  @maertensMisinformationSusceptibilityTest2024
+  @espinamairalInteractiveCrowdsourcingFactcheck2023
+  @martelRelianceEmotionPromotes2020
+  @modirrousta-galianWordlessWisdomDominant2024
+  @modirrousta-galianEffectsInductiveLearning2023
+  @mudaPeopleAreWorse2023
+  @oroszProsocialFakeNews2023
+  @pehlivanogluRoleAnalyticalReasoning2021
+  @pennycookPriorExposureIncreases2018
+  @pennycookLazyNotBiased2019
+  @pennycookWhoFallsFake2020
+  @pennycookFightingCOVID19Misinformation2020a
+  @pennycookPracticalGuideDoing2021
+  @pereiraInoculationReducesMisinformation2023
+  @arinAbilityDetectingWillingness2023
+  @oecdInternationalEffortUsing2022
+  @rathjeAccuracySocialMotivations2023
+  @roozenbeekSusceptibilityMisinformationCOVID192020
+  @roozenbeekSusceptibilityMisinformationConsistent2022
+  @rosenzweigHappinessSurpriseAre2021
+  @rossFakeNewsSocial2018
+  @rossFakeNewsAnalytic2021
+  @shirikovFakeNewsAll2024
+  @smelterPicturesRepeatedExposure2020
+  @stagnaroIncreasingAccuracyMotivations2023
+  @winterDontStopBelieving2024
+  @hlatkyUnintendedConsequencesRussian2024
+  @altayMediaLiteracyTips2024
+  @lyonsPartisanshipOlderAmericans2023
+  @sultanTimePressureReduces2022a
 
 
 

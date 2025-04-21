@@ -1,0 +1,924 @@
+---
+title: "Cleaning data"
+format: html
+---
+
+```{r packages, message=FALSE, warning=FALSE, include=FALSE}
+library(tidyverse)
+library(patchwork) # combine plots
+library(labelled)  # For adding and extracting labels
+```
+
+# Quality checks and removing NAs
+
+Read data.
+```{r, message=FALSE}
+# uses the csv file with numeric values as exported from Qualtrics
+d <- read_csv("data/qualtrics.csv")
+```
+
+```{r, include=FALSE}
+# inspect data
+names(d)
+head(d)
+```
+
+Delete empty observations in the first two rows. 
+
+```{r}
+# delete first two rows
+d <- d %>% slice(3:n())
+```
+
+## Attention checks
+
+First attention check
+
+```{r, echo=FALSE}
+# attention check number 1:
+
+# to see different answers given (i.e.levels), transform into factor
+d$attcheck_number <- as.factor(d$ATTCHECK_NUMBER)
+# check levels to see different answer types
+levels(d$attcheck_number) 
+knitr::kable(table(d$ATTCHECK_NUMBER, useNA = "always"))
+```
+
+Second attention check
+
+```{r}
+# attention check number 2:
+
+# to see different answers given (i.e.levels), transform into factor
+d$attcheck_res <- as.factor(d$ATTCHECK_RES)
+# check levels to see different answer types
+levels(d$attcheck_res) 
+knitr::kable(table(d$ATTCHECK_RES, useNA = "always"))
+```
+
+
+```{r, echo=FALSE}
+# make plot data
+plot_data_general <- d %>% 
+  mutate(
+    # create attention check 'failed' / 'passed` 
+    attcheck_number = tolower(attcheck_number),
+    attcheck_number = ifelse(
+    # make sure to count correct answers written in text as 'passed', too.
+    attcheck_number == "213" | str_detect(attcheck_number, "treize"), 
+    "passed", "failed"), 
+    attcheck_res  = ifelse(attcheck_res == 1, "passed", 
+                           "failed"), 
+    attention_checks = ifelse(attcheck_res == "failed" | attcheck_number == "failed", 
+                              "failed", "passed"), 
+    # code NAs as failed
+    attention_checks = ifelse(is.na(attention_checks), "failed", attention_checks)
+    )
+
+plot_data_detail <- plot_data_general %>% 
+  pivot_longer(starts_with("attcheck", ignore.case = FALSE), 
+               names_to = "attcheck_type", 
+               values_to = "attcheck_outcome") %>% 
+  # make sure NAs are coded as 'failed'
+  mutate(attcheck_outcome = ifelse(is.na(attcheck_outcome), "failed", 
+                                   attcheck_outcome)
+         ) %>% 
+  group_by(attcheck_type, attcheck_outcome) %>% 
+  summarise(n = n_distinct(ResponseId))
+
+# make graphs to vizalize
+attention_check_general <- ggplot(plot_data_general, aes(x = attention_checks, fill = attention_checks)) + 
+  geom_bar(position = "dodge") +
+  geom_text(aes(label = ..count..), stat = "count", position = position_dodge(width = 0.9), vjust = -0.1)  + 
+  labs(title = "Overall", x = NULL)
+
+attention_check_details <- ggplot(plot_data_detail, aes(x = attcheck_type, y= n,  fill = attcheck_outcome)) + 
+  geom_col(position = "dodge") + 
+  coord_flip() +
+  geom_text(aes(label = n), position = position_dodge(width = 0.9), vjust = 0.1) +
+  labs(title = "Per attention check", x = NULL)
+
+ggpubr::ggarrange(attention_check_general, attention_check_details, common.legend = TRUE, legend = "bottom")
+```
+
+```{r}
+# delete failed attention checks
+d <- d %>%
+  mutate(
+    attcheck_number = tolower(attcheck_number),
+    attcheck_number =
+      ifelse(attcheck_number == "213" | str_detect(attcheck_number, "treize"),
+             attcheck_number, NA),
+    attcheck_res  = ifelse(attcheck_res == 1,
+                           attcheck_res, NA)
+  )
+
+d <- d %>% 
+  drop_na(attcheck_number, attcheck_res)
+```
+
+There also appears to be one preview run included.
+```{r}
+table(d$DistributionChannel, useNA = "always")
+```
+
+We remove this run
+
+```{r}
+d <- d %>% 
+  mutate(DistributionChannel = ifelse(DistributionChannel == "preview", NA, DistributionChannel)) %>% 
+  drop_na(DistributionChannel)
+```
+
+### Response time.
+
+```{r, include=FALSE, echo=FALSE}
+# calculate response time
+time <- d %>% 
+  select(ResponseId, StartDate, EndDate) %>% 
+  mutate(time = difftime(EndDate, StartDate, units="mins"))
+
+# get measures of central tendency
+mean(time$time)
+median(time$time) 
+```
+
+```{r, echo=FALSE}
+# inspect graphically
+ggplot(time, aes(x = time)) +
+  geom_histogram() +
+  geom_vline(aes(xintercept = mean(time, na.rm=TRUE)), colour = "red") +
+  labs(title = "Time among respondents who passed \n all attention checks ", 
+       x = "time (in mins)") +
+  annotate("text", x = 2000, y = 300, label = paste("n =", nrow(time)))
+```
+
+```{r, echo=FALSE}
+# filter time
+time_reduced <- time %>% filter(time <= 60)
+
+# check without outlier
+ggplot(time_reduced, aes(x = time)) +
+  geom_histogram() +
+  geom_vline(aes(xintercept = mean(time, na.rm=TRUE)), colour = "red") + 
+  scale_x_continuous(breaks = seq(from = 0, to = 60, by = 5)) +
+  labs(title = "Time among respondents who passed \n all attention checks, removing those who took more than 1h", 
+       x = "time (in mins)") +
+  annotate("text", x = 40, y = 40, label = paste("n =", nrow(time_reduced)))
+```
+
+### Response date
+
+```{r, echo=FALSE}
+date <- ggplot(d, aes(x = as.factor(as.Date(StartDate)))) + 
+  geom_bar(position = "dodge") +
+  geom_text(aes(label = ..count..), stat = "count", position = position_dodge(), vjust = -0.1)  + 
+  labs(title = "Start date of survey, 
+       valid (i.e. passed attention checks) responses only", x = NULL) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+date
+```
+
+### Age
+
+```{r, echo=FALSE}
+# inspect graphically
+ggplot(d, aes(x = as.numeric(DEM_AGE))) +
+  geom_histogram() +
+  scale_x_continuous(breaks = seq(from = 0, to = 100, by = 5)) +
+  geom_vline(aes(xintercept = mean(as.numeric(DEM_AGE), na.rm=TRUE)), colour = "red") +
+  labs(title = "Age of respondents who passed \n all attention checks ", 
+       x = "age") +
+  annotate("text", x = 75, y = 100, label = paste("n =", nrow(d)))
+```
+
+# Specific checks for additional questions
+
+We recruited a total sample of ~2000 participants together as team France. Each of the 4 binomes added a set of questions. However, to not make the survey too long, we split our additional questions: Half of participants would be randomly assigned to one set of questions, the other half to the other.
+
+For our variables, check whether variable names match questions. 
+
+```{r, echo=FALSE, include=FALSE, message=FALSE}
+# check if questions correspond to variable name for a selection of variables
+knitr::kable(
+  # we have to read in the original data again since we deleted the first
+  # row with the question framing already
+  read_csv("data/qualtrics.csv") %>% 
+               select(starts_with("disciplines"), subjective_status) %>% 
+               slice(1) %>% 
+               pivot_longer(everything(), 
+                            names_to = "variable", 
+                            values_to = "question"), 
+             "html") %>% 
+  kableExtra::kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+### Scientific disciplines
+
+Check how many observations we have.
+
+```{r, include=FALSE, echo=FALSE}
+# Disciplines NA check
+disciplines_NA <- d %>% 
+  pivot_longer(cols = starts_with("disciplines"), names_to = "variable_discipline", 
+               values_to = "score", names_prefix = "disciplines_") %>% 
+  group_by(ResponseId) %>% 
+  summarise(sum_NA = sum(is.na(score))) 
+
+table(disciplines_NA$sum_NA)
+```
+
+```{r, echo=FALSE}
+disciplines_NA_plot <- ggplot(disciplines_NA, aes(x = as.factor(sum_NA))) + 
+  geom_bar(position = "dodge") +
+  geom_text(aes(label = ..count..), stat = "count", position = position_dodge(width = 0.9), vjust = -0.5) +
+  labs(title = "Number of NAs across the 18 discipline questions", 
+       x = "Total sum of NA's across all 18 questions")
+
+disciplines_NA_plot
+```
+
+We have 1008 valid answers and three people who have 1 NA value, and 1 person who has 13 NA values. 
+
+### Subjective status
+
+Check how many observations we have.
+
+```{r, include=FALSE, echo=FALSE}
+# Status NA check
+status_NA <- d %>% group_by(ResponseId) %>% 
+  summarize(sum_NA = sum(is.na(subjective_status))) %>% 
+    select(sum_NA) %>% 
+  mutate(sum_NA = ifelse(sum_NA == 1, "NA", "No NA"))
+
+table(status_NA$sum_NA)
+```
+
+```{r, echo=FALSE}
+status_NA_plot <- ggplot(status_NA, aes(x = sum_NA,  fill = sum_NA)) + 
+  geom_bar(position = "dodge") +
+  geom_text(aes(label = ..count..), stat = "count", position = position_dodge(width = 0.9), vjust = - 0.1) +
+  labs(title = "Number of NAs vs. No NAs for status question", x = NULL) + 
+  guides(fill = FALSE)
+
+status_NA_plot
+```
+
+For the status question, we have 1015 valid answers. 
+
+# Data cleaning
+
+```{r}
+# give it a nicer 'id' column
+d <- d %>% mutate(id = 1:nrow(d))
+```
+
+### Select valid participants for discipline questions
+
+Among the total sample, only half were randomly selected to answer the questions about the different scientific disciplines. We therefor limit the sample to those participants who saw these question. 
+
+As shown above, we want to exclude participants who have only NA responses. 
+
+```{r}
+# select participants to exclude
+participants_to_exclude <- d %>% 
+  pivot_longer(cols = starts_with("disciplines"), names_to = "variable_discipline", 
+               values_to = "score", names_prefix = "disciplines_") %>% 
+  group_by(ResponseId) %>% 
+  summarise(sum_NA = sum(is.na(score))) |> 
+  filter(sum_NA == 18) |> 
+  pull(ResponseId)
+
+# check
+length(participants_to_exclude)
+
+# subset the data
+d <- d |> filter(!ResponseId %in% participants_to_exclude)
+```
+
+### Benevolence of scientists
+
+The main survey has three items intended to capture the factor `benevolence`:
+
+-   `benevolence_concerned`(original survey coding: `TRUST_SCI_concerned`): "How concerned or not concerned are most scientists about people's wellbeing?" [1 = Not concerned, 2 = Somewhat not concerned, 3 = Neither concerned nor not concerned, 4 = Somewhat concerned, 5 = Very concerned]
+
+-   `benevolence_improve`(original survey coding: `TRUST_SCI_improve`): "How eager or uneager are most scientists to improve others' lives?" [1 = Very uneager, 2 = Somewhat uneager, 3 = Neither eager nor uneager, 4 = Somewhat eager, 5 = Very eager]
+
+-   `benevolence_otherinterest`(original survey coding: `TRUST_SCI_otherint`): "How considerate or inconsiderate are most scientists of others' interests?" [1 = Very inconsiderate, 2 = Somewhat inconsiderate, 3 = Neither considerate nor inconsiderate, 4 = Somewhat considerate, 5 = Very considerate]
+
+```{r}
+# do the re-naming and transform to numeric
+d <- d %>%
+  # syntax for rename() is new_name = old_name
+  rename(benevolence_concerned = TRUST_SCI_concerned, 
+         benevolence_improve = TRUST_SCI_improve,
+         benevolence_otherinterest = TRUST_SCI_otherint
+         ) %>% 
+  # For now, all variables containing numbers are coded as 'character'.
+  # We need them as numeric.
+  mutate(across(starts_with("benevolence"), as.numeric))
+```
+
+
+We will treat them as three different measures of the same construct, `benevolence` in our analysis. Practically, this means that for our analysis, we will simply calculate their mean as our measure of `benevolence`.
+
+```{r}
+d <- d %>%
+  # calculate composite measure
+  mutate(benevolence = rowMeans(across(starts_with('benevolence')), na.rm = TRUE)
+         )
+```
+
+We assign labels.
+
+```{r}
+# Assign variable labels (questions)
+d <- d %>%
+  set_variable_labels(
+    benevolence_concerned = "How concerned or not concerned are most scientists about people's wellbeing?",
+    benevolence_improve = "How eager or uneager are most scientists to improve others' lives?",
+    benevolence_otherinterest = "How considerate or inconsiderate are most scientists of others' interests?"
+  )
+
+# Assign value labels (answer options)
+d <- d %>%
+  set_value_labels(
+    benevolence_concerned = c("Not concerned" = 1, "Somewhat not concerned" = 2, 
+                              "Neither concerned nor not concerned" = 3, "Somewhat concerned" = 4, "Very concerned" = 5),
+    
+    benevolence_improve = c("Very uneager" = 1, "Somewhat uneager" = 2, 
+                            "Neither eager nor uneager" = 3, "Somewhat eager" = 4, "Very eager" = 5),
+    
+    benevolence_otherinterest = c("Very inconsiderate" = 1, "Somewhat inconsiderate" = 2, 
+                                  "Neither considerate nor inconsiderate" = 3, "Somewhat considerate" = 4, "Very considerate" = 5)
+  )
+```
+
+
+### Competence of scientists
+
+The main survey has three items intended to capture the factor `competence`:
+
+-   `competence_expert`(original survey coding:`TRUST_SCI_expert`): "How expert or inexpert are most scientists?" [1 = Very inexpert, 2 = Somewhat inexpert, 3 = Neither expert nor inexpert, 4 = Somewhat expert, 5 = Very expert]
+
+-   `competence_intelligent`(original survey coding:`TRUST_SCI_intellig`): "How intelligent or unintelligent are most scientists?" [1 = Very unintelligent, 2 = Somewhat unintelligent, 3 = Neither intelligent nor unintelligent, 4 = Somewhat intelligent, 5 = Very intelligent]
+
+-   `competence_qualified`(original survey coding:`TRUST_SCI_qualified`): "How qualified or unqualified are most scientists when it comes to conducting high-quality research?" [ 1 = Very unqualified, 2 = Somewhat unqualified, 3 = Neither qualified nor unqualified, 4 = Somewhat qualified, 5 = Very qualified]
+
+```{r}
+# do the re-naming and transform to numeric
+d <- d %>%
+  # syntax for rename() is new_name = old_name
+  rename(competence_expert = TRUST_SCI_expert, 
+         competence_intelligent = TRUST_SCI_intellig,
+         competence_qualified = TRUST_SCI_qualified
+         ) %>% 
+  # For now, all variables containing numbers are coded as 'character'.
+  # We need them as numeric.
+  mutate(across(starts_with("competence"), as.numeric))
+```
+
+We will treat them as three different measures of the same construct, `competence` in our analysis. Practically, this means that for our analysis, we will simply calculate their mean as our measure of `competence`.
+
+```{r}
+d <- d %>%
+  # calculate composite measure
+  mutate(competence = rowMeans(across(starts_with('competence')), na.rm = TRUE)
+         )
+```
+
+We assign labels. 
+
+```{r}
+# Assign variable labels (questions)
+d <- d %>%
+  set_variable_labels(
+    competence_expert = "How expert or inexpert are most scientists?",
+    competence_intelligent = "How intelligent or unintelligent are most scientists?",
+    competence_qualified = "How qualified or unqualified are most scientists when it comes to conducting high-quality research?"
+  )
+
+# Assign value labels (answer options)
+d <- d %>%
+  set_value_labels(
+    competence_expert = c("Very inexpert" = 1, "Somewhat inexpert" = 2, 
+                          "Neither expert nor inexpert" = 3, "Somewhat expert" = 4, "Very expert" = 5),
+    
+    competence_intelligent = c("Very unintelligent" = 1, "Somewhat unintelligent" = 2, 
+                               "Neither intelligent nor unintelligent" = 3, "Somewhat intelligent" = 4, "Very intelligent" = 5),
+    
+    competence_qualified = c("Very unqualified" = 1, "Somewhat unqualified" = 2, 
+                             "Neither qualified nor unqualified" = 3, "Somewhat qualified" = 4, "Very qualified" = 5)
+  )
+
+```
+
+
+### Integrity of scientists
+
+The main survey has three items intended to capture the factor `integrity`:
+
+-   `integrity_honest`(original survey coding:`TRUST_SCI_honest`): "How honest or dishonest are most scientists?" [1 = Very dishonest, 2 = Somewhat dishonest, 3 = Neither honest nor dishonest, 4 = Somewhat honest, 5 = Very honest]
+
+-   `integrity_ethical`(original survey coding:`TRUST_SCI_ethical`): "How ethical or unethical are most scientists?" [1 = Very unethical, 2 = Somewhat unethical, 3 = Neither ethical nor unethical, 4 = Somewhat ethical, 5 = Very ethical]
+
+-   `integrity_sincere`(original survey coding:`TRUST_SCI_sincere`): "How sincere or insincere are most scientists?" [ 1 = Very insincere, 2 = Somewhat insincere, 3 = Neither sincere nor insincere, 4 = Somewhat sincere, 5 = Very sincere]
+
+```{r}
+# do the re-naming and transform to numeric
+d <- d %>%
+  # syntax for rename() is new_name = old_name
+  rename(integrity_honest = TRUST_SCI_honest, 
+         integrity_ethical = TRUST_SCI_ethical,
+         integrity_sincere = TRUST_SCI_sincere
+         ) %>% 
+  # For now, all variables containing numbers are coded as 'character'.
+  # We need them as numeric.
+  mutate(across(starts_with("integrity"), as.numeric))
+```
+
+We will treat them as three different measures of the same construct, `integrity` in our analysis. Practically, this means that for our analysis, we will simply calculate their mean as our measure of `integrity`.
+
+```{r}
+d <- d %>%
+  # calculate composite measure
+  mutate(integrity = rowMeans(across(starts_with('integrity')), na.rm = TRUE)
+         )
+```
+
+We assign labels. 
+
+```{r}
+# Assign variable labels (questions)
+d <- d %>%
+  set_variable_labels(
+    integrity_honest = "How honest or dishonest are most scientists?",
+    integrity_ethical = "How ethical or unethical are most scientists?",
+    integrity_sincere = "How sincere or insincere are most scientists?"
+  )
+
+# Assign value labels (answer options)
+d <- d %>%
+  set_value_labels(
+    integrity_honest = c("Very dishonest" = 1, "Somewhat dishonest" = 2, 
+                         "Neither honest nor dishonest" = 3, "Somewhat honest" = 4, "Very honest" = 5),
+    
+    integrity_ethical = c("Very unethical" = 1, "Somewhat unethical" = 2, 
+                          "Neither ethical nor unethical" = 3, "Somewhat ethical" = 4, "Very ethical" = 5),
+    
+    integrity_sincere = c("Very insincere" = 1, "Somewhat insincere" = 2, 
+                          "Neither sincere nor insincere" = 3, "Somewhat sincere" = 4, "Very sincere" = 5)
+  )
+```
+
+
+### Openness of scientists
+
+The main survey has three items intended to capture the factor `openness`:
+
+-   `openness_open`(original survey coding:`TRUST_SCI_open`): "How open are most scientists to feedback??" [1 = Not open, 2 = Somewhat open, 3 = Neither open or not open, 4 = Somewhat open, 5 = Very open]
+
+-   `openness_transparent`(original survey coding:`TRUST_SCI_trans`): "How willing or unwilling are most scientists to be transparent?" [1 = Very unwilling, 2 = Somewhat unwilling, 3 = Neither willing nor unwilling, 4 = Somewhat willing, 5 = Very willing]
+
+-   `openness_otherviews`(original survey coding:`TRUST_SCI_otherviews`): "How much or little attention do scientists pay to others' views?" [ 1 = Very little attention, 2 = Somewhat little attention, 3 = Neither much nor little attention, 4 = Somewhat much attention, 5 = Very much attention]
+
+```{r}
+# do the re-naming and transform to numeric
+d <- d %>%
+  # syntax for rename() is new_name = old_name
+  rename(openness_open = TRUST_SCI_open, 
+         openness_transparent = TRUST_SCI_trans,
+         openness_otherviews = TRUST_SCI_otherviews
+         ) %>% 
+  # For now, all variables containing numbers are coded as 'character'.
+  # We need them as numeric.
+  mutate(across(starts_with("openness"), as.numeric))
+```
+
+We will treat them as three different measures of the same construct, `openness` in our analysis. Practically, this means that for our analysis, we will simply calculate their mean as our measure of `openness`.
+
+```{r}
+d <- d %>%
+  # calculate composite measure
+  mutate(openness = rowMeans(across(starts_with('openness')), na.rm = TRUE)
+         )
+```
+
+Next, we add labels to our data.
+
+```{r}
+
+# Assign variable labels (questions)
+d <- d %>%
+  set_variable_labels(
+    openness_open = "How open are most scientists to feedback?",
+    openness_transparent = "How willing or unwilling are most scientists to be transparent?",
+    openness_otherviews = "How much or little attention do scientists pay to others' views?"
+  )
+
+# Assign value labels (answer options)
+d <- d %>%
+  set_value_labels(
+    openness_open = c("Not open" = 1, "Somewhat open" = 2, 
+                      "Neither open nor not open" = 3, "Somewhat open" = 4, "Very open" = 5),
+    
+    openness_transparent = c("Very unwilling" = 1, "Somewhat unwilling" = 2, 
+                             "Neither willing nor unwilling" = 3, "Somewhat willing" = 4, "Very willing" = 5),
+    
+    openness_otherviews = c("Very little attention" = 1, "Somewhat little attention" = 2, 
+                            "Neither much nor little attention" = 3, "Somewhat much attention" = 4, "Very much attention" = 5)
+  )
+```
+
+### Influence (normative) of scientists on policy
+
+The main survey has six items intended to capture perceptions "normative perceptions" on the role of scientists.
+
+-   `influence_integrate` (original survey coding: `NORMPERC_integrate`): "Scientists should work closely with politicians to integrate scientific results into policy-making." [1 = strongly disagree, 5 = strongly agree]
+
+-   `influence_advocate` (original survey coding: `NORMPERC_advocate`): "Scientists should actively advocate for specific policies." [1 = strongly disagree, 5 = strongly agree]
+
+-   `influence_communicate` (original survey coding: `NORMPERC_communicate`): "Scientists should communicate their findings to politicians." [1 = strongly disagree, 5 = strongly agree]
+
+-   `influence_involved` (original survey coding: `NORMPERC_involved`): "Scientists should be more involved in the policy-making process." [1 = strongly disagree, 5 = strongly agree]
+
+-   `outreach` (original survey coding: `NORMPERC_outreach`): "Scientists should communicate about science with the general public." [1 = strongly disagree, 5 = strongly agree]
+
+-   `influence_independent` (original survey coding: `NORMPERC_independent`): "Scientists should remain independent from the policy-making process." [1 = strongly disagree, 5 = strongly agree]
+
+We will use five of these items to capture perceptions on the influence scientists should have on policy making (all but `outreach`). 
+
+```{r}
+# do the re-naming and transform to numeric
+d <- d %>%
+  # syntax for rename() is new_name = old_name
+  rename(influence_integrate = NORMPERC_integrate, 
+         influence_advocate = NORMPERC_advocate,
+         influence_communicate = NORMPERC_communicate,
+         influence_involved = NORMPERC_involved,
+         influence_independent = NORMPERC_independent
+         ) %>% 
+  # For now, all variables containing numbers are coded as 'character'.
+  # We need them as numeric.
+  mutate(across(starts_with("influence"), as.numeric))
+```
+
+Precisely, we will build a composite measure `influence_policy` taking their mean.
+
+```{r}
+d <- d %>%
+  # calculate composite measure
+  mutate(influence_policy = rowMeans(across(starts_with('influence')), na.rm = TRUE)
+         )
+```
+
+### Influence (normative) of scientists on private lifestyle
+
+The main survey has several items intended to capture "willingness to be vulnerable" towards scientists. One items captures influence scientists should have on private lifestyle.
+
+-   `influence_lifestyle` (original survey coding: `WILLVUL_ppl`): "How much or little should people rely on scientists' guidance when making lifestyle choices related to science?" [1 = not at all, 5 = very strongly]
+
+```{r}
+d <- d %>% 
+  # do the re-naming and transform to numeric
+  mutate(influence_lifestyle = as.numeric(WILLVUL_ppl)) %>% 
+  # delete old variable
+  select(-c(WILLVUL_ppl))
+```
+
+### Trust, consensus and precision by discipline
+
+We added a set of questions to the main survey where we asked participants to give distinct answers for the following set of different scientific disciplines (including one 'general' item):
+
+-   Science in general
+-   Biology
+-   Sociology
+-   Economics
+-   Physics
+-   Climate science
+
+The questions are: 
+
+-   `disciplines_trust` : "How much do you trust the researchers working in these disciplines?" [1 = Not trust at all, 5 = Trust very much]
+
+-   `disciplines_consensus` : "How much do you think researchers in these disciplines agree on fundamental findings?" [1 = They do not agree at all, 5 = They agree very much]
+
+-   `disciplines_precision` : "How precise do you think the results obtained by researchers in these disciplines are?" [1 = Not precise at all, 5 = Extremely precise]
+
+```{r}
+# no need to rename, but transform to numeric
+d <- d  %>% 
+  mutate(across(starts_with("disciplines"), as.numeric))
+```
+
+### Subjective social status
+
+We added a question regarding subjective social status to the main survey. The question is from the US General Social Survey, but we reversed the coding for the scale (such that 10 = top) and also let the scale run from bottom (left) to top (right) since that was consistent with all other scales in the survey.
+
+-   `subjective_status` (coding in the GSS: `rank`) : "In our society there are groups which tend to be towards the top and groups which tend to be towards the bottom. Below is a scale that runs *from bottom to top*. Where would you put yourself on this scale?" [10 = Top, 1 = Bottom]
+
+```{r}
+# no need to rename, but transform to numeric
+d <- d  %>% 
+  mutate(across(subjective_status, as.numeric))
+```
+
+### Trust in scientific method
+
+The survey includes one question on trust in the scientific method.
+
+-   `trust_method`(original survey coding:`TRUST_METHOD`): "To what extent do you agree or disagree with the following statement? 'Scientific research methods are the best way to find out if something is true or false.'" [1 = Strongly disagree, 5 = Strongly agree]
+
+```{r}
+# do the re-naming and transform to numeric
+d <- d %>%
+  rename_with(tolower, matches("TRUST_METHOD")) %>% 
+  # For now, all variables containing numbers are coded as 'character'.
+  # We need them as numeric.
+  mutate(across(trust_method, as.numeric))
+```
+
+### Trust in scientists 
+
+Based on the measures for `competence`, `benevolence`, `integrity` and `openness`, we build a composite variable `trust_composite`. Practically, this means that for our analysis, we will simply calculate the mean of all 12 items.
+
+```{r}
+d <- d %>%
+  # calculate composite measure
+  mutate(trust_composite = rowMeans(
+    across(starts_with(c("benevolence", "competence", "integrity", "openness")) & contains("_")), 
+    na.rm = TRUE)
+  )
+```
+
+To be able to run our pre-registered analysis, we also add a reduced composite measure that is only based on `competence` and `benevolence`. 
+
+```{r}
+d <- d %>%
+  # calculate composite measure
+  mutate(trust_composite_reduced = rowMeans(
+    across(starts_with(c("benevolence", "competence")) & contains("_")), 
+    na.rm = TRUE)
+  )
+```
+
+### Education
+
+-   `education`(original survey coding:`DEM_EDU`): "What is your highest completed level of education?" [1 = Did not attend school, 2 = Primary education, 3 = Secondary education (e.g., high school), 4 = Higher education (e.g., university degree or higher education diploma)]
+
+```{r}
+# do the re-naming and transform to numeric
+d <- d %>%
+  # make a numeric version
+  mutate(education_numeric = as.numeric(DEM_EDU)) %>% 
+  # make a factor variable version 
+  mutate(
+    education = factor(education_numeric, 
+                       levels = 1:4, 
+                       labels = c("Did not attend school", 
+                                  "Primary education", 
+                                  "Secondary education (e.g., high school)", 
+                                  "Higher education (e.g., university degree or higher education diploma)"))
+  )
+```
+
+### Gender
+
+- `DEM_GENDER`: 0 = "Woman", 1 = "Man", 2 = "Prefer to self-describe", 99 = "Prefer not to say"
+
+```{r}
+# code a new gender variable
+d <- d %>%
+  mutate(
+    gender = factor(DEM_GENDER, 
+                    levels = c(0, 1, 2, 99), 
+                    labels = c("Woman", "Man", "Prefer to self-describe", "Prefer not to say"))
+  )
+```
+
+### Age
+
+```{r}
+d <- d %>%
+  mutate(age = as.numeric(DEM_AGE))
+```
+
+### Religion
+
+- `DEM_RELIGIOUS` "Please indicate to what extent you consider yourself religious." [Not religious at all  (1) - Very strongly religious  (5)]
+
+```{r}
+d <- d %>%
+  mutate(religious = factor(
+    DEM_RELIGIOUS,
+    levels = 1:5,  # Ensure correct ordering
+    labels = c("Not religious at all (1)", "(2)", 
+               "(3)", "(4)", 
+               "Very strongly religious (5)")
+  ))
+```
+
+### Urban
+
+- `DEM_RESIDENCE` "Which of the following best describes the area you live in?" [Rural (1), Urban (2)]
+
+```{r}
+d <- d %>%
+  mutate(residence = factor(
+    DEM_RESIDENCE,
+    levels = 1:2,  # Ensure correct ordering
+    labels = c("Rural", 
+               "Urban")
+  ))
+
+# check
+# d |> 
+#   select(residence, DEM_RESIDENCE)
+```
+
+
+### Income
+
+-   `income`(original survey coding:`DEM_INCOME`): "Please indicate your household's yearly net income (in local currency)."
+
+This is a sensitive question in France and it's worth checking how well people responded to this question. 
+
+```{r}
+# Before transforming, check all unique values. 
+d %>% select(DEM_INCOME) %>% 
+  group_by(DEM_INCOME) %>% 
+  count() 
+```
+
+Also, some people used dots, but not as correct delimiters. 
+
+```{r}
+d %>% 
+  select(DEM_INCOME) %>% 
+  group_by(DEM_INCOME) %>% 
+  count() %>%
+  filter(str_detect(DEM_INCOME, "\\.")) %>% 
+  mutate(DEM_INCOME_numeric = as.numeric(str_remove(DEM_INCOME, "\\.")))
+```
+
+Only in one case, the "20000.00" the delimiter appears to have been used correctly. 
+
+First, we transform all values to numeric.
+
+```{r}
+# do the re-naming and transform to numeric
+d <- d %>%
+  # we keep both variables to be able to cross-check
+  mutate(income = case_when(
+    # for the one case, don't remove the dot
+    DEM_INCOME == "20000.00" ~ as.numeric(DEM_INCOME), 
+    # for all other cases, remove it
+    TRUE ~ as.numeric(str_remove(DEM_INCOME, "\\.")
+    )
+  )
+  ) 
+```
+
+Check values
+
+```{r}
+ggplot(d, aes(income)) +
+  geom_histogram(bins = 30)
+```
+
+Clearly, at least some values are unrealistically low, others unrealistically high. 
+
+Let's inspect the individuals with an income of more than `100'000` in more detail. 
+
+```{r, echo=FALSE}
+d %>% filter(income > 100000) %>% 
+  select(income, DEM_INCOME) %>% 
+  arrange(desc(income))
+```
+
+The two largest values are obviously invalid responses. We code them as `NA`. 
+
+```{r}
+# do the re-naming and transform to numeric
+d <- d %>%
+  # code two obvious outliers as `NA`
+  mutate(income = ifelse(income > 1000000, NA, income))
+```
+
+Then we can distinguish some income groups.  
+
+```{r, echo=FALSE}
+# check how many we remove by accepting only <= one million as valid income
+d %>% mutate(income_categories = case_when(income >100000 ~ "more than 100'000",
+                                              income == 0 ~ "zero",
+                                              income <10000 ~ "less than 10'000 (but not zero)", 
+                                              is.na(income) ~ NA_character_, 
+                                              TRUE ~ "somewhere in between"
+                                              )
+                  ) %>% group_by(income_categories) %>% 
+  count()
+```
+
+```{r, echo=FALSE}
+# plot income distributions
+plot_data <- d %>% filter(income < 10000)
+low_income <- ggplot(plot_data, aes(x = income)) +
+  geom_density() +
+  labs(title = "Distribution for \n income < 10'000") +
+  annotate("text", x = 7500, y = 0.00015, label = paste("n =", nrow(plot_data)))
+
+
+plot_data <- d %>% filter(income > 100000)
+high_income <- ggplot(plot_data, aes(x = income)) +
+  geom_density() +
+  labs(title = "Distribution for \n income > 100'000") +
+  annotate("text", x = 500000, y = 0.000003, label = paste("n =", nrow(plot_data)))
+
+
+plot_data <- d %>% filter(!is.na(income))
+income <- ggplot(d, aes(x = income)) +
+  geom_density() +
+  labs(title = "Overall distribution for income") +
+  annotate("text", x = 500000, y = 0.00001, label = paste("n =", nrow(plot_data)))
+
+
+income / (low_income + high_income)
+```
+
+We did not specify this in our pre-registration, but due to the shape of the income distribution, we will also build a log-transformed income variable, `income_log`.
+
+```{r}
+# add a log-transformed version of `income`
+d <- d %>% 
+  mutate(income_log = log(income))
+```
+
+```{r, echo=FALSE}
+# plot logged income
+plot_data <- d %>% filter(!is.na(income_log))
+income <- ggplot(d, aes(x = income_log)) +
+  geom_density() +
+  labs(title = "Overall distribution for log income") +
+  annotate("text", x = 5, y = 0.3, label = paste("n =", nrow(plot_data)))
+income
+```
+
+# Select target variables
+
+# Long format version
+
+In order to compare different disciplines, we need to bring our data into a long format version. 
+
+```{r}
+# make long-format data 
+data_long <- d %>% 
+  pivot_longer(cols = starts_with("disciplines"), names_to = "variable_discipline", 
+               values_to = "score", names_prefix = "disciplines_") %>% 
+  # separate variable and discipline into two distinct columns
+  separate_wider_delim(variable_discipline, delim = "_", 
+                       names = c("variable", "discipline")) %>% 
+  # pivot wider variable and score 
+  # (such that three distinct columns for trust, consensus and precision)
+  pivot_wider(names_from = variable, values_from = score)
+```
+
+This makes that instead of having this... 
+
+```{r, echo=FALSE}
+# wide format
+knitr::kable(d %>%  
+               filter(id == 4) %>% 
+               select(id, starts_with("disciplines_consensus", ignore.case = FALSE)),
+             caption = "Wide format data")
+```
+
+We have this...
+
+```{r, echo=FALSE}
+# wide format
+knitr::kable(data_long %>%  
+               filter(id == 4) %>% 
+               select(id, discipline, consensus, precision),
+             caption = "Long format data")
+```
+
+### Date
+
+```{r}
+d <- d |> 
+  mutate(date = format(as.Date(StartDate), "%B %d, %Y")) 
+```
+
+### Writing cleaned data file
+
+```{r}
+# store data
+write_csv(d, "data/cleaned_wide.csv")
+write_csv(data_long, "data/cleaned_long.csv")
+
+# to prevent factor levels, save as RDS
+saveRDS(d, "data/cleaned_wide.rds")
+saveRDS(data_long, "data/cleaned_long.rds")
+
+```

@@ -84,6 +84,14 @@ source("functions/plot_theme.R")
 source("functions/functions.R")
 ```
 
+::: {.callout-note}
+### available as a preprint here: 
+
+Pfänder, J., Rouilhan, S. D., & Mercier, H. (2025). *Trusting but forgetting impressive science.* [https://doi.org/10.31219/osf.io/argq5_v1](https://doi.org/10.31219/osf.io/argq5_v1)
+
+For supplementary materials, please refer to the preprint.
+:::
+
 ## Introduction
 
 ```{r}
