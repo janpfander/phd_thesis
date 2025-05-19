@@ -20,6 +20,7 @@ book:
     - consensus_trust/consensus_trust.qmd
     - trust_science_france/trust_science_france.qmd
     - meta_news_judgement/meta_news_judgement.qmd
+    - conclusion.qmd
     - references.qmd
   search: true
   repo-url: https://github.com/jjallaire/hopr/

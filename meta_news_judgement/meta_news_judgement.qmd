@@ -7,7 +7,7 @@ abstract: >
 doi: 10.1038/s41562-024-02086-1
 ---
 
-# Spotting False News and Doubting True News, A Meta-Analysis of News Judgments
+# Spotting False News and Doubting True News, A Meta-Analysis of News Judgments {#sec-meta}
 
 ```{r setup, include=FALSE}
 ## Figure out output format
