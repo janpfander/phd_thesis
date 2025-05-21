@@ -15,15 +15,15 @@ book:
     - index.qmd
     - summary.qmd
     - intro.qmd
-    - everyone_trusts_science_abit/everyone_trusts_science_abit.qmd
     - impressive_science/impressive_science.qmd
     - consensus_trust/consensus_trust.qmd
     - trust_science_france/trust_science_france.qmd
+    - everyone_trusts_science_abit/everyone_trusts_science_abit.qmd
     - meta_news_judgement/meta_news_judgement.qmd
     - conclusion.qmd
     - references.qmd
   search: true
-  repo-url: https://github.com/jjallaire/hopr/
+  repo-url: https://github.com/janpfander/phd_thesis
   repo-actions: [edit]
   downloads: [pdf, epub]
 

@@ -1,43 +1,4 @@
 # Preface {.unnumbered}
 
-At the time of writing this these, by some indicators, things do not look great for public trust in science. On the first day in office of his second term, US President Donald Trump signed a number of executive orders (EOs), including EOs withdrawing the US from the Paris Agreement on climate change and the World Health Organization (WHO).
 
-
-
-
-
-
-
-
-
-
-Potentially check data: on funding here https://ourworldindata.org/research-and-development
-
-During times where US is retiring from climate change. Europe shifts money into defense fonds instead of climate change. 
-
-By all these indicators, there is reason to worry about trust in science. So why focus on explaining trust in science? First to say 
-
-Defunding science is legitimized with arguing that science is not acting in the public's interest. 
-
-I write this during times of budget cuts for science - in France, in the US. A anti-vaxx US health minister. Climate change goals unattainable. I should worry about why people don't take science seriously. Yet, I discuss why people trust science. Why? Because that is the case. This suggests that what seems to be large-scale distrust and ignorance of science is largely elite driven. Second, it allows us to get insights. View science as a social construct and stuff. 
-
-In this thesis, I point out that public trust in science is, if not at ceiling, rather high. This is not to say that everything's fine. But first, this gives hope that people are not completely irrational and it is impossible to talk to each other anymore. Take a more humble stance on what our trust in science rests upon (not profound understanding!) and encourage to search for motivations that incite people to distrust science (on specific issues). 
-
-I want to thank etc...
-
-
-Make the conclusion about information decifit thinking (in trust in science as much as in misinformation research).
-
-It's a bit different though: in the deficit model people are rational: they see good information when they encounter it. In the misinfo lit, they are gullible: they don't see bad information when they encounter it.
-
-Maybe: Failure of deficit model could suggest that trust in science is largely irrational. People don't know what is true or false, becasue they don't know about science. In a way, that was the very perspective of the deficit model. This fits into the misinfo rethorik: people don't know what's true and false, they are vulnerable to misinfo.
-
-
-Make sure that studying mis-and disinformation is worthwhile - there are many things we do not know!!
-
-From a practical perspective, a lack of trust, or active distrust, appears to be the more pressing phenomenon to explain. But we believe that studying the origins of public trust in science can generate relevant insights on how to strengthen public trust in science. In a way, the deficit-model has shown this: the fact that knowledge seemed only weakly correlated with trust made researchers question the idea of "knowledge" as the main cure for an alleged public trust deficit.
-
-Like much of science, our account does not have immediate practical implications. In fact, there are several conclusions that we believe should not be drawn from our account.
-
-This view should not suggest that there's nothing to do to defend science - there are anti-science interests and ideologies. However, we can build on a strong solid ground of trust in science that most people see, but might be motivated to ignore for other reasons.
 
