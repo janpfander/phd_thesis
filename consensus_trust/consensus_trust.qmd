@@ -138,7 +138,7 @@ knitr::include_graphics("figures/figure_Benoit-2.png")
 
 ### Simulations
 
-In order to better understand the influence of different parameters (e.g. degree of convergence, number of individuals) on the relationship between convergence, accuracy, and competence of informants, we conducted simulations. In all simulations, we assume agents to be unbiased and independent in their answers, but varying in their competence. All code and data regarding the simulations can be found on Open Science Framework [project page](https://osf.io/6abqy/?view_only=42632bccea604fd7928dbe58e087d23b) (<https://osf.io/6abqy/?view_only=42632bccea604fd7928dbe58e087d23b>).
+In order to better understand the influence of different parameters (e.g. degree of convergence, number of individuals) on the relationship between convergence, accuracy, and competence of informants, we conducted simulations. In all simulations, we assume agents to be unbiased and independent in their answers, but varying in their competence. All code and data regarding the simulations can be found on Open Science Framework [project page](https://osf.io/6abqy/) (<https://osf.io/6abqy/>).
 
 #### Continuous case
 
@@ -234,7 +234,7 @@ patchwork +
 
 Our models indicate that groups of informants are more likely to have given accurate answers, and to be competent, when their answers converge. In a series of experiments, we test whether people draw these inferences both in numerical tasks (Experiments 1, 2, 3), and in categorical tasks (Experiments 4, 5, 6). By contrast with previous studies, participants were not given any information about the tasks--how difficult they were--and the informants--how competent they might be. There has recently been much interest in investigating whether participants are able to take informational dependencies into account when evaluating convergent information [@yousifIllusionConsensusFailure2019; @mercierUtilizingSimpleCues2019; @desaiGettingSourceIllusion2022; @xieSensitivityEvidentialDependencies2022; @yinSmartlyFollowingOthers2024]. To test whether participants took into account dependencies between the informants in the present context, this factor was manipulated in two different ways (in Experiment 2, some informants had discussed with each other; in Experiments 3 and 5, some informants had an incentive to provide the same answer). We predicted that dependencies between the informants’ answers should reduce participants' reliance on the convergence of the answer as a cue to accuracy and to competence.
 
-All experiments were preregistered. All documents, data and code can be found on Open Science Framework [project page](https://osf.io/6abqy/?view_only=42632bccea604fd7928dbe58e087d23b) (<https://osf.io/6abqy/?view_only=42632bccea604fd7928dbe58e087d23b>). All analyses were conducted in R (version 4.2.2) using R Studio. For most statistical models, we relied on the `lme4` package and its `lmer()` function. Unless mentioned otherwise, we report unstandardized model coefficients that can be interpreted in units of the scales we use for our dependent variables.
+All experiments were preregistered. All documents, data and code can be found on Open Science Framework [project page](https://osf.io/6abqy/) (<https://osf.io/6abqy/>). All analyses were conducted in R (version 4.2.2) using R Studio. For most statistical models, we relied on the `lme4` package and its `lmer()` function. Unless mentioned otherwise, we report unstandardized model coefficients that can be interpreted in units of the scales we use for our dependent variables.
 
 ## Experiment 1
 
@@ -1135,11 +1135,11 @@ These limitations could be overcome by replicating the present results in differ
 
 #### Data availability
 
-Data for all experiments and the simulations is available on the OSF project page (<https://osf.io/6abqy/?view_only=42632bccea604fd7928dbe58e087d23b>).
+Data for all experiments and the simulations is available on the OSF project page (<https://osf.io/6abqy/>).
 
 #### Code availability
 
-The code used to create all results (including tables and figures) of this manuscript is also available on the OSF project page (<https://osf.io/6abqy/?view_only=42632bccea604fd7928dbe58e087d23b>).
+The code used to create all results (including tables and figures) of this manuscript is also available on the OSF project page (<https://osf.io/6abqy/>).
 
 #### Competing interest
 

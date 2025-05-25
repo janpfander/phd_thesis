@@ -1214,6 +1214,10 @@ Regarding H2, the results are mixed for the relation of conspiracy beliefs (meas
 Why did participants reject the scientific consensus? We collected a total of `r exp4_descriptives$justifications_n + exp3_descriptives$justifications_n + exp2_descriptives$justifications_n` answers (Studies 2: `r exp2_descriptives$justifications_n`; 3: `r exp3_descriptives$justifications_n`; 4: `r exp4_descriptives$justifications_n`) from `r exp4_descriptives$justifications_n_participants + exp3_descriptives$justifications_n_participants + exp2_descriptives$justifications_n_participants` (Studies 2: `r exp2_descriptives$justifications_n_participants`; 3: `r exp3_descriptives$justifications_n_participants`; 4: `r exp4_descriptives$justifications_n_participants`) participants to the open-ended questions on why they had rejected the scientific consensus on a particular question. Based on the answers, we created five categories (@tbl-justifications). All individual answers can be accessed in cleaned data sheets via the OSF project page.
 
 ```{r justifications}
+#| label: tbl-justifications
+#| tbl-cap: "Justifications for rejecting the scientific consensus by category, Studies 2, 3 and 4 combined."
+
+
 ### make a common table of exp 2 and exp 3
 justifications <- bind_rows(exp2_justifications %>% 
                               mutate(study = "study 2"), 
@@ -1244,7 +1248,7 @@ table <- justifications %>%
 
 table %>% kbl(
   booktabs = T, longtable = T,
-    caption = "Justifications for rejecting the scientific consensus by category, Studies 2, 3 and 4 combined.",
+  #caption = "Justifications for rejecting the scientific consensus by category, Studies 2, 3 and 4 combined.",
   full_width = T) %>%
   footnote(general = "*Participans with at least one answer in that category",
            escape = FALSE,

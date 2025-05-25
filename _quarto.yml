@@ -9,7 +9,7 @@ book:
   title: "A cognitive perspective on trust in science"
   subtitle: "(PhD thesis)"
   author: "Jan Pfänder"
-  date: "4/15/2025"
+  date: "5/26/2025"
   cover-image: cover/couverture.jpeg
   chapters:
     - index.qmd
