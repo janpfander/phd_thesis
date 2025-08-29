@@ -1,0 +1,56 @@
+
+/*-- scss:defaults --*/
+
+$presentation-h1-font-size: 2em;
+
+/* Full-slide theme: big, centered content */
+.reveal .slides section.big-center {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  text-align: center;
+
+  /* Disable reveal.js auto-scaling */
+  font-size: 1.5em !important;   /* relative to base font */
+  transform: none !important;
+}
+
+/* Keep headings at the top */
+.reveal .slides section.big-center h1,
+.reveal .slides section.big-center h2,
+.reveal .slides section.big-center h3 {
+  margin-top: 0;
+  margin-bottom: 1em;
+  align-self: flex-start;  /* push to top-left (with centering text-align still applying) */
+  text-align: left;        /* optional: keep titles left-aligned */
+  width: 100%;
+}
+
+/*-- scss:rules --*/
+
+.big-center {
+  font-size: 1.5em;
+  text-align: center;
+  display: flex;
+  flex-direction: column;   /* stack elements vertically */
+  justify-content: center;   /* horizontal centering */
+  align-items: center;       /* vertical centering */
+  height: 100%;              /* take full slide height */
+}
+
+
+.reveal .slides section .flex-bar {
+  position: absolute;   /* overlay positioned relative to the slide */
+  background-color: black; 
+  opacity: 1;        /* adjust transparency */
+  z-index: 10;          /* sits above normal content */
+}
+
+.v-center-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 90%;
+}
